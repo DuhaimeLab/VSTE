@@ -89,7 +89,7 @@ viruses$keep_score_checkV <- 0
 #vibrant
 viruses$keep_score_vibrant[viruses$Quality=="high quality draft"] <- 1
 viruses$keep_score_vibrant[viruses$Quality=="medium quality draft"] <- 0.52
-viruses$keep_score_vibrant[viruses$Quality=="low quality draft"] <- 0.333
+viruses$keep_score_vibrant[viruses$Quality=="low quality draft"] <- 0.52
 viruses$keep_score_vibrant[viruses$viral_genes==0 & viruses$host_genes>=1] <- 0
 viruses$keep_score_vibrant[(viruses$viral_genes*3) <= viruses$host_genes] <- 0
 viruses$keep_score_vibrant[viruses$contig_length>50000 & viruses$hallmark==0] <- 0
@@ -101,7 +101,7 @@ viruses$keep_score_deepvirfinder[(viruses$viral_genes*3) <= viruses$host_genes] 
 viruses$keep_score_deepvirfinder[viruses$contig_length>50000 & viruses$hallmark==0] <- 0
 
 #virsorter2
-viruses$keep_score_virsorter2[viruses$viral>=50] <- 0.333
+viruses$keep_score_virsorter2[viruses$viral>=50] <- 0.52
 viruses$keep_score_virsorter2[viruses$hallmark>2] <- 1
 viruses$keep_score_virsorter2[viruses$viral>=95] <- viruses$keep_score_virsorter2[viruses$viral>=95] + 1
 viruses$keep_score_virsorter2[viruses$viral_genes==0 & viruses$host_genes>=1] <- 0
@@ -183,6 +183,158 @@ ggplot(sm_m, aes(x=primary_method, y=number,
   ylab("Count of Viral Contigs")
 ```
 
+# Visualizing which tools led to a contig being selected
+(alluvial plot)
+with help from: https://www.bioinfo-scrounger.com/archives/alluvial-and-Sankey/
+
+```{r}
+alluvial_data <- viruses %>% select(keep_score_vibrant:keep_score_checkV) %>%
+  count(keep_score_vibrant, keep_score_virsorter2, keep_score_deepvirfinder, keep_score_checkV)
+```
+
+```{r}
+alluvial_data$cum_sum <- alluvial_data %>% select(keep_score_vibrant:keep_score_checkV) %>% 
+  rowSums()
+```
+
+```{r}
+alluvial_data$viral <- "not viral"
+alluvial_data$viral[alluvial_data$cum_sum>=1] <- "one method"
+alluvial_data$viral[alluvial_data$cum_sum>=2] <- "two methods"
+alluvial_data$viral[alluvial_data$cum_sum>=3] <- "three methods"
+alluvial_data$viral[alluvial_data$cum_sum>=4] <- "all methods"
+
+alluvial_data$viral <- factor(alluvial_data$viral, levels=c("not viral", "one method",
+                                                            "two methods", "three methods",
+                                                            "all methods"))
+```
+
+```{r}
+alluvial_data <- alluvial_data %>% 
+  mutate(across(keep_score_vibrant:keep_score_checkV, as.factor))
+```
+
+```{r}
+head(alluvial_data)
+```
+
+
+```{r}
+library(ggalluvial)
+```
+
+
+```{r}
+ggplot(data = alluvial_data,
+       aes(axis1 = as.character(keep_score_vibrant), 
+           axis2 = as.character(keep_score_virsorter2),
+           axis3 = as.character(keep_score_deepvirfinder),
+           axis4 = as.character(keep_score_checkV),
+           y = n)) +
+  geom_alluvium(aes(fill = viral)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_fill_viridis_d() + scale_x_discrete(limits = c("VIBRANT", "VirSorter2", "DeepVirFinder", "CheckV"),
+                                  expand = c(0.05, 0.05, 0.05, 0.05)) +
+  ylab("Number of Sequences") +
+  theme_classic()
+```
+
+
+#########################################################
+# Slightly modified rules for visualization purposes
+
+######################################################################
+# New rules for keeping
+
+## Getting Score for Deciding Whether to Keep
+```{r}
+viruses$keep_score_vibrant <- 0
+viruses$keep_score_deepvirfinder <- 0
+viruses$keep_score_virsorter2 <- 0
+viruses$keep_score_checkV <- 0
+
+#vibrant
+viruses$keep_score_vibrant[viruses$Quality=="high quality draft"] <- 1
+viruses$keep_score_vibrant[viruses$Quality=="medium quality draft"] <- 0.5
+viruses$keep_score_vibrant[viruses$Quality=="low quality draft"] <- 0.5
+
+#deepvirfinder
+viruses$keep_score_deepvirfinder[viruses$bh_pvalue<=0.05] <- 1
+
+#virsorter2
+viruses$keep_score_virsorter2[viruses$viral>=50] <- 0.5
+viruses$keep_score_virsorter2[viruses$hallmark>2] <- 1
+viruses$keep_score_virsorter2[viruses$viral>=95] <- viruses$keep_score_virsorter2[viruses$viral>=95] + 1
+
+#checkV
+viruses$keep_score_checkV[(viruses$viral>=50 & viruses$host_genes==0) & viruses$viral_genes==0] <- viruses$keep_score_checkV[(viruses$viral>=50 & viruses$host_genes==0) & viruses$viral_genes==0] + 0.5
+viruses$keep_score_checkV[viruses$percent_viral>=50] <- viruses$keep_score_checkV[viruses$percent_viral>=50] + 1
+viruses$keep_score_checkV[viruses$viral_genes==0 & viruses$host_genes>=1] <- -5
+viruses$keep_score_checkV[(viruses$viral_genes*3) <= viruses$host_genes] <- -5
+viruses$keep_score_checkV[viruses$contig_length>50000 & viruses$hallmark==0] <- -5
+```
+
+# Visualizing which tools led to a contig being selected
+(alluvial plot)
+with help from: https://www.bioinfo-scrounger.com/archives/alluvial-and-Sankey/
+
+```{r}
+alluvial_data <- viruses %>% select(keep_score_vibrant:keep_score_checkV) %>%
+  count(keep_score_vibrant, keep_score_virsorter2, keep_score_deepvirfinder, keep_score_checkV)
+```
+
+```{r}
+alluvial_data$cum_sum <- alluvial_data %>% select(keep_score_vibrant:keep_score_checkV) %>% 
+  rowSums()
+```
+
+```{r}
+alluvial_data$viral <- "not viral"
+alluvial_data$viral[alluvial_data$cum_sum>=1] <- "one method"
+alluvial_data$viral[alluvial_data$cum_sum>=2] <- "two methods"
+alluvial_data$viral[alluvial_data$cum_sum>=3] <- "three methods"
+alluvial_data$viral[alluvial_data$cum_sum>=4] <- "all methods"
+
+alluvial_data$viral <- factor(alluvial_data$viral, levels=c("not viral", "one method",
+                                                            "two methods", "three methods",
+                                                            "all methods"))
+```
+
+```{r}
+alluvial_data <- alluvial_data %>% 
+  mutate(across(keep_score_vibrant:keep_score_checkV, as.factor))
+```
+
+```{r}
+head(alluvial_data)
+```
+
+```{r}
+ggplot(data = alluvial_data,
+       aes(axis1 = as.character(keep_score_vibrant), 
+           axis2 = as.character(keep_score_virsorter2),
+           axis3 = as.character(keep_score_deepvirfinder),
+           axis4 = as.character(keep_score_checkV),
+           y = n)) +
+  geom_alluvium(aes(fill = viral)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_fill_viridis_d() + scale_x_discrete(limits = c("VIBRANT", "VirSorter2", "DeepVirFinder", "CheckV"),
+                                  expand = c(0.05, 0.05, 0.05, 0.05)) +
+  ylab("Number of Sequences") +
+  theme_classic()
+```
+
+=> once have the testing set data, make this figure but split by type of sequence
+
+
+
+
+
+# Other visualizations of output
 
 ```{r}
 hist(viruses$keep_score[viruses$keep_score_high==1])
