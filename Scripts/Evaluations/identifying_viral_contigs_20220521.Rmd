@@ -188,10 +188,6 @@ assess_performance <- function(seqtype, keep_score) {
 ```
 
 
-```{r}
-comp_pipelines <- tibble(pipeline="example", precision=0, recall=0, F1=0)
-```
-
 ## just vibrant
 ```{r}
 viruses$keep_score_vb <- getting_viral_set_1(viruses, include_vibrant = T,
@@ -623,7 +619,9 @@ colnames(confusion_by_taxa) <- c("confusion_matrix", "seqtype","count")
 
 
 ```{r}
-ggplot(confusion_by_taxa, aes(x=count, y=seqtype,
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+p2 <- ggplot(confusion_by_taxa, aes(x=count, y=seqtype,
                    fill=confusion_matrix,
                    color=confusion_matrix)) +
   geom_bar(stat="identity") +
@@ -632,7 +630,11 @@ ggplot(confusion_by_taxa, aes(x=count, y=seqtype,
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "bottom"
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
   ) +
   scale_fill_manual(name="",
                      values = alpha(rev(pal(4)), 0.5),
@@ -644,12 +646,83 @@ ggplot(confusion_by_taxa, aes(x=count, y=seqtype,
                              "true negative", "true positive")) +
   xlab("Number of Sequences") +
   ylab("") 
+
+p2
 ```
+
+```{r}
+png("testing_set_accuracy_by_taxa.png", width=6.8, height=3.2, units="in", res=400)
+
+p2 
+ 
+dev.off()
+```
+
+
+# Visualizing confusion matrix by number of tools
+
+
+```{r}
+viruses$confusion_matrix <- "true positive"
+viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score_all<1] <- "false negative"
+viruses$confusion_matrix[viruses$seqtype!="virus" & viruses$keep_score_all>=1] <- "false positive"
+viruses$confusion_matrix[viruses$seqtype!="virus" & viruses$keep_score_all<1] <- "true negative"
+
+viruses$keep_score_visualize <- viruses$keep_score_all
+viruses$keep_score_visualize[viruses$keep_score_all>1] <- ">1"
+
+viruses$keep_score_visualize <- factor(viruses$keep_score_visualize, 
+                                       levels=c("-0.5", "-1", "0", "0.5","1", ">1"))
+viruses$keep_score_visualize <- factor(viruses$keep_score_visualize, 
+                                       labels=c("≤ 0", "≤ 0", "≤ 0", "0.5","1", "> 1"))
+```
+
+```{r}
+levels(factor(viruses$keep_score_visualize))
+```
+
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 20", type="regular")
+
+p1 <- ggplot(viruses, aes(x=confusion_matrix,
+                   fill=keep_score_visualize, color=keep_score_visualize)) +
+  geom_bar(stat="count", position="stack") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16)
+  ) +
+  scale_color_manual(name = 'Viral Score',
+                     values = alpha(c(pal(4)), 1)) +
+  scale_fill_manual(name = 'Viral Score',
+                     values = alpha(c(pal(4)), 0.5)) +
+  xlab("") +
+  ylab("Sequence Count") 
+
+p1
+```
+
+```{r}
+png("testing_set_accuracy_confusion_matrix.png", width=6.8, height=2.6, units="in", res=400)
+
+p1 
+ 
+dev.off()
+```
+
 
 # Using NMDS to compare the tools
 get matrix want to use for beta diversity
 ```{r}
-virus_score_matrix <- viruses %>% select(keep_score_vb, keep_score_dvf,keep_score_vs2, keep_score_cv, keep_score_vb_cv, keep_score_dvf_cv,keep_score_vs2_cv, keep_score_cv_kj, keep_score_all)
+virus_score_matrix <- viruses %>% select(keep_score_vb, keep_score_dvf,keep_score_vs2, keep_score_cv, keep_score_vb_cv, keep_score_dvf_cv,keep_score_vs2_cv, keep_score_kj_cv, keep_score_all)
 
 ```
 
@@ -691,6 +764,20 @@ p <- ggplot() +
                      values = c(20,21,21,22,22,23,23,24,24)) 
 
 p
+```
+
+# Correlating Scores and Other parameters
+
+```{r}
+cor(viruses$keep_score_all, viruses$hallmark, method="pearson")
+```
+
+```{r}
+cor(viruses$keep_score_all, viruses$percent_unknown, method="pearson")
+```
+
+```{r}
+cor(viruses$keep_score_all, viruses$percent_viral, method="pearson")
 ```
 
 
