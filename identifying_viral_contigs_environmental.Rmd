@@ -306,9 +306,9 @@ This section defines a viralness score "keep_score" based on the tool classifica
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
 VIBRANT
-    Quality == "High Quality Draft": +1
-    Quality == "Medium Quality Draft": +1
-    Quality == "Low Quality Draft" & provirus == TRUE: +0.5
+    vibrant_quality == "High Quality Draft": +1
+    vibrant_quality == "Medium Quality Draft": +1
+    vibrant_quality == "Low Quality Draft" & provirus == TRUE: +0.5
 
 Virsorter2
     Viral >= 50: +0.5
@@ -351,9 +351,9 @@ getting_viral_set_1 <- function(input_seqs,
   keep_score <- rep(0, nrow(input_seqs))
   
   if (include_vibrant) {
-    keep_score[input_seqs$Quality=="high quality draft"] <- keep_score[input_seqs$Quality=="high quality draft"] + 1
-    keep_score[input_seqs$Quality=="medium quality draft"] <- keep_score[input_seqs$Quality=="medium quality draft"] + 1
-    keep_score[input_seqs$Quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$Quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
   }
   
   if (include_virsorter2) {
