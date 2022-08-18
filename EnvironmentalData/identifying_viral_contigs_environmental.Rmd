@@ -165,7 +165,6 @@ vs_c$`## Contig_id` <- sub("-circular", "", vs_c$`## Contig_id`)
 vs_c$`## Contig_id` <- gsub("_", "", vs_c$`## Contig_id`)
 vs_c <- separate(vs_c, col = `## Contig_id`, into = c("assembly", "contig"), sep="--")
 
-vs_c <- vs_c[!duplicated(vs_c$contig),]
 vs_c <- vs_c %>% drop_na(contig)
 ```
 
@@ -306,9 +305,9 @@ This section defines a viralness score "keep_score" based on the tool classifica
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
 VIBRANT
-    vibrant_quality == "High Quality Draft": +1
-    vibrant_quality == "Medium Quality Draft": +1
-    vibrant_quality == "Low Quality Draft" & provirus == TRUE: +0.5
+    Quality == "High Quality Draft": +1
+    Quality == "Medium Quality Draft": +1
+    Quality == "Low Quality Draft" & provirus == TRUE: +0.5
 
 Virsorter2
     Viral >= 50: +0.5
@@ -353,13 +352,14 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
+    # keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.5
   }
   
   if (include_virsorter2) {
     keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
     keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
+    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 0.5
   }
   
   if (include_virsorter) {
@@ -373,7 +373,7 @@ getting_viral_set_1 <- function(input_seqs,
   
   if (include_deepvirfinder) {
     keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
-#   keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 0.5
+#    keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 0.5
   }
 
   if (include_kaiju) {
@@ -668,6 +668,8 @@ viruses$keep_score_vs_cv_kj_vs2_dvf <- getting_viral_set_1(viruses, include_vibr
 
 # # # # # assess_performance(viruses$seqtype, viruses$keep_score_vs_cv_kj_vs2_dvf)
 ```
+
+
 
  TODO WHAT DO I DO ABOUT THE ZEROS????
 # Plot of how many methods identify a contig
