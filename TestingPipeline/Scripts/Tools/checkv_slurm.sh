@@ -40,6 +40,6 @@ echo "activate conda environment"
 source activate  /home/hegartyb/miniconda3/envs/checkV
 
 echo "run checkV on all testing sets"
-bash checkv.sh ${SLURM_ARRAY_TASK_ID}
+bash checkv.sh ${SLURM_ARRAY_TASK_ID} {SLURM_CPUS_ON_NODE}
 
 echo done

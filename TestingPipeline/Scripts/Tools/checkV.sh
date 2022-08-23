@@ -4,7 +4,7 @@ echo start
 echo $1
 samplename="/scratch/duhaimem_root/duhaimem/shared_data/VSTE/TestingSet/metagenomic_testing_set_${1}.fna"
 database="/home/hegartyb/checkv-db-v0.6/"
-threads=4
+threads=$2
 
 echo contamination
 checkv contamination $samplename ./ -t $threads -d $database
