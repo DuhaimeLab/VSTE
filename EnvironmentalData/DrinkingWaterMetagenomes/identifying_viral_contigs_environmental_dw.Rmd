@@ -324,8 +324,8 @@ Virsorter2
     Hallmark > 2: +1
 
 Virsorter
-    category <= 5: +1
-    category == 6: +0.5
+    category ==  1,2,4,5: +1
+    category == 3,6: +0.5
 
 DeepVirFinder:
     Score >= 0.7: +0.5
