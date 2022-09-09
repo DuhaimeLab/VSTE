@@ -403,231 +403,155 @@ getting_viral_set_1 <- function(input_seqs,
 ```
 
 
-## just vibrant
+## vibrant virsorter2 virsorter checkV
 ```{r}
-viruses$keep_score_vb <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = F,
-                                            include_checkV = F,
+viruses$keep_score_vbvs2vscv <- getting_viral_set_1(viruses, include_vibrant = T,
+                                            include_virsorter2 = T,
+                                            include_checkV = T,
+                                            include_virsorter = T,
                                             include_kaiju = F,
                                             include_deepvirfinder = F)
 ```
 
-## vibrant + checkV
 ```{r}
-viruses$keep_score_vb_cv <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = F,
+table(viruses$keep_score_vbvs2vscv>=1)
+```
+
+
+```{r}
+getting_viral_set_3 <- function(input_seqs,
+                                include_vibrant=FALSE, 
+                                include_virsorter2=FALSE,
+                                include_deepvirfinder=FALSE,
+                                include_checkV=FALSE,
+                                include_virsorter=FALSE) {
+  
+  keep_score <- rep(0, nrow(input_seqs))
+  
+  if (include_vibrant) {
+    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- 
+      keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.3
+  }
+  
+  if (include_virsorter2) {
+    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.3
+    keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] <- 
+      keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] + 0.5
+    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
+    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
+    }
+  
+  if (include_virsorter) {
+    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
+    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.3
+    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
+    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.3
+  }
+  
+  if (include_deepvirfinder) {
+    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
+    keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 1
+  }
+  
+  if (include_checkV) {
+    keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>=1] <- 0
+    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0
+    keep_score[input_seqs$contig_length>50000 & input_seqs$hallmark==0] <- 0
+  }
+  
+  return(keep_score)
+  
+}
+```
+
+## vibrant virsorter2 virsorter checkV
+```{r}
+viruses$keep_score_vbvs2vscv_3 <- getting_viral_set_3(viruses, include_vibrant = T,
+                                            include_virsorter2 = T,
                                             include_checkV = T,
-                                            include_kaiju = F,
+                                            include_virsorter = T,
                                             include_deepvirfinder = F)
 ```
 
-## vibrant + checkV + kaiju
 ```{r}
-viruses$keep_score_vb_cv_kj <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = F,
+table(viruses$keep_score_vbvs2vscv_3>=1)
+```
+
+```{r}
+getting_viral_set_2 <- function(input_seqs,
+                                include_vibrant=FALSE, 
+                                include_virsorter2=FALSE,
+                                include_deepvirfinder=FALSE,
+                                include_checkV=FALSE,
+                                include_virsorter=FALSE) {
+  
+    keep_score <- rep(0, nrow(input_seqs))
+  
+  if (include_vibrant) {
+    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- 
+      keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.3
+  }
+  
+  if (include_virsorter2) {
+    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.3
+    keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] <- 
+      keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] + 0.5
+    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
+    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
+    }
+  
+  if (include_virsorter) {
+    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
+    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.3
+    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
+    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.3
+  }
+  
+  if (include_deepvirfinder) {
+    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
+    keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 1
+  }
+  
+  if (include_checkV) {
+    keep_score[input_seqs$checkv_quality=="low"] <- keep_score[input_seqs$checkv_quality=="low"] + 0.3
+    keep_score[input_seqs$checkv_quality=="medium"] <- keep_score[input_seqs$checkv_quality=="medium"] + 0.5
+    keep_score[input_seqs$checkv_quality=="high"] <- keep_score[input_seqs$checkv_quality=="medium"] + 1
+    
+    keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>1] <- 0
+  }
+  
+  return(keep_score)
+  
+}
+```
+
+## vibrant virsorter2 virsorter checkV
+```{r}
+viruses$keep_score_vbvs2vscv_2 <- getting_viral_set_2(viruses, include_vibrant = T,
+                                            include_virsorter2 = T,
                                             include_checkV = T,
-                                            include_kaiju = T,
+                                            include_virsorter = T,
                                             include_deepvirfinder = F)
 ```
 
-## vibrant + checkV + kaiju + deepvirfinder
 ```{r}
-viruses$keep_score_vb_cv_kj_dvf <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T)
+table(viruses$keep_score_vbvs2vscv_2>=1)
 ```
 
-## vibrant + virsorter2 + checkV + kaiju
-```{r}
-viruses$keep_score_vb_vs2_cv_kj <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F)
-```
 
-#all: vibrant + virsorter2 + checkV + kaiju + deepvirfinder
-```{r}
-viruses$keep_score_all <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T,
-                                            include_virsorter = T)
-```
 
-## just virsorter2
-```{r}
-viruses$keep_score_vs2 <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = T,
-                                            include_checkV = F,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F)
-```
 
-## virsorter2 + checkV
-```{r}
-viruses$keep_score_vs2_cv <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F)
-```
 
-## virsorter2 + checkV + kaiju
-```{r}
-viruses$keep_score_vs2_cv_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F)
-```
 
-## virsorter2 + checkV + kaiju + deepvirfinder
-```{r}
-viruses$keep_score_vs2_cv_kj_dvf <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T)
-```
 
-## just checkV
-```{r}
-viruses$keep_score_cv <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F)
-```
-
-## checkV + kaiju
-```{r}
-viruses$keep_score_cv_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F)
-```
-
-## just kaiju
-```{r}
-viruses$keep_score_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = F,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = F)
-```
-
-## just deepvirfinder
-```{r}
-viruses$keep_score_dvf <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = F,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = T)
-```
-
-## deepvirfinder + checkV
-```{r}
-viruses$keep_score_dvf_cv <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = T)
-```
-
-## deepvirfinder + checkV + kaiju
-```{r}
-viruses$keep_score_dvf_cv_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T,
-                                            include_virsorter = F)
-```
-
-## virsorter2 + checkV + kaiju
-```{r}
-viruses$keep_score_vs2_cv_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T)
-```
-
-## just virsorter
-```{r}
-viruses$keep_score_vs <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = F,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV
-```{r}
-viruses$keep_score_vs_cv <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV + kaiju
-```{r}
-viruses$keep_score_vs_cv_kj <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV + kaiju + vibrant + deepvirfinder + virsorter2
-```{r}
-viruses$keep_score_vs_cv_kj <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV + kaiju + vibrant
-```{r}
-viruses$keep_score_vs_cv_kj_vb <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = F,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV + kaiju + virsorter2 + vibrant
-```{r}
-viruses$keep_score_vs_cv_kj_vb_vs2 <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = F,
-                                            include_virsorter = T)
-```
-
-## virsorter + checkV + kaiju + virsorter2
-```{r}
-viruses$keep_score_vs_cv_kj_vs2_dvf <- getting_viral_set_1(viruses, include_vibrant = F,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_kaiju = T,
-                                            include_deepvirfinder = T,
-                                            include_virsorter = T)
-```
 
  TODO WHAT DO I DO ABOUT THE ZEROS????
 # Plot of how many methods identify a contig
