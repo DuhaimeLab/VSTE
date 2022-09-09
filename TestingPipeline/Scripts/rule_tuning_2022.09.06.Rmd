@@ -347,8 +347,8 @@ getting_viral_set_1 <- function(input_seqs,
   }
   
   if (include_deepvirfinder) {
-    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
-#   keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 0.5
+    keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<10000] <- keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<10000] + 0.5
+   keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<10000] <- keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<10000] + 1
   }
 
   if (include_kaiju) {
@@ -454,11 +454,23 @@ for (i in 2:10) {
 
 ```
 
+```{r}
+library("stringr")
+```
+
+```{r}
+accuracy_scores$numtools <- str_count(accuracy_scores$toolcombo, "1")
+accuracy_scores <- accuracy_scores[order(accuracy_scores$numtools, decreasing=F),]
+accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+accuracy_scores$numtools <- as.factor(accuracy_scores$numtools)
+```
+
+
 ## Visualize how the precision, recall, and F1 scores change across pipelines.
 ```{r}
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
-
-p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1)) +
+p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1, 
+                                  color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -473,9 +485,7 @@ p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1)) +
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("F1 Score")
-
 p2
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision)) +
   geom_point(alpha=0.5) +
   theme_light() +
@@ -491,7 +501,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision)) +
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Precision")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=recall)) +
   geom_point(alpha=0.5) +
   theme_light() +
