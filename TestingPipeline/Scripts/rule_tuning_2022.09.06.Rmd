@@ -67,7 +67,6 @@ vs2_path <- "../ToolOutput/testing_sets_virsorter2_output.tsv"
 kj_path <- "../ToolOutput/merged.nreuk.kaiju.names.out"
 # KB cutoff
 KB_CUTOFF <- 3000
-
 ```
 
 # All Viral Contigs
@@ -148,7 +147,6 @@ dvf_c <- fread(dvf_path,
         contig = name
         )
 dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
-
 dvf_c <- separate(dvf_c, col = contig, into = c("seqtype", "contig"), sep="--")
 dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method="BH")
 ```
@@ -165,12 +163,10 @@ vs_c <- fread(vs_path,
     rename(
         Index = index
         )
-
 vs_c$contig <- sub("VIRSorter_", "", vs_c$contig)
 vs_c$contig <- sub("-circular", "", vs_c$contig)
 vs_c <- separate(vs_c, col = `contig`, into = c("seqtype", "contig"), sep="--")
 vs_c$contig <- sub("\\.", "_", vs_c$contig)
-
 vs_c <- vs_c %>% drop_na(contig)
 vs_c <- vs_c[!duplicated(vs_c$contig),]
 ```
@@ -208,12 +204,9 @@ vs2_c <- vs2_c[!duplicated(vs2_c$contig),]
 ## Kaiju 
 ```{r}
 kj_c <- read_tsv(kj_path, col_names = T)
-
 kj_c$Contig <- sub("\\.", "_", kj_c$Contig)
-
 kj_c <- separate(kj_c, col = Contig, into = c("seqtype", "contig"), sep="--")
 kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
-
 kj_c$contig <- sub("\\.", "_", kj_c$contig)
 ```
 Quick glimpse of cellular vs viral sequence classification by Kaiju by assembly
@@ -256,21 +249,16 @@ get rid of NAs for downstream processing
 # checkV
 viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
 viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
-
 # VIBRANT
 viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
-
 # DeepVirFinder
 viruses$score[is.na(viruses$score)] <- 0
 viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
-
 # VirSorter2
 viruses$viral[is.na(viruses$viral)] <- 0
 viruses$hallmark[is.na(viruses$hallmark)] <- 0
-
 #Virsorter
 viruses$category[is.na(viruses$category)] <- 0
-
 # Kaiju
 viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
 viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
@@ -352,7 +340,6 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<20000] <- keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<20000] + 0.5
    keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<20000] <- keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<20000] + 0.5
   }
-
   if (include_kaiju) {
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 1
     keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
@@ -370,7 +357,6 @@ getting_viral_set_1 <- function(input_seqs,
   return(keep_score)
   
 }
-
 ```
 
 # Assessing performance against the "truth"
@@ -395,9 +381,7 @@ assess_performance <- function(seqtype, keep_score) {
   FN <- table(confusion_matrix)[1]
   
   precision <- TP/(TP+FP)
-
   recall <- TP/(TP+FN)
-
   F1 <- 2*precision*recall/(precision+recall)
   
   MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
@@ -461,7 +445,6 @@ build_score_list <- function(input_seqs, combos) {
 ## Calculate the performance of each pipeline
 ```{r}
 accuracy_scores <- build_score_list(viruses[viruses$Index==1], combos_list)
-
 accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*10),
                       precision=rep(0, nrow(combos_list)*10),
                        recall=rep(0, nrow(combos_list)*10),
@@ -471,16 +454,13 @@ accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*10),
                       fungal_FP=rep(0, nrow(combos_list)*10),
                       bacterial_FP=rep(0, nrow(combos_list)*10),
                       viral_FN=rep(0, nrow(combos_list)*10))
-
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==1], combos_list))
-
 for (i in 2:10) {
   accuracy_scores <- rbind(accuracy_scores,
                            cbind(testing_set_index=rep(i, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==i], combos_list)))
 }
-
 ```
 
 ```{r}
@@ -548,7 +528,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Recall")
-
 ggplot(accuracy_scores, aes(x=precision, y=recall, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -565,7 +544,6 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
   ) +
   xlab("Precision") +
   ylab("Recall")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall), 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -582,7 +560,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall),
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Precision-Recall")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -599,7 +576,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("MCC")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=AUC, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -616,7 +592,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=AUC,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("AUC")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -633,7 +608,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Fungal False Positives")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -650,7 +624,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Bacterial False Positives")
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -667,7 +640,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Viral False Negatives")
-
 ```
 
 
@@ -734,7 +706,6 @@ p2 <- ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   ylab("") + 
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
-
 p2
 ```
 note: are these fungal actually false negatives? At least one was classified as viral by Kaiju.
@@ -746,7 +717,6 @@ note: are these fungal actually false negatives? At least one was classified as 
 ```{r}
 viruses$keep_score_visualize <- viruses$keep_score
 viruses$keep_score_visualize[viruses$keep_score>1] <- ">1"
-
 viruses$keep_score_visualize <- factor(viruses$keep_score_visualize, 
                                        levels=c("-0.5", "-1", "0", "0.5","1", ">1"))
 viruses$keep_score_visualize <- factor(viruses$keep_score_visualize, 
@@ -760,7 +730,6 @@ levels(factor(viruses$keep_score_visualize))
 
 ```{r}
 pal <- ggthemes::tableau_color_pal(palette="Tableau 20", type="regular")
-
 p1 <- ggplot(viruses, aes(x=as.factor(Index),
                    fill=keep_score_visualize, color=keep_score_visualize)) +
   geom_bar(stat="count", position="stack") +
@@ -783,8 +752,6 @@ p1 <- ggplot(viruses, aes(x=as.factor(Index),
   xlab("Index") +
   ylab("Sequence Count") +
   facet_wrap(~confusion_matrix, scales = "free")
-
-
 p1
 ```
 
@@ -803,19 +770,15 @@ viruses$truepositive[viruses$seqtype=="virus"] <- 1
 ```{r}
 rocobj <- roc(viruses$truepositive, viruses$keep_score)
 rocobj_all <- roc(viruses$truepositive, viruses$keep_score_all)
-
 auc <- round(auc(viruses$truepositive, viruses$keep_score),4)
 auc_all <- round(auc(viruses$truepositive, viruses$keep_score_all),4)
-
 #create ROC plot
 ggroc(rocobj, colour = 'steelblue', size = 2) +
   ggtitle(paste0('ROC Curve ', '(AUC = ', auc, ')')) +
   coord_equal()
-
 ggroc(rocobj_all, colour = 'green', size = 2) +
   ggtitle(paste0('ROC Curve ', '(AUC = ', auc_all, ')'))
 ```
 Sensitivity: The probability that the model predicts a positive outcome for an observation when indeed the outcome is positive.
 Specificity: The probability that the model predicts a negative outcome for an observation when indeed the outcome is negative.
-
 
