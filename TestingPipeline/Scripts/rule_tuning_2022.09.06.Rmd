@@ -276,7 +276,7 @@ VIBRANT
 
 Virsorter2
     Viral >= 50: +0.5
-    Viral >= 0.95: +1
+    Viral >= 0.95: +0.5
 
 Virsorter
     category ==  1,2,4,5: +1
@@ -649,10 +649,193 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
 
 # Experimenting
 
+## high precision example
 ```{r}
-viruses$keep_score <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
-                                              include_virsorter2 = T,
+                                              include_virsorter2 = F,
+                                              include_kaiju = T,
+                                              include_tuning = T,
+                                              include_virsorter = F)
+```
+
+
+```{r}
+viruses$confusion_matrix_high_precision <- "true negative"
+viruses$confusion_matrix_high_precision[viruses$seqtype=="virus" & viruses$keep_score_high_precision<=1] <- "false negative"
+viruses$confusion_matrix_high_precision[viruses$seqtype=="virus" & viruses$keep_score_high_precision>=1] <- "true positive"
+viruses$confusion_matrix_high_precision[viruses$seqtype!="virus" & viruses$keep_score_high_precision>=1] <- "false positive"
+```
+
+visualizing confusion matrix by taxa
+```{r}
+confusion_by_taxa <- melt(table(viruses$confusion_matrix_high_precision, viruses$seqtype, viruses$Index))
+colnames(confusion_by_taxa) <- c("confusion_matrix", "seqtype","Index", "count")
+```
+
+
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Sequences") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+```
+
+```{r}
+ ggplot(viruses, aes(x=checkv_viral_genes, y=confusion_matrix,
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_boxplot(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Viral Sequences") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+
+ ggplot(viruses, aes(x=percent_viral, y=confusion_matrix,
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_boxplot(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Percent Genes Viral") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+
+ ggplot(viruses, aes(x=hallmark, y=confusion_matrix,
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_boxplot(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Hallmark Genes") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+ 
+ggplot(viruses, aes(x=hallmark, y=checkv_viral_genes,
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Number of Viral Genes") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+```
+
+```{r}
+table(viruses$hallmark[viruses$confusion_matrix_high_precision=="false positive"]>0)
+
+table(viruses$percent_host[viruses$confusion_matrix_high_precision=="false positive"]<50)
+```
+
+
+
+## high recall example
+```{r}
+viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
                                               include_kaiju = T,
                                               include_tuning = T,
                                               include_virsorter = T)
@@ -661,9 +844,9 @@ viruses$keep_score <- getting_viral_set_1(viruses, include_deepvirfinder = T,
 
 ```{r}
 viruses$confusion_matrix <- "true negative"
-viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score<=1] <- "false negative"
-viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score>=1] <- "true positive"
-viruses$confusion_matrix[viruses$seqtype!="virus" & viruses$keep_score>=1] <- "false positive"
+viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score_high_recall<=1] <- "false negative"
+viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score_high_recall>=1] <- "true positive"
+viruses$confusion_matrix[viruses$seqtype!="virus" & viruses$keep_score_high_recall>=1] <- "false positive"
 ```
 
 visualizing confusion matrix by taxa
@@ -708,7 +891,6 @@ p2 <- ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   coord_flip()
 p2
 ```
-note: are these fungal actually false negatives? At least one was classified as viral by Kaiju.
 
 
 # Visualizing confusion matrix by number of tools
