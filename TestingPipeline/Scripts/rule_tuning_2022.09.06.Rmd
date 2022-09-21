@@ -103,6 +103,7 @@ checkV$method = 'checkv'
 checkV <- separate(checkV, col = contig, into = c("seqtype", "contig"), sep="--")
 checkV$contig <- sub("\\.", "_", checkV$contig)
 checkV$contig <- sub("\\|", "_", checkV$contig)
+checkV <- checkV[!duplicated(paste(checkV$contig, checkV$Index)),]
 ```
 
 ## VIBRANT
@@ -128,7 +129,7 @@ vb_c <- separate(vb_c, col = contig, into = c("seqtype", "contig"), sep="--")
 vb_c$contig <- gsub("_fragment_.*", "", vb_c$contig)
 vb_c$contig <- sub("\\.", "_", vb_c$contig)
 vb_c <- separate(vb_c, col=contig, into="contig", remove=T, sep = " ")
-vb_c <- vb_c[!duplicated(vb_c$contig),]
+vb_c <- vb_c[!duplicated(paste(vb_c$contig, vb_c$Index)),]
 ```
 
 ## DeepVirFinder
@@ -149,6 +150,7 @@ dvf_c <- fread(dvf_path,
 dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
 dvf_c <- separate(dvf_c, col = contig, into = c("seqtype", "contig"), sep="--")
 dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method="BH")
+dvf_c <- dvf_c[!duplicated(paste(dvf_c$contig, dvf_c$Index)),]
 ```
 
 ## VirSorter
@@ -168,7 +170,7 @@ vs_c$contig <- sub("-circular", "", vs_c$contig)
 vs_c <- separate(vs_c, col = `contig`, into = c("seqtype", "contig"), sep="--")
 vs_c$contig <- sub("\\.", "_", vs_c$contig)
 vs_c <- vs_c %>% drop_na(contig)
-vs_c <- vs_c[!duplicated(vs_c$contig),]
+vs_c <- vs_c[!duplicated(paste(vs_c$contig, vs_c$Index)),]
 ```
 
 
@@ -197,7 +199,7 @@ vs2_c <- fread(vs2_path,
                   )
 vs2_c$contig <- sub("\\.", "_", vs2_c$contig)
 vs2_c <- separate(vs2_c, col = contig, into = c("seqtype", "contig"), sep="--")
-vs2_c <- vs2_c[!duplicated(vs2_c$contig),]
+vs2_c <- vs2_c[!duplicated(paste(vs2_c$contig, vs2_c$Index)),]
 ```
 
 
@@ -208,6 +210,7 @@ kj_c$Contig <- sub("\\.", "_", kj_c$Contig)
 kj_c <- separate(kj_c, col = Contig, into = c("seqtype", "contig"), sep="--")
 kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
 kj_c$contig <- sub("\\.", "_", kj_c$contig)
+kj_c <- kj_c[!duplicated(paste(kj_c$contig, kj_c$Index)),]
 ```
 Quick glimpse of cellular vs viral sequence classification by Kaiju by assembly
 ```{r}
@@ -340,6 +343,7 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<20000] <- keep_score[input_seqs$score>=0.7 & input_seqs$contig_length<20000] + 0.5
    keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<20000] <- keep_score[input_seqs$score>=0.9 & input_seqs$contig_length<20000] + 0.5
   }
+  
   if (include_kaiju) {
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 1
     keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
@@ -349,8 +353,10 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
     keep_score[input_seqs$percent_unknown>=75] <- keep_score[input_seqs$percent_unknown>=75] + 0.5
     keep_score[input_seqs$percent_viral>=50] <- keep_score[input_seqs$percent_viral>=50] + 0.5
+    #keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] <- keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] + 1 #add some ratio
     keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>=1] <- 0
-    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0
+    keep_score[((input_seqs$viral_genes*3) <= input_seqs$host_genes) & input_seqs$checkv_provirus=="No"] <- 0 # consider accounting for provirus designation
+#    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0 # consider accounting for provirus designation
     keep_score[input_seqs$contig_length>50000 & input_seqs$hallmark==0] <- 0
   }
   
@@ -710,9 +716,9 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
 ```
 
 ```{r}
- ggplot(viruses, aes(x=checkv_viral_genes, y=confusion_matrix,
-                   fill=confusion_matrix,
-                   color=confusion_matrix)) +
+ ggplot(viruses, aes(x=checkv_viral_genes, y=confusion_matrix_high_precision,
+                   fill=confusion_matrix_high_precision,
+                   color=confusion_matrix_high_precision)) +
   geom_boxplot(alpha=0.3) +
   theme_light() +
   theme(
@@ -738,9 +744,9 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
 
- ggplot(viruses, aes(x=percent_viral, y=confusion_matrix,
-                   fill=confusion_matrix,
-                   color=confusion_matrix)) +
+ ggplot(viruses, aes(x=percent_viral, y=confusion_matrix_high_precision,
+                   fill=confusion_matrix_high_precision,
+                   color=confusion_matrix_high_precision)) +
   geom_boxplot(alpha=0.3) +
   theme_light() +
   theme(
@@ -766,9 +772,9 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
 
- ggplot(viruses, aes(x=hallmark, y=confusion_matrix,
-                   fill=confusion_matrix,
-                   color=confusion_matrix)) +
+ ggplot(viruses, aes(x=hallmark, y=confusion_matrix_high_precision,
+                   fill=confusion_matrix_high_precision,
+                   color=confusion_matrix_high_precision)) +
   geom_boxplot(alpha=0.3) +
   theme_light() +
   theme(
@@ -795,8 +801,8 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   coord_flip()
  
 ggplot(viruses, aes(x=hallmark, y=checkv_viral_genes,
-                   fill=confusion_matrix,
-                   color=confusion_matrix)) +
+                   fill=confusion_matrix_high_precision,
+                   color=confusion_matrix_high_precision)) +
   geom_point(alpha=0.3) +
   theme_light() +
   theme(
@@ -822,6 +828,163 @@ ggplot(viruses, aes(x=hallmark, y=checkv_viral_genes,
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
 ```
+
+```{r}
+viruses_false_positive <- viruses[viruses$confusion_matrix_high_precision=="false positive",]
+viruses_false_negative <- viruses[viruses$confusion_matrix_high_precision=="false negative",]
+```
+
+```{r}
+ggplot(viruses, aes(x=hallmark, y=checkv_viral_genes,
+                   fill=checkv_length,
+                   color=checkv_length,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Number of Viral Genes") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_positive, aes(x=hallmark, y=checkv_length,
+                   fill=checkv_viral_genes,
+                   color=checkv_viral_genes,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_positive[viruses_false_positive$seqtype=="bacteria"], aes(x=hallmark, y=checkv_length,
+                   fill=checkv_viral_genes,
+                   color=checkv_viral_genes,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~Kaiju_Viral, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_positive[viruses_false_positive$seqtype=="fungi"], aes(x=hallmark, y=checkv_length,
+                   fill=keep_score_high_precision,
+                   color=keep_score_high_precision,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~Kaiju_Viral, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_positive[viruses_false_positive$seqtype=="protist"], aes(x=hallmark, y=checkv_length,
+                   fill=checkv_viral_genes,
+                   color=checkv_viral_genes,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~Kaiju_Viral, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_negative, aes(x=hallmark, y=checkv_length,
+                   fill=checkv_viral_genes,
+                   color=checkv_viral_genes,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~Kaiju_Viral, scales = "free") +
+  coord_flip()
+
+ggplot(viruses_false_negative, aes(x=hallmark, y=checkv_length,
+                   fill=keep_score_high_precision,
+                   color=keep_score_high_precision,
+                   shape=checkv_provirus)) +
+  geom_point(alpha=0.3) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Hallmark Genes") +
+  ylab("Contig Length") + 
+  facet_wrap(~Kaiju_Viral, scales = "free") +
+  coord_flip()
+```
+
+
+
 
 ```{r}
 table(viruses$hallmark[viruses$confusion_matrix_high_precision=="false positive"]>0)
