@@ -61,13 +61,13 @@ checkV_path <- "DrinkingWaterToolOutput/merged_checkV_allcontigs.tsv"
 # VIBRANT
 vibrant_path <- "DrinkingWaterToolOutput/vibrant_merged_contig_list_all.txt"
 # DeepVirFinder
-dvf_path <- "DrinkingWaterToolOutput/merged_lake_michigan_dvf_assemblies.tsv"
+dvf_path <- "DrinkingWaterToolOutput/dvf_outputs_merged.tsv"
 # Virsorter
 vs_path <- "DrinkingWaterToolOutput/vs_merged_all.txt"
 # Virsorter2
 vs2_path <- "DrinkingWaterToolOutput/vs2_merged_file.txt"
 # Kaiju
-kj_path <- "DrinkingWaterToolOutput/merged_lake_michigan_kaiju_assemblies.tsv"
+kj_path <- "DrinkingWaterToolOutput/kaju_outputs_merged.tsv"
 # KB cutoff
 KB_CUTOFF <- 3000
 
@@ -106,6 +106,7 @@ checkV <- fread(checkV_path,
 checkV$method = 'checkv'
 checkV$contig <- sub("\\.", "_", checkV$contig)
 checkV$uniq_contig <- paste(checkV$assembly, checkV$contig, sep = "--")
+checkV <- checkV[!duplicated(checkV$uniq_contig),]
 ```
 
 ## VIBRANT
@@ -133,24 +134,26 @@ vb_c$uniq_contig <- paste(vb_c$assembly, vb_c$contig, sep = "--")
 vb_c <- vb_c[!duplicated(vb_c$uniq_contig),]
 ```
 
-## DeepVirFinder - to run
+## DeepVirFinder
 ```{r}
 dvf_c <- fread(dvf_path,
                header = T,
                sep = "\t",
                select = c(
+                   'sample',
                    'name',
-                   'assembly',
                    'score',
                    'pvalue'
                    )
                ) %>% 
     rename(
-        contig = name
+        contig = name,
+        assembly = sample
         )
 dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
-
 dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method = "BH")
+dvf_c$uniq_contig <- paste(dvf_c$assembly, dvf_c$contig, sep = "--")
+dvf_c <- dvf_c[!duplicated(dvf_c$uniq_contig),]
 ```
 
 ## VirSorter
@@ -206,26 +209,15 @@ vs2_c <- vs2_c[!duplicated(vs2_c$uniq_contig),]
 ```
 
 
-## Kaiju - to run
-(parsing when reading the file in "fails" for sequences that weren't classified)
+## Kaiju
 ```{r}
-kj_c <- fread(kj_path)
-    
-colnames(kj_c) <-c(
-    "Classified",
-    "Contig",
-    "NCBI_taxon",
-    "len",
-    "ID_best",
-    "IDs_all",
-    "Seq",
-    "Name"
-    )
-kj_c$Contig <- gsub('_', '', kj_c$Contig)
-kj_c$Contig <- sub("\\.", "_", kj_c$Contig)
-
-kj_c <- setDT(kj_c)[, c("assembly", "contig") := tstrsplit(Contig, "--")]
-kj_c <- setDT(kj_c)[, c("Kaiju_Viral", "Kingdom") := tstrsplit(Name, ";", keep = c(1, 2))]
+kj_c <- read_tsv(kj_path, col_names = T)
+colnames(kj_c)[1] <- "assembly"
+colnames(kj_c)[3] <- "contig"
+kj_c$contig <- sub("\\.", "_", kj_c$contig)
+kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
+kj_c$uniq_contig <- paste(kj_c$assembly, kj_c$contig, sep="--")
+kj_c <- kj_c[!duplicated(kj_c$contig),]
 ```
 
 ```{r}
@@ -352,7 +344,7 @@ getting_viral_set_1 <- function(input_seqs,
                                 include_vibrant=FALSE, 
                                 include_virsorter2=FALSE,
                                 include_deepvirfinder=FALSE,
-                                include_checkV=FALSE,
+                                include_tuning=FALSE,
                                 include_kaiju=FALSE,
                                 include_virsorter=FALSE) {
   
@@ -362,12 +354,12 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
+#    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.5
   }
   
   if (include_virsorter2) {
     keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
+    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 0.5
   }
   
   if (include_virsorter) {
@@ -380,184 +372,97 @@ getting_viral_set_1 <- function(input_seqs,
   }
   
   if (include_deepvirfinder) {
-    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
-#   keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 0.5
+    keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] <- keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] + 0.5
+   keep_score[input_seqs$score>=0.9 & input_seqs$checkv_length<20000] <- keep_score[input_seqs$score>=0.9 & input_seqs$checkv_length<20000] + 0.5
   }
-
+  
   if (include_kaiju) {
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 1
     keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
   }
   
-  if (include_checkV) {
-    keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>=1] <- 0
-    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0
-    keep_score[input_seqs$contig_length>50000 & input_seqs$hallmark==0] <- 0
+  if (include_tuning) {
+    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
     keep_score[input_seqs$percent_unknown>=75] <- keep_score[input_seqs$percent_unknown>=75] + 0.5
-  }
-  
-  return(keep_score)
-  
-}
-
-```
-
-
-## vibrant virsorter2 virsorter checkV
-```{r}
-viruses$keep_score_vbvs2vscv <- getting_viral_set_1(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_virsorter = T,
-                                            include_kaiju = F,
-                                            include_deepvirfinder = F)
-```
-
-```{r}
-table(viruses$keep_score_vbvs2vscv>=1)
-```
-
-
-```{r}
-getting_viral_set_3 <- function(input_seqs,
-                                include_vibrant=FALSE, 
-                                include_virsorter2=FALSE,
-                                include_deepvirfinder=FALSE,
-                                include_checkV=FALSE,
-                                include_virsorter=FALSE) {
-  
-  keep_score <- rep(0, nrow(input_seqs))
-  
-  if (include_vibrant) {
-    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- 
-      keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 0.5
-    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.3
-  }
-  
-  if (include_virsorter2) {
-    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.3
-    keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] <- 
-      keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] + 0.5
-    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    }
-  
-  if (include_virsorter) {
-    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
-    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
-    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.3
-    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
-    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
-    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.3
-  }
-  
-  if (include_deepvirfinder) {
-    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
-    keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 1
-  }
-  
-  if (include_checkV) {
+    keep_score[input_seqs$percent_viral>=50] <- keep_score[input_seqs$percent_viral>=50] + 0.5
+    #keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] <- keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] + 1 #add some ratio
     keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>=1] <- 0
-    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0
+    keep_score[((input_seqs$viral_genes*3) <= input_seqs$host_genes) & input_seqs$checkv_provirus=="No"] <- 0 # consider accounting for provirus designation
+#    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0 # consider accounting for provirus designation
     keep_score[input_seqs$contig_length>50000 & input_seqs$hallmark==0] <- 0
   }
   
   return(keep_score)
   
 }
+
 ```
+
 
 ## vibrant virsorter2 virsorter checkV
 ```{r}
-viruses$keep_score_vbvs2vscv_3 <- getting_viral_set_3(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_virsorter = T,
-                                            include_deepvirfinder = F)
+viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_kaiju = T,
+                                              include_tuning = T,
+                                              include_virsorter = F)
 ```
 
 ```{r}
-table(viruses$keep_score_vbvs2vscv_3>=1)
+table(viruses$keep_score_high_precision>=1)
 ```
 
 ```{r}
-getting_viral_set_2 <- function(input_seqs,
-                                include_vibrant=FALSE, 
-                                include_virsorter2=FALSE,
-                                include_deepvirfinder=FALSE,
-                                include_checkV=FALSE,
-                                include_virsorter=FALSE) {
-  
-    keep_score <- rep(0, nrow(input_seqs))
-  
-  if (include_vibrant) {
-    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- 
-      keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 0.5
-    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.3
-  }
-  
-  if (include_virsorter2) {
-    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.3
-    keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] <- 
-      keep_score[(input_seqs$viral>=50 & input_seqs$host_genes==0) & input_seqs$viral_genes==0] + 0.5
-    keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 1
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    }
-  
-  if (include_virsorter) {
-    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
-    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
-    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.3
-    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
-    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
-    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.3
-  }
-  
-  if (include_deepvirfinder) {
-    keep_score[input_seqs$score>=0.7] <- keep_score[input_seqs$score>=0.7] + 0.5
-    keep_score[input_seqs$score>=0.9] <- keep_score[input_seqs$score>=0.9] + 1
-  }
-  
-  if (include_checkV) {
-    keep_score[input_seqs$checkv_quality=="low"] <- keep_score[input_seqs$checkv_quality=="low"] + 0.3
-    keep_score[input_seqs$checkv_quality=="medium"] <- keep_score[input_seqs$checkv_quality=="medium"] + 0.5
-    keep_score[input_seqs$checkv_quality=="high"] <- keep_score[input_seqs$checkv_quality=="medium"] + 1
-    
-    keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>1] <- 0
-  }
-  
-  return(keep_score)
-  
-}
-```
+viruses$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_kaiju = F,
+                                              include_tuning = F,
+                                              include_virsorter = F)
 
-## vibrant virsorter2 virsorter checkV
-```{r}
-viruses$keep_score_vbvs2vscv_2 <- getting_viral_set_2(viruses, include_vibrant = T,
-                                            include_virsorter2 = T,
-                                            include_checkV = T,
-                                            include_virsorter = T,
-                                            include_deepvirfinder = F)
-```
+viruses$keep_score_dvf <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_kaiju = F,
+                                              include_tuning = F,
+                                              include_virsorter = F)
 
-```{r}
-table(viruses$keep_score_vbvs2vscv_2>=1)
+viruses$keep_score_vs2 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_kaiju = F,
+                                              include_tuning = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_kaiju = F,
+                                              include_tuning = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_tuning <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_kaiju = F,
+                                              include_tuning = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_kj <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_kaiju = T,
+                                              include_tuning = F,
+                                              include_virsorter = F)
 ```
 
 
 
-
-
-
-
-
- TODO WHAT DO I DO ABOUT THE ZEROS????
 # Plot of how many methods identify a contig
 ```{r}
-viruses_high <- viruses[viruses$keep_score_all>=1,]
-viruses_high_mod <- viruses_high %>% select(keep_score_vb_cv, keep_score_dvf_cv,keep_score_vs2_cv, keep_score_vs_cv, keep_score_cv_kj)
+#viruses_high <- viruses[viruses$keep_score_all>=1,]
+viruses_high_mod <- viruses %>% select(keep_score_vb, keep_score_dvf,keep_score_vs2, keep_score_vs, keep_score_kj)
 viruses_high_mod <- apply(viruses_high_mod, c(1,2), function(x) {if (x >= 1) {x <- 1} else {x <- 0}})
 viruses_high_mod <- as_tibble(viruses_high_mod)
 
@@ -571,19 +476,21 @@ virusHighCount <- function(df, tool_combo) {
     }
 }
 
-sm <- as.data.frame(rbind(table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_vb_cv>0,])),
-                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_dvf_cv>0,])),
-                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_cv_kj>0,]))
+sm <- as.data.frame(rbind(table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_vb>0,])),
+                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_dvf>0,])),
+                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_vs2>0,])),
+                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_vs>0,])),
+                          table(rowSums(viruses_high_mod[viruses_high_mod$keep_score_kj>0,]))
                           )
 )
 
 sm <- as.data.frame(
     rbind(
-        virusHighCount(viruses_high_mod, "keep_score_vb_cv"),
-        virusHighCount(viruses_high_mod, "keep_score_dvf_cv"),
-        virusHighCount(viruses_high_mod, "keep_score_vs2_cv"),
-        virusHighCount(viruses_high_mod, "keep_score_vs_cv"),
-        virusHighCount(viruses_high_mod, "keep_score_cv_kj")
+        virusHighCount(viruses_high_mod, "keep_score_vb"),
+        virusHighCount(viruses_high_mod, "keep_score_dvf"),
+        virusHighCount(viruses_high_mod, "keep_score_vs2"),
+        virusHighCount(viruses_high_mod, "keep_score_vs"),
+        virusHighCount(viruses_high_mod, "keep_score_kj")
     )
 )
 
@@ -626,112 +533,5 @@ ggplot(sm_m, aes(x=primary_method, y=number,
   xlab("Primary Method") +
   ylab("Count of Viral Contigs")
 ```
-
-# Visualizing which tools led to a contig being selected
-(alluvial plot)
-with help from: https://www.bioinfo-scrounger.com/archives/alluvial-and-Sankey/
-
-```{r}
-alluvial_data <- viruses %>% select(keep_score_vb_cv, keep_score_vs_cv, keep_score_dvf_cv,keep_score_vs2_cv, keep_score_cv_kj) %>% 
-  apply(c(1,2), function(x) {if (x >= 1) {x <- 1} else if (x==0.5) {x <- 0.5} else {x <- 0}}) %>%
-  as_tibble() %>%
-  count(keep_score_vb_cv, keep_score_vs_cv, keep_score_dvf_cv,keep_score_vs2_cv, keep_score_cv_kj)
-```
-
-```{r}
-alluvial_data$cum_sum <- alluvial_data %>% select(keep_score_vb_cv, keep_score_vs_cv, keep_score_dvf_cv, keep_score_vs2_cv, keep_score_cv_kj) %>% 
-  rowSums()
-```
-
-```{r}
-alluvial_data$keep_score <- "0-0.5"
-alluvial_data$keep_score[alluvial_data$cum_sum>=1] <- "1-1.5"
-alluvial_data$keep_score[alluvial_data$cum_sum>=2] <- "2-2.5"
-alluvial_data$keep_score[alluvial_data$cum_sum>=3] <- "3-3.5"
-alluvial_data$keep_score[alluvial_data$cum_sum>=4] <- "4-4.5"
-alluvial_data$keep_score[alluvial_data$cum_sum>=5] <- "5+"
-
-alluvial_data$keep_score <- factor(
-    alluvial_data$keep_score,
-    levels=c(
-        "0-0.5",
-        "1-1.5",
-        "2-2.5",
-        "3-3.5",
-        "4-4.5",
-        "5+"
-        )
-    )
-```
-
-```{r}
-alluvial_data <- alluvial_data %>% 
-  mutate(
-      across(
-          c(keep_score_vb_cv,
-            keep_score_vs_cv,
-            keep_score_dvf_cv,
-            keep_score_vs2_cv,
-            keep_score_cv_kj
-            ),
-          as.factor
-          )
-      )
-```
-
-```{r}
-head(alluvial_data)
-```
-
-
-```{r}
-library(ggalluvial)
-```
-
-
-```{r}
-ggplot(data = alluvial_data,
-       aes(axis1 = as.character(keep_score_vb_cv), 
-           axis2 = as.character(keep_score_vs_cv),
-           axis3 = as.character(keep_score_vs2_cv),
-           axis4 = as.character(keep_score_dvf_cv),
-           axis5 = as.character(keep_score_cv_kj),
-           y = n)) +
-  geom_alluvium(aes(fill = keep_score)) +
-  geom_stratum() +
-  geom_text(stat = "stratum",
-            aes(label = after_stat(stratum))) +
-  scale_fill_viridis_d() + scale_x_discrete(limits = c("VIBRANT", "Virsorter", "VirSorter2", "DeepVirFinder", "Kaiju"),
-                                  expand = c(0.05, 0.05, 0.05, 0.05)) +
-  ylab("Number of Sequences") +
-  xlab("method") +
-  theme_bw()
-```
-
-Get proportion of contigs from "viruses" classified as virus by combined tool:
-
-```{r}
-prop_viral <- paste(nrow(viruses_high) / nrow(viruses) * 100, "%", sep="")
-prop_viral
-```
-
-Distribution of keep_score across "viruses" dataframe.
-```{r}
-keep_scores <- reshape2::melt(table(viruses$keep_score_all))
-
-colnames(keep_scores) <- c('keep_score', 'count')
-keep_scores[,'keep_score'] <- as.factor(keep_scores[,'keep_score'])
-
-ggplot(data = keep_scores, aes(x = keep_score, y = count)) +
-    geom_bar(stat="identity", width = 0.3, fill = 'steelblue')
-```
-
-Determine number of viral sequences with kaiju taxonomic classification
-
-```{r}
-tax_counts <- viruses_high %>% count(Kaiju_Viral, name = "num")
-tax_counts$prop <- tax_counts$num / sum(tax_counts$num)
-```
-
 
 
