@@ -409,7 +409,35 @@ assess_performance <- function(seqtype, keep_score) {
 
 combination of tools list
 ```{r}
-combos_list <- read_csv("combinations_list.csv", col_names = T)
+combos_list <- data.frame(toolcombo=rep(0, 64),
+                          CheckV=rep(0, 64),
+                          DVF=rep(0, 64),
+                          Kaiju=rep(0, 64),
+                          VIBRANT=rep(0, 64),
+                          VS=rep(0, 64),
+                          VS2=rep(0, 64))
+p <- 1
+
+for (i in c(0,1)){
+  for (j in c(0,1)){
+    for (k in c(0,1)){
+      for (l in c(0,1)){
+        for (m in c(0,1)){
+          for (n in c(0,1)){
+            combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
+            combos_list$CheckV[p] <- i
+            combos_list$DVF[p] <- j
+            combos_list$Kaiju[p] <- k
+            combos_list$VIBRANT[p] <- l
+            combos_list$VS[p] <- m
+            combos_list$VS2[p] <- n
+            p <- p+1
+          }
+        }
+      }
+    }
+  }
+}
 ```
 
 this function builds a list of all of the combinations that the user wants to 
@@ -450,7 +478,6 @@ build_score_list <- function(input_seqs, combos) {
 
 ## Calculate the performance of each pipeline
 ```{r}
-accuracy_scores <- build_score_list(viruses[viruses$Index==1], combos_list)
 accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*10),
                       precision=rep(0, nrow(combos_list)*10),
                        recall=rep(0, nrow(combos_list)*10),

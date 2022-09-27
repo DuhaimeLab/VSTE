@@ -67,7 +67,7 @@ vs_path <- "DrinkingWaterToolOutput/vs_merged_all.txt"
 # Virsorter2
 vs2_path <- "DrinkingWaterToolOutput/vs2_merged_file.txt"
 # Kaiju
-kj_path <- "DrinkingWaterToolOutput/kaju_outputs_merged.tsv"
+kj_path <- "DrinkingWaterToolOutput/kaiju_outputs_merged.tsv"
 # KB cutoff
 KB_CUTOFF <- 3000
 
@@ -227,7 +227,6 @@ table(kj_c$assembly, kj_c$Kaiju_Viral)
 
 
 ## Merging
-to do: this step isn't working properly
 ```{r}
 viruses <- full_join(x=vs2_c, y=checkV, by = c("uniq_contig", "assembly"))
 viruses <- full_join(x=viruses, y=dvf_c, by = c("uniq_contig", "assembly"))
@@ -288,7 +287,7 @@ viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
 
 ```{r}
 viruses_filename <- 'merged_viral_id_outputs.csv'
-write.csv(viruses, paste(dataset_name, viruses_filename, sep='_'))
+#write.csv(viruses, paste(dataset_name, viruses_filename, sep='_'))
 ```
 
 Data cleaning is done! Export viruses to tsv and load into identifying_viral_metrics.Rmd for metrics on tool outputs. The code for metrics is also pasted below, but it is not recommended running it in the same R session due to memory issues. The construction of the final dataframe essentially doubles the memory being used, and even with garbage collector can make Rstudio unresponsive.
@@ -532,6 +531,196 @@ ggplot(sm_m, aes(x=primary_method, y=number,
                      values = alpha(c(viridis(5)), 1)) +
   xlab("Primary Method") +
   ylab("Count of Viral Contigs")
+```
+
+# Comparing all of the tool methods
+
+```{r}
+combos_list <- data.frame(toolcombo=rep(0, 64),
+                          CheckV=rep(0, 64),
+                          DVF=rep(0, 64),
+                          Kaiju=rep(0, 64),
+                          VIBRANT=rep(0, 64),
+                          VS=rep(0, 64),
+                          VS2=rep(0, 64))
+p <- 1
+
+for (i in c(0,1)){
+  for (j in c(0,1)){
+    for (k in c(0,1)){
+      for (l in c(0,1)){
+        for (m in c(0,1)){
+          for (n in c(0,1)){
+            combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
+            combos_list$CheckV[p] <- i
+            combos_list$DVF[p] <- j
+            combos_list$Kaiju[p] <- k
+            combos_list$VIBRANT[p] <- l
+            combos_list$VS[p] <- m
+            combos_list$VS2[p] <- n
+            p <- p+1
+          }
+        }
+      }
+    }
+  }
+}
+
+combos_list <- combos_list[-1,]
+```
+
+```{r}
+viral_scores <- matrix(data=0, nrow=nrow(viruses), ncol=nrow(combos_list))
+num_viruses <- data.frame(toolcombo=rep(0, nrow(combos_list)),
+                          num_viruses=rep(0, nrow(combos_list)))
+
+for (i in 1:nrow(combos_list)) {
+  viral_scores[,i] <- getting_viral_set_1(viruses, include_vibrant = combos_list$VIBRANT[i],
+                                            include_virsorter = combos_list$VS[i],
+                                            include_virsorter2 = combos_list$VS2[i],
+                                            include_tuning = combos_list$CheckV[i],
+                                            include_kaiju = combos_list$Kaiju[i],
+                                            include_deepvirfinder = combos_list$DVF[i])
+  
+  num_viruses$num_viruses[i] <- table(viral_scores[,i]>=1)[[2]]
+    
+  num_viruses$toolcombo[i] <- combos_list$toolcombo[i]
+}
+
+num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
+num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
+num_viruses$numtools <- as.factor(num_viruses$numtools)
+```
+
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+ggplot(num_viruses, aes(x=toolcombo, y=num_viruses, 
+                                  color=numtools, fill=numtools)) +
+  geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
+  ylab("Num Viruses Predicted")
+```
+
+```{r}
+viral_scores_nozeros <- viral_scores[rowSums(viral_scores)>0,]
+viral_scores_nozeros <- viral_scores_nozeros + 1
+viral_scores_nozeros <- as.data.frame(viral_scores_nozeros)
+
+colnames(viral_scores_nozeros) <- num_viruses$toolcombo
+```
+
+```{r}
+library(phyloseq)
+```
+
+
+```{r}
+tooldata <- num_viruses
+rownames(tooldata) <- tooldata$toolcombo
+```
+
+```{r}
+physeq_pooled <- phyloseq(otu_table(viral_scores_nozeros, taxa_are_rows = T),
+                                     sample_data(tooldata))
+
+ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw() +
+  geom_label(label=tooldata$toolcombo)
+
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw()
+```
+to do: try coloring above based on the F1 scores of the testing set on each combination
+
+
+
+```{r}
+write_tsv(num_viruses, "dw_num_viruses_by_tool_combo.tsv")
+num_viruses <- read_tsv("dw_num_viruses_by_tool_combo.tsv")
+```
+
+```{r}
+accuracy_scores <- read_tsv("../../TestingPipeline/Scripts/20220927_accuracy_scores.tsv")
+```
+
+```{r}
+num_viruses_comp <- full_join(num_viruses, accuracy_scores[accuracy_scores$testing_set_index==1,], by=c("toolcombo", "numtools"))
+```
+
+```{r}
+num_viruses_comp$numtools <- as.factor(num_viruses_comp$numtools)
+```
+
+
+```{r}
+ggplot(num_viruses_comp, aes(x=num_viruses, y=F1, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("F1") +
+  xlab("Num Viruses Predicted")
+
+ggplot(num_viruses_comp, aes(x=num_viruses, y=precision, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Precision") +
+  xlab("Num Viruses Predicted")
+
+ggplot(num_viruses_comp, aes(x=num_viruses, y=recall, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Recall") +
+  xlab("Num Viruses Predicted")
 ```
 
 
