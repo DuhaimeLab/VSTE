@@ -675,6 +675,9 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
   ylab("Viral False Negatives")
 ```
 
+```{r}
+write_tsv(accuracy_scores, "20220927_accuracy_scores.tsv")
+```
 
 
 
