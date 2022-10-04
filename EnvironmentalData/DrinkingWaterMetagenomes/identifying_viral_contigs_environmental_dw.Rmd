@@ -552,6 +552,9 @@ for (i in c(0,1)){
         for (m in c(0,1)){
           for (n in c(0,1)){
             combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
+            combos_list$toolcombo2[p] <- paste(if(i){"C"}else{"0"},if(j){"DVF"}else{"0"},
+                                               if(k){"K"}else{"0"},if(l){"VB"}else{"0"},
+                                               if(m){"VS"}else{"0"},if(n){"VS2"}else{"0"})
             combos_list$CheckV[p] <- i
             combos_list$DVF[p] <- j
             combos_list$Kaiju[p] <- k
@@ -583,20 +586,39 @@ for (i in 1:nrow(combos_list)) {
                                             include_deepvirfinder = combos_list$DVF[i])
   
   num_viruses$num_viruses[i] <- table(viral_scores[,i]>=1)[[2]]
-    
+  
   num_viruses$toolcombo[i] <- combos_list$toolcombo[i]
+  
+  num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
 }
 
 num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
 num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
 num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
+num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
 num_viruses$numtools <- as.factor(num_viruses$numtools)
 ```
 
 
 ```{r}
-pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
 ggplot(num_viruses, aes(x=toolcombo, y=num_viruses, 
+                                  color=numtools, fill=numtools)) +
+  geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
+  ylab("Num Viruses Predicted")
+
+ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses, 
                                   color=numtools, fill=numtools)) +
   geom_point() +
   theme_light() +
@@ -619,7 +641,7 @@ viral_scores_nozeros <- viral_scores[rowSums(viral_scores)>0,]
 viral_scores_nozeros <- viral_scores_nozeros + 1
 viral_scores_nozeros <- as.data.frame(viral_scores_nozeros)
 
-colnames(viral_scores_nozeros) <- num_viruses$toolcombo
+colnames(viral_scores_nozeros) <- num_viruses$toolcombo2
 ```
 
 ```{r}
@@ -629,13 +651,16 @@ library(phyloseq)
 
 ```{r}
 tooldata <- num_viruses
-rownames(tooldata) <- tooldata$toolcombo
+
+rownames(tooldata) <- tooldata$toolcombo2
 ```
 
 ```{r}
 physeq_pooled <- phyloseq(otu_table(viral_scores_nozeros, taxa_are_rows = T),
                                      sample_data(tooldata))
+```
 
+```{r}
 ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
 phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
                           shape="numtools", color="num_viruses") + 
@@ -649,6 +674,24 @@ phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
   theme_bw()
 ```
 to do: try coloring above based on the F1 scores of the testing set on each combination
+
+```{r}
+bray_dist <- phyloseq::distance(physeq_pooled, method="bray")
+clusters <- hclust(dist(bray_dist))
+plot(clusters)
+
+myclusters <- cutree(clusters, h=0.8)
+```
+
+
+```{r}
+names(myclusters[myclusters==1])
+names(myclusters[myclusters==2])
+names(myclusters[myclusters==3])
+names(myclusters[myclusters==4])
+names(myclusters[myclusters==5])
+
+```
 
 
 
