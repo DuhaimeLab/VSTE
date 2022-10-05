@@ -21,6 +21,8 @@ library(tidyr)
 library(dplyr)
 library(readr)
 library(data.table)
+library(pROC)
+library(here)
 ```
 
 # Inputs
@@ -392,14 +394,14 @@ assess_performance <- function(seqtype, keep_score) {
   
   MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
   
-  auc <- round(auc(truepositive, keep_score),4)
+  AUC <- round(auc(truepositive, keep_score),4)
   
   #by type metrics
   fungal_FP <- table(confusion_matrix[seqtype=="fungi"])[2]
   bacterial_FP <- table(confusion_matrix[seqtype=="bacteria"])[2]
   viral_FN <- table(confusion_matrix[seqtype=="virus"])[1]
   
-  performance <- c(precision, recall, F1, MCC, auc, fungal_FP, bacterial_FP, viral_FN)
+  performance <- c(precision, recall, F1, MCC, AUC, fungal_FP, bacterial_FP, viral_FN)
   names(performance) <- c("precision", "recall", "F1", "MCC", "AUC", "fungal_FP",
                           "bacterial_FP", "viral_FN")
   
@@ -1115,11 +1117,11 @@ viruses$truepositive[viruses$seqtype=="virus"] <- 1
 ```{r}
 rocobj <- roc(viruses$truepositive, viruses$keep_score)
 rocobj_all <- roc(viruses$truepositive, viruses$keep_score_all)
-auc <- round(auc(viruses$truepositive, viruses$keep_score),4)
+AUC <- round(auc(viruses$truepositive, viruses$keep_score),4)
 auc_all <- round(auc(viruses$truepositive, viruses$keep_score_all),4)
 #create ROC plot
 ggroc(rocobj, colour = 'steelblue', size = 2) +
-  ggtitle(paste0('ROC Curve ', '(AUC = ', auc, ')')) +
+  ggtitle(paste0('ROC Curve ', '(AUC = ', AUC, ')')) +
   coord_equal()
 ggroc(rocobj_all, colour = 'green', size = 2) +
   ggtitle(paste0('ROC Curve ', '(AUC = ', auc_all, ')'))
@@ -1127,3 +1129,20 @@ ggroc(rocobj_all, colour = 'green', size = 2) +
 Sensitivity: The probability that the model predicts a positive outcome for an observation when indeed the outcome is positive.
 Specificity: The probability that the model predicts a negative outcome for an observation when indeed the outcome is negative.
 
+## Pull out Fungi
+
+```{r}
+fungi_1 <- viruses[(viruses$seqtype == "fungi") & (viruses$Kaiju_Viral == "Viruses")]
+vb_1 <- read_tsv("/Users/riddellj/Documents/Research/VSTE/Troubleshoot_Fungi/VIBRANT_annotations_metagenomic_testing_set_1.tsv")
+vb_1 <- separate(vb_1, col = "scaffold", into = c("seqtype", "contig"), sep="--")
+vb_1$contig <- sub("\\.", "_", vb_1$contig)
+vb_1_vb_c <- inner_join(vb_1, vb_c, on='contig')
+vb_1_vb_c_fungi <- vb_1_vb_c %>% filter(seqtype == "fungi")
+
+fungi_1_vb_1_vb_c_fungi <- inner_join(fungi_1,vb_1_vb_c_fungi, on='contig')
+
+                                      
+#Examples of "false positive" fungi
+# https://www.ncbi.nlm.nih.gov/nuccore/599124765
+
+```
