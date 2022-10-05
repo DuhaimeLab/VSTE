@@ -67,7 +67,7 @@ vs_path <- "DrinkingWaterToolOutput/vs_merged_all.txt"
 # Virsorter2
 vs2_path <- "DrinkingWaterToolOutput/vs2_merged_file.txt"
 # Kaiju
-kj_path <- "DrinkingWaterToolOutput/kaiju_outputs_merged.tsv"
+kj_path <- "/Users/hegartyb/Documents/BlueSkyPostdoc/ViralSortingToolsEvaluation/Temp/kaiju_outputs_merged.tsv"
 # KB cutoff
 KB_CUTOFF <- 3000
 
@@ -398,6 +398,26 @@ getting_viral_set_1 <- function(input_seqs,
 ```
 
 
+## 
+```{r}
+viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_kaiju = T,
+                                              include_tuning = T,
+                                              include_virsorter = T)
+viruses$keep_score_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_kaiju = T,
+                                              include_tuning = T,
+                                              include_virsorter = T)
+```
+
+```{r}
+table(viruses$keep_score_high_precision>=1)
+```
+
 ## vibrant virsorter2 virsorter checkV
 ```{r}
 viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvirfinder = F,
@@ -406,10 +426,6 @@ viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvi
                                               include_kaiju = T,
                                               include_tuning = T,
                                               include_virsorter = F)
-```
-
-```{r}
-table(viruses$keep_score_high_precision>=1)
 ```
 
 ```{r}
@@ -454,14 +470,23 @@ viruses$keep_score_kj <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_kaiju = T,
                                               include_tuning = F,
                                               include_virsorter = F)
+viruses$keep_score_kj <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_kaiju = T,
+                                              include_tuning = F,
+                                              include_virsorter = F)
 ```
 
 
 
 # Plot of how many methods identify a contig
 ```{r}
-#viruses_high <- viruses[viruses$keep_score_all>=1,]
-viruses_high_mod <- viruses %>% select(keep_score_vb, keep_score_dvf,keep_score_vs2, keep_score_vs, keep_score_kj)
+viruses_high <- viruses[viruses$keep_score_high_precision>=1,] #uncomment this line if high precision example
+#viruses_high <- viruses[viruses$keep_score_high_recall>=1,] #uncomment this line if want high recall example 
+#viruses_high <- viruses[viruses$keep_score_all>=1,] #uncomment this line if want to use all 6 tools
+#viruses_high <- viruses[,] #comment this line if want only the "high precision contigs"
+viruses_high_mod <- viruses_high %>% select(keep_score_vb, keep_score_dvf,keep_score_vs2, keep_score_vs, keep_score_kj)
 viruses_high_mod <- apply(viruses_high_mod, c(1,2), function(x) {if (x >= 1) {x <- 1} else {x <- 0}})
 viruses_high_mod <- as_tibble(viruses_high_mod)
 
@@ -635,6 +660,26 @@ ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses,
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Num Viruses Predicted")
 ```
+
+```{r}
+ggplot(num_viruses, aes(x=numtools, y=num_viruses)) +
+  geom_boxplot(aes(color=numtools)) +
+  geom_point(aes(color=numtools, fill=numtools)) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Tools") +
+  ylab("Num Viruses Predicted")
+```
+
 
 ```{r}
 viral_scores_nozeros <- viral_scores[rowSums(viral_scores)>0,]
