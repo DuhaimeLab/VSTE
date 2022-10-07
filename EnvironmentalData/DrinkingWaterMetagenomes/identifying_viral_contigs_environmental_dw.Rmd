@@ -736,6 +736,55 @@ names(myclusters[myclusters==3])
 names(myclusters[myclusters==4])
 names(myclusters[myclusters==5])
 
+myclusters_df <- tibble(combo=names(myclusters),
+                            cluster_index=myclusters)
+
+myclusters_df <- separate(myclusters_df, col=combo, into=c("CheckV", "DVF",
+                                                            "Kaiju", "VIBRANT",
+                                                            "VirSorter", "VirSorter2"),
+                          sep=" ", remove = F)
+
+
+tool_count <- as.data.frame(rbind(table(myclusters_df$CheckV, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$DVF, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$Kaiju, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VIBRANT, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VirSorter, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VirSorter2, myclusters_df$cluster_index)[2,])
+                    )
+
+tool_count$method <- c("CheckV", "DVF", "Kaiju", "VIBRANT", "VirSorter", "VirSorter2")
+
+tool_count <- melt(tool_count)
+
+colnames(tool_count) <- c("tool", "cluster_index", "tool_count")
+```
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+ggplot(tool_count, aes(x=cluster_index, y=tool_count,
+                   fill=cluster_index,
+                   color=cluster_index)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  xlab("Cluster") +
+  ylab("Number of Times in Cluster") + 
+  facet_wrap(~tool, scales = "free")
 ```
 
 
