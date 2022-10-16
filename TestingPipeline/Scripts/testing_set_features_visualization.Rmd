@@ -168,5 +168,26 @@ phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
   theme_bw()
 ```
 
+use of each tuning rule
+```{r}
+keep_score <- rep(0, nrow(viruses))
 
+
+keep_score[viruses$hallmark>2] <- keep_score[viruses$hallmark>2] + 1
+table(keep_score, viruses$seqtype)
+keep_score[viruses$checkv_host_genes>50 & viruses$checkv_provirus=="No"] <- keep_score[viruses$checkv_host_genes>50 & viruses$checkv_provirus=="No"] - 1
+table(keep_score, viruses$seqtype)
+keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] <- keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] + 0.5
+table(keep_score, viruses$seqtype)
+keep_score[viruses$percent_viral>=50] <- keep_score[viruses$percent_viral>=50] + 0.5
+table(keep_score, viruses$seqtype)
+    #keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] <- keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] + 1 #add some ratio
+keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] <- keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] - 1
+table(keep_score, viruses$seqtype)
+keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"] <- keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"] - 1 # consider accounting for provirus designation
+table(keep_score, viruses$seqtype)
+#    keep_score[(viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes] <- 0 # consider accounting for provirus designation
+keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] <- keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] - 1
+table(keep_score, viruses$seqtype)
+```
 
