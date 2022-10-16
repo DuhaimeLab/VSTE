@@ -1,0 +1,172 @@
+---
+title: "Testing Set Features Visualization"
+output: html_notebook
+---
+
+This notebook examines the relationship between different features of the data for distinguishing viral from nonviral sequences.
+
+Please reach out to James Riddell (riddell.26@buckeyemail.osu.edu) or
+Bridget Hegarty (beh53@case.edu) regarding any issues, or open an issue on github.
+
+```{r setup-library}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(viridis)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(data.table)
+```
+
+```{r}
+viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
+```
+
+```{r}
+colnames(viruses)
+```
+
+
+# Important features by sequence type
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(viruses, aes(x=hallmark, y=checkv_viral_genes)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Number of Hallmark Genes") +
+  ylab("Number of Viral Genes")
+```
+
+```{r}
+ggplot(viruses, aes(x=checkv_host_genes, y=checkv_viral_genes)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Number of Host Genes") +
+  ylab("Number of Viral Genes")
+```
+
+```{r}
+ggplot(viruses, aes(x=percent_unknown, y=percent_viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Percentage of Genes Unknown") +
+  ylab("Percentage of Genes Viral")
+```
+
+```{r}
+ggplot(viruses, aes(x=percent_unknown, y=checkv_length)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Percentage of Genes Unknown") +
+  ylab("Length of Sequence")
+```
+
+```{r}
+ggplot(viruses, aes(x=percent_viral, y=checkv_length)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Percentage of Genes Viral") +
+  ylab("Length of Sequence") 
+```
+
+```{r}
+ggplot(viruses, aes(x=hallmark, y=checkv_length)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Number of Hallmark Genes") +
+  ylab("Length of Sequence") 
+```
+
+```{r}
+ggplot(viruses, aes(x=checkv_length, y=checkv_completeness)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Length") +
+  ylab("Completeness") 
+```
+
+```{r}
+table(viruses$seqtype[viruses$checkv_length>50000 & viruses$hallmark==0])/table(viruses$seqtype)
+table(viruses$seqtype[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"])/table(viruses$seqtype)
+table(viruses$seqtype[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1])/table(viruses$seqtype)
+
+table(viruses$seqtype[viruses$percent_viral>=50])/table(viruses$seqtype)
+table(viruses$seqtype[viruses$percent_unknown>=75])/table(viruses$seqtype)
+table(viruses$seqtype[viruses$percent_unknown>=75 & viruses$checkv_length<50000])/table(viruses$seqtype)
+table(viruses$seqtype[viruses$hallmark>2])/table(viruses$seqtype[viruses$seqtype %in% unique(viruses$seqtype[viruses$hallmark>2])])
+```
+
+```{r}
+table(viruses$seqtype, viruses$Kaiju_Viral)
+```
+
+```{r}
+seqdata <- data.frame(seqtype=viruses$seqtype[!duplicated(viruses$contig)])
+
+rownames(seqdata) <- viruses$contig[!duplicated(viruses$contig)]
+```
+
+```{r}
+library(phyloseq)
+```
+
+
+```{r}
+features_table <- viruses[viruses$Index==1,]
+features_table <- features_table[,colnames(features_table) %in% c( 
+                                              "checkv_viral_genes",
+                                              "checkv_host_genes",
+                                              "checkv_unknown_genes",
+                                              "checkv_length",
+                                              "checkv_completeness",
+                                              "checkv_total_genes",
+                                              "percent_host",
+                                              "percent_viral",
+                                              "hallmark",
+                                              "percent_unknown"
+                                              )]
+
+features_table[is.na(features_table)] <- 0
+ft_colnames <- colnames(features_table)
+features_table <- t(features_table)
+rownames(features_table) <- ft_colnames
+colnames(features_table) <- rownames(seqdata)
+
+physeq_pooled <- phyloseq(otu_table(features_table, taxa_are_rows = T))
+```
+
+```{r}
+ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw() +
+  geom_label(label=seqdata$toolcombo)
+
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw()
+```
+
+
+
