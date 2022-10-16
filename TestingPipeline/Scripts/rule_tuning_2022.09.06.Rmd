@@ -21,253 +21,13 @@ library(tidyr)
 library(dplyr)
 library(readr)
 library(data.table)
+library(pROC)
 ```
 
-# Inputs
-1) For this script's inputs, the user must merge each viral identification 
-tool output file into one tab-separated file. 
-Replace the filenames with their paths if needed into the variables in the 
-'inputs' chunk.
-
-    General filenames for each tool:
-        Checkv: quality_summary.tsv
-        VIBRANT: VIBRANT_genome_quality_${assembly}.tsv
-        Virsorter: VIRSorter_global-phage-signal.csv
-        Virsorter2: final-viral-score.tsv
-        DeepVirFinder: ${assembly}.fasta_gt2500bp_dvfpred.txt
-        Kaiju: ${assembly}.kaiju.names.out
-
-2) Make sure all fasta headers (assembly, contig) are consistent within and
-across tools. Chunks for each tool do contain some lines for cleaning up these 
-features, but due to their variability it will be the user's responsibility to 
-make sure they match across tools.
-
-3) Check each chunk and ensure all columns are accounted for.
-
-4) This script is designed for contigs > 3000 basepairs. It can be modified
-to be higher or lower, but going lower will greatly increase the size of the
-dataframe and memory usage.
-
-
-
-```{r inputs}
-# dataset name for file organization and outputs for metrics file
-dataset_name <- "testing_set"
-# checkV
-checkV_path <- "../ToolOutput/testing_sets_checkv_output.tsv"
-# VIBRANT
-vibrant_path <- "../ToolOutput/testing_sets_vibrant_output.tsv"
-# DeepVirFinder
-dvf_path <- "../ToolOutput/testing_sets_deepvirfinder_output.tsv"
-# Virsorter
-vs_path <- "../ToolOutput/testing_sets_virsorter_output.tsv"
-# Virsorter2
-vs2_path <- "../ToolOutput/testing_sets_virsorter2_output.tsv"
-# Kaiju
-kj_path <- "../ToolOutput/merged.nreuk.kaiju.names.out"
-# KB cutoff
-KB_CUTOFF <- 3000
-```
-
-# All Viral Contigs
-
-## checkV
+Import the file that combines the results from each of the tools from running "combining_tool_output.Rmd":
 ```{r}
-checkV <- fread(checkV_path, 
-                sep="\t",
-                header = T, 
-                select = c(
-                    'Index',
-                    'contig_id',
-                    'provirus',
-                    'completeness',
-                    'contamination',
-                    'viral_genes',
-                    'host_genes',
-                    'gene_count',
-                    'contig_length',
-                    'checkv_quality'
-                    )
-                ) %>% 
-    rename(
-        contig = contig_id,
-        checkv_provirus = provirus,
-        checkv_completeness = completeness,
-        checkv_contamination = contamination,
-        checkv_viral_genes = viral_genes,
-        checkv_host_genes = host_genes,
-        checkv_total_genes = gene_count,
-        checkv_length = contig_length
-        )
-checkV$method = 'checkv'
-checkV <- separate(checkV, col = contig, into = c("seqtype", "contig"), sep="--")
-checkV$contig <- sub("\\.", "_", checkV$contig)
-checkV$contig <- sub("\\|", "_", checkV$contig)
-checkV <- checkV[!duplicated(paste(checkV$contig, checkV$Index)),]
+viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
-
-## VIBRANT
-```{r}
-vb_c <- fread(vibrant_path,
-              header = T,
-              sep = "\t",
-              select = c(
-                  'Index',
-                  'scaffold',
-                  'type',
-                  'Quality'
-                  )
-              ) %>%
-    rename(
-        contig = scaffold,
-        vibrant_quality = Quality
-        )
-vb_c$method <- "vibrant"
-vb_c$vibrant_prophage <- "No"
-vb_c$vibrant_prophage[grep("_fragment_", vb_c$contig)] <- "Yes"
-vb_c <- separate(vb_c, col = contig, into = c("seqtype", "contig"), sep="--")
-vb_c$contig <- gsub("_fragment_.*", "", vb_c$contig)
-vb_c$contig <- sub("\\.", "_", vb_c$contig)
-vb_c <- separate(vb_c, col=contig, into="contig", remove=T, sep = " ")
-vb_c <- vb_c[!duplicated(paste(vb_c$contig, vb_c$Index)),]
-```
-
-## DeepVirFinder
-```{r}
-dvf_c <- fread(dvf_path,
-               header = T,
-               sep = "\t",
-               select = c(
-                   'Index',
-                   'name',
-                   'score',
-                   'pvalue'
-                   )
-               ) %>% 
-    rename(
-        contig = name
-        )
-dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
-dvf_c <- separate(dvf_c, col = contig, into = c("seqtype", "contig"), sep="--")
-dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method="BH")
-dvf_c <- dvf_c[!duplicated(paste(dvf_c$contig, dvf_c$Index)),]
-```
-
-## VirSorter
-```{r}
-vs_c <- fread(vs_path,
-              select = c(
-                  'index',
-                  'contig',
-                  'category'
-                  )
-              ) %>% 
-    rename(
-        Index = index
-        )
-vs_c$contig <- sub("VIRSorter_", "", vs_c$contig)
-vs_c$contig <- sub("-circular", "", vs_c$contig)
-vs_c <- separate(vs_c, col = `contig`, into = c("seqtype", "contig"), sep="--")
-vs_c$contig <- sub("\\.", "_", vs_c$contig)
-vs_c <- vs_c %>% drop_na(contig)
-vs_c <- vs_c[!duplicated(paste(vs_c$contig, vs_c$Index)),]
-```
-
-
-## VirSorter2 
-```{r}
-vs2_c <- fread(vs2_path,
-                    header = T,
-                    sep = '\t',
-                    select = c(
-                        'Index',
-                        'seqname',
-                        'dsDNAphage',
-                        'ssDNA',
-                        'max_score',
-                        'max_score_group',
-                        'hallmark',
-                        'viral',
-                        'cellular'
-                    )
-               ) %>% 
-              separate(
-                  col = seqname,
-                  into = c("contig", "vs2type"), 
-                  sep = "\\|\\|",
-                  remove = T
-                  )
-vs2_c$contig <- sub("\\.", "_", vs2_c$contig)
-vs2_c <- separate(vs2_c, col = contig, into = c("seqtype", "contig"), sep="--")
-vs2_c <- vs2_c[!duplicated(paste(vs2_c$contig, vs2_c$Index)),]
-```
-
-
-## Kaiju 
-```{r}
-kj_c <- read_tsv(kj_path, col_names = T)
-kj_c$Contig <- sub("\\.", "_", kj_c$Contig)
-kj_c <- separate(kj_c, col = Contig, into = c("seqtype", "contig"), sep="--")
-kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
-kj_c$contig <- sub("\\.", "_", kj_c$contig)
-kj_c <- kj_c[!duplicated(paste(kj_c$contig, kj_c$Index)),]
-```
-Quick glimpse of cellular vs viral sequence classification by Kaiju by assembly
-```{r}
-table(kj_c$seqtype, kj_c$Kaiju_Viral)
-```
-
-
-## Merging
-```{r}
-viruses <- full_join(x=checkV, y=kj_c, by = c("Index", "contig", "seqtype"))
-viruses <- full_join(x=viruses, y=dvf_c, by = c("Index", "contig", "seqtype"))
-viruses <- full_join(x=viruses, y=vb_c, by = c("Index", "contig", "seqtype"))
-viruses <- full_join(x=viruses, y=vs_c, by = c("Index", "contig", "seqtype"))
-viruses <- full_join(x=viruses, y=vs2_c, by = c("Index", "contig", "seqtype"))
-```
-
-Remove contigs not greater than the basepair length cutoff (3000)
-```{r}
-viruses <- viruses %>% filter(checkv_length > KB_CUTOFF)
-```
-
-
-Use the next code chunk to check if any contigs are missing from checkv.
-If yes, then there is a mix up in contig names since checkv should contain
-all contig names even if they are identified as non-viral.
-```{r}
-v_missing <- viruses[is.na(viruses$checkv_uniq_contig),]
-```
-
-calculate percent viral/host/unknown
-```{r}
-viruses$percent_host <- viruses$checkv_host_genes/viruses$checkv_total_genes*100
-viruses$percent_viral <- viruses$checkv_viral_genes/viruses$checkv_total_genes*100
-viruses$percent_unknown <- 100-(viruses$checkv_host_genes+viruses$checkv_viral_genes)/viruses$checkv_total_genes*100
-```
-
-get rid of NAs for downstream processing
-```{r}
-# checkV
-viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
-viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
-# VIBRANT
-viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
-# DeepVirFinder
-viruses$score[is.na(viruses$score)] <- 0
-viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
-# VirSorter2
-viruses$viral[is.na(viruses$viral)] <- 0
-viruses$hallmark[is.na(viruses$hallmark)] <- 0
-#Virsorter
-viruses$category[is.na(viruses$category)] <- 0
-# Kaiju
-viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
-viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
-```
-
-
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
@@ -321,7 +81,7 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus=="Yes"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$checkv_provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$checkv_provirus=="Yes"] + 0.5
 #    keep_score[input_seqs$vibrant_quality=="low quality draft"] <- keep_score[input_seqs$vibrant_quality=="low quality draft"] + 0.5
   }
   
@@ -346,18 +106,19 @@ getting_viral_set_1 <- function(input_seqs,
   
   if (include_kaiju) {
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 1
-    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
+    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 0.5
   }
   
   if (include_tuning) {
     keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    keep_score[input_seqs$percent_unknown>=75] <- keep_score[input_seqs$percent_unknown>=75] + 0.5
+    keep_score[input_seqs$checkv_host_genes>50 & input_seqs$checkv_provirus=="No"] <- keep_score[input_seqs$checkv_host_genes>50 & input_seqs$checkv_provirus=="No"] - 1
+    keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] <- keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] + 0.5
     keep_score[input_seqs$percent_viral>=50] <- keep_score[input_seqs$percent_viral>=50] + 0.5
     #keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] <- keep_score[input_seqs$hallmark>=(input_seqs$checkv_viral_genes/5)] + 1 #add some ratio
-    keep_score[input_seqs$viral_genes==0 & input_seqs$host_genes>=1] <- 0
-    keep_score[((input_seqs$viral_genes*3) <= input_seqs$host_genes) & input_seqs$checkv_provirus=="No"] <- 0 # consider accounting for provirus designation
-#    keep_score[(input_seqs$viral_genes*3) <= input_seqs$host_genes] <- 0 # consider accounting for provirus designation
-    keep_score[input_seqs$contig_length>50000 & input_seqs$hallmark==0] <- 0
+    keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
+    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] - 1 # consider accounting for provirus designation
+#    keep_score[(input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes] <- 0 # consider accounting for provirus designation
+    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark==0] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark==0] - 1
   }
   
   return(keep_score)
@@ -396,12 +157,14 @@ assess_performance <- function(seqtype, keep_score) {
   
   #by type metrics
   fungal_FP <- table(confusion_matrix[seqtype=="fungi"])[2]
+  protist_FP <- table(confusion_matrix[seqtype=="protist"])[2]
   bacterial_FP <- table(confusion_matrix[seqtype=="bacteria"])[2]
   viral_FN <- table(confusion_matrix[seqtype=="virus"])[1]
   
-  performance <- c(precision, recall, F1, MCC, auc, fungal_FP, bacterial_FP, viral_FN)
+  performance <- c(precision, recall, F1, MCC, auc, fungal_FP, 
+                   protist_FP, bacterial_FP, viral_FN)
   names(performance) <- c("precision", "recall", "F1", "MCC", "AUC", "fungal_FP",
-                          "bacterial_FP", "viral_FN")
+                          "protist_FP", "bacterial_FP", "viral_FN")
   
   return(performance)
 }
@@ -457,6 +220,7 @@ build_score_list <- function(input_seqs, combos) {
                        MCC=rep(0, nrow(combos)),
                        AUC=rep(0, nrow(combos)),
                        fungal_FP=rep(0, nrow(combos)),
+                       protist_FP=rep(0, nrow(combos)),
                        bacterial_FP=rep(0, nrow(combos)),
                        viral_FN=rep(0, nrow(combos)))
   for (i in 1:nrow(combos)) {
@@ -467,7 +231,7 @@ build_score_list <- function(input_seqs, combos) {
                                             include_kaiju = combos$Kaiju[i],
                                             include_deepvirfinder = combos$DVF[i])
   
-    output[i,1:8] <- assess_performance(input_seqs$seqtype, keep_score)
+    output[i,1:9] <- assess_performance(input_seqs$seqtype, keep_score)
     
     output$toolcombo[i] <- paste(combos$CheckV[i],combos$DVF[i],
                                  combos$Kaiju[i], combos$VIBRANT[i],
@@ -475,8 +239,7 @@ build_score_list <- function(input_seqs, combos) {
   }
   
   output[is.na(output)] <- 0
-  
-  #return(keep_score)
+
   return (output)
 }
 ```
@@ -490,14 +253,16 @@ accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*10),
                        MCC=rep(0, nrow(combos_list)*10), 
                       AUC=rep(0, nrow(combos_list)*10),
                       fungal_FP=rep(0, nrow(combos_list)*10),
+                      protist_FP=rep(0, nrow(combos_list)*10),
                       bacterial_FP=rep(0, nrow(combos_list)*10),
                       viral_FN=rep(0, nrow(combos_list)*10))
+
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
-                              build_score_list(viruses[viruses$Index==1], combos_list))
+                              build_score_list(viruses[viruses$Index==1,], combos_list))
 for (i in 2:10) {
   accuracy_scores <- rbind(accuracy_scores,
                            cbind(testing_set_index=rep(i, nrow(combos_list)),
-                              build_score_list(viruses[viruses$Index==i], combos_list)))
+                              build_score_list(viruses[viruses$Index==i,], combos_list)))
 }
 ```
 
@@ -646,6 +411,24 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP,
   ) +
   xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
   ylab("Fungal False Positives")
+
+ggplot(accuracy_scores, aes(x=toolcombo, y=protist_FP, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (CV, DVF, KJ, VB, VS, VS2)") +
+  ylab("Protist False Positives")
+
 ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -701,7 +484,7 @@ viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvi
 
 ```{r}
 viruses$confusion_matrix_high_precision <- "true negative"
-viruses$confusion_matrix_high_precision[viruses$seqtype=="virus" & viruses$keep_score_high_precision<=1] <- "false negative"
+viruses$confusion_matrix_high_precision[viruses$seqtype=="virus" & viruses$keep_score_high_precision<1] <- "false negative"
 viruses$confusion_matrix_high_precision[viruses$seqtype=="virus" & viruses$keep_score_high_precision>=1] <- "true positive"
 viruses$confusion_matrix_high_precision[viruses$seqtype!="virus" & viruses$keep_score_high_precision>=1] <- "false positive"
 ```
@@ -1025,11 +808,9 @@ table(viruses$hallmark[viruses$confusion_matrix_high_precision=="false positive"
 table(viruses$percent_host[viruses$confusion_matrix_high_precision=="false positive"]<50)
 ```
 
-
-
-## high recall example
+## high MCC example
 ```{r}
-viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = F,
                                               include_kaiju = T,
@@ -1039,15 +820,75 @@ viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfi
 
 
 ```{r}
-viruses$confusion_matrix <- "true negative"
-viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score_high_recall<=1] <- "false negative"
-viruses$confusion_matrix[viruses$seqtype=="virus" & viruses$keep_score_high_recall>=1] <- "true positive"
-viruses$confusion_matrix[viruses$seqtype!="virus" & viruses$keep_score_high_recall>=1] <- "false positive"
+viruses$confusion_matrix_high_MCC <- "true negative"
+viruses$confusion_matrix_high_MCC[viruses$seqtype=="virus" & viruses$keep_score_high_MCC<1] <- "false negative"
+viruses$confusion_matrix_high_MCC[viruses$seqtype=="virus" & viruses$keep_score_high_MCC>=1] <- "true positive"
+viruses$confusion_matrix_high_MCC[viruses$seqtype!="virus" & viruses$keep_score_high_MCC>=1] <- "false positive"
 ```
 
 visualizing confusion matrix by taxa
 ```{r}
-confusion_by_taxa <- melt(table(viruses$confusion_matrix, viruses$seqtype, viruses$Index))
+confusion_by_taxa <- melt(table(viruses$confusion_matrix_high_MCC, viruses$seqtype, viruses$Index))
+colnames(confusion_by_taxa) <- c("confusion_matrix", "seqtype","Index", "count")
+```
+
+
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
+                   fill=confusion_matrix,
+                   color=confusion_matrix)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Sequences") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free") +
+  coord_flip()
+```
+
+## high recall example
+```{r}
+viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_kaiju = T,
+                                              include_tuning = T,
+                                              include_virsorter = T)
+```
+
+
+```{r}
+viruses$confusion_matrix_high_recall <- "true negative"
+viruses$confusion_matrix_high_recall[viruses$seqtype=="virus" & viruses$keep_score_high_recall<1] <- "false negative"
+viruses$confusion_matrix_high_recall[viruses$seqtype=="virus" & viruses$keep_score_high_recall>=1] <- "true positive"
+viruses$confusion_matrix_high_recall[viruses$seqtype!="virus" & viruses$keep_score_high_recall>=1] <- "false positive"
+```
+
+visualizing confusion matrix by taxa
+```{r}
+confusion_by_taxa <- melt(table(viruses$confusion_matrix_high_recall, viruses$seqtype, viruses$Index))
 colnames(confusion_by_taxa) <- c("confusion_matrix", "seqtype","Index", "count")
 ```
 
@@ -1087,6 +928,13 @@ p2 <- ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   coord_flip()
 p2
 ```
+
+looking at false negatives
+```{r}
+viruses_false_negs <- viruses[(viruses$seqtype=="virus" & viruses$keep_score_high_recall<=1),]
+```
+
+
 
 
 # Visualizing confusion matrix by number of tools
