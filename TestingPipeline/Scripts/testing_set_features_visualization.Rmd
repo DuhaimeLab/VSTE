@@ -105,6 +105,16 @@ ggplot(viruses, aes(x=checkv_length, y=checkv_completeness)) +
 ```
 
 ```{r}
+ggplot(viruses, aes(x=hallmark, y=checkv_completeness)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Hallmark Genes") +
+  ylab("Completeness") 
+```
+
+```{r}
 table(viruses$seqtype[viruses$checkv_length>50000 & viruses$hallmark==0])/table(viruses$seqtype)
 table(viruses$seqtype[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"])/table(viruses$seqtype)
 table(viruses$seqtype[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1])/table(viruses$seqtype)

@@ -29,6 +29,11 @@ Import the file that combines the results from each of the tools from running "c
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
 
+```{r}
+viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
+```
+
+
 This section defines a viralness score "keep_score" based on the tool classifications. 
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
@@ -67,6 +72,12 @@ includes ecological metrics like alpha diversity.
 You can decide which combination is appropriate for them and only need use the
 tools appropriate for your data.
 
+#seeing about a length cutoff
+```{r}
+viruses <- viruses[viruses$checkv_length>=5000,]
+```
+
+
 ```{r getting_viral_set_1}
 getting_viral_set_1 <- function(input_seqs,
                                 include_vibrant=FALSE, 
@@ -92,11 +103,11 @@ getting_viral_set_1 <- function(input_seqs,
   
   if (include_virsorter) {
     keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
-    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 1
-    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
+    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+#    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
     keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
-    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 1
-    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
+#    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5
   }
   
   if (include_deepvirfinder) {
@@ -118,7 +129,8 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
     keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] - 1 # consider accounting for provirus designation
 #    keep_score[(input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes] <- 0 # consider accounting for provirus designation
-    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark==0] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark==0] - 1
+    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] - 1
+    keep_score[input_seqs$checkv_completeness<1 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_completeness>1 & input_seqs$hallmark<=1] - 1
   }
   
   return(keep_score)
@@ -814,7 +826,7 @@ table(viruses$percent_host[viruses$confusion_matrix_high_precision=="false posit
 ```{r}
 viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
-                                              include_virsorter2 = F,
+                                              include_virsorter2 = T,
                                               include_kaiju = T,
                                               include_tuning = T,
                                               include_virsorter = T)
@@ -870,6 +882,38 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
   coord_flip()
 ```
 
+```{r}
+ggplot(viruses, aes(x=checkv_length, y=keep_score_high_MCC,
+                   fill=confusion_matrix_high_MCC,
+                   color=confusion_matrix_high_MCC)) +
+  geom_point(stat="identity", shape=21) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Sequence Length (bp)") +
+  ylab("Pipeline Viral Score") + 
+  facet_wrap(~seqtype) + 
+  scale_x_log10()
+```
+
+
+
 ## high recall example
 ```{r}
 viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = T,
@@ -887,6 +931,13 @@ viruses$confusion_matrix_high_recall[viruses$seqtype=="virus" & viruses$keep_sco
 viruses$confusion_matrix_high_recall[viruses$seqtype=="virus" & viruses$keep_score_high_recall>=1] <- "true positive"
 viruses$confusion_matrix_high_recall[viruses$seqtype!="virus" & viruses$keep_score_high_recall>=1] <- "false positive"
 ```
+
+accuracy:
+```{r}
+length(grep("true", viruses$confusion_matrix_high_recall))/nrow(viruses)
+```
+
+
 
 visualizing confusion matrix by taxa
 ```{r}
@@ -931,11 +982,106 @@ p2 <- ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
 p2
 ```
 
-looking at false negatives
 ```{r}
-viruses_false_negs <- viruses[(viruses$seqtype=="virus" & viruses$keep_score_high_recall<=1),]
+ggplot(viruses, aes(x=checkv_completeness, y=hallmark,
+                   fill=confusion_matrix_high_recall,
+                   color=confusion_matrix_high_recall)) +
+  geom_point(stat="identity", shape=21) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("CheckV Completeness") +
+  ylab("Number of Hallmark Genes") + 
+  facet_wrap(~seqtype) + 
+  scale_x_log10()
 ```
 
+```{r}
+ggplot(viruses, aes(x=checkv_completeness, y=keep_score_high_MCC,
+                   fill=confusion_matrix_high_recall,
+                   color=confusion_matrix_high_recall)) +
+  geom_point(stat="identity", shape=21) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("CheckV Completeness") +
+  ylab("Pipeline Viral Score") + 
+  facet_wrap(~seqtype) + 
+  scale_x_log10()
+```
+
+```{r}
+ggplot(viruses, aes(x=confusion_matrix_high_recall, y=checkv_length,
+                   fill=confusion_matrix_high_recall,
+                   color=confusion_matrix_high_recall)) +
+  geom_boxplot() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Sequence Length (bp)") +
+  ylab("Pipeline Viral Score") +
+  scale_y_log10()
+```
+
+
+
+looking at false negatives
+```{r}
+viruses_false_negs <- viruses[(viruses$seqtype=="virus" & viruses$keep_score_high_recall<1),]
+```
+
+looking at protists calling viral
+```{r}
+viruses_false_pos_protists <- viruses[(viruses$seqtype=="protist" & viruses$keep_score_high_recall>=1),]
+```
 
 
 
