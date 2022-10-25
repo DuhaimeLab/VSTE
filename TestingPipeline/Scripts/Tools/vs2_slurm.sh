@@ -37,11 +37,11 @@ echo $SLURM_JOB_NODELIST
 echo start
 
 echo "activate conda environment"
-source activate  /home/hegartyb/miniconda3/envs/vs2_2
+source activate  /home/hegartyb/miniconda3/envs/vs2_20221025
 
 echo "run virsorter on all testing sets"
-mkdir ../VS2
-cd ../VS2
-bash ../Scripts/vs2.sh ${SLURM_ARRAY_TASK_ID} ${SLURM_CPUS_ON_NODE}
+mkdir /scratch/duhaimem_root/duhaimem/shared_data/VSTE/RunningToolsOnTestingSet/VS2
+cd /scratch/duhaimem_root/duhaimem/shared_data/VSTE/RunningToolsOnTestingSet/VS2
+bash /scratch/duhaimem_root/duhaimem/shared_data/VSTE/Scripts/vs2.sh ${SLURM_ARRAY_TASK_ID} ${SLURM_CPUS_ON_NODE}
 
 echo done

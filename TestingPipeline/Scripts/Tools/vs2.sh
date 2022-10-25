@@ -12,6 +12,6 @@ threads=$2
 path="/scratch/duhaimem_root/duhaimem/shared_data/VSTE/RunningToolsOnTestingSet/VS2/VS2_${1}"
 threads=10
 
-virsorter run -w $path -i $samplename -j $threads all
+virsorter run -w $path -i $samplename --include-groups all -j $threads all
 
 echo done
