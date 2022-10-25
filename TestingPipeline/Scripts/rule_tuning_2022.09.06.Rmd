@@ -1135,52 +1135,52 @@ ggplot(viruses, aes(x=as.factor(Index),
 viruses$keep_score_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = T,
-                                              include_tuning = T,
-                                              include_virsorter = T)
+                                              include_virsorter = T,
+                                              include_tuning_viral= T,
+                                              include_tuning_not_viral = T)
 ```
 
 ```{r}
 viruses$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_dvf <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = F,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_vs2 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = F,
                                               include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_vs <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = F,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = T)
 
 viruses$keep_score_tuning <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = F,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
                                               include_virsorter = F)
 
 viruses$keep_score_kj <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = F,
                                               include_virsorter2 = F,
-                                              include_kaiju = T,
-                                              include_tuning = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 ```
 
@@ -1312,52 +1312,52 @@ ggplot(sm_m, aes(x=primary_method, y=number,
 viruses$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_vb_dvf <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_vb_dvf_vs2 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
 viruses$keep_score_vb_dvf_vs2_vs <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = T)
 
-viruses$keep_score_vb_dvf_vs2_vs_tuning <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+viruses$keep_score_vb_dvf_vs2_vs_tv <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = T)
 
-viruses$keep_score_vb_dvf_vs2_vs_tuning_kj <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+viruses$keep_score_vb_dvf_vs2_vs_tv_tnv <- getting_viral_set_1(viruses, include_deepvirfinder = T,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = T,
-                                              include_tuning = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
                                               include_virsorter = T)
 ```
 
 # Considering how each method contributes to the final prediction
 ```{r}
-viruses_high <- viruses[viruses$keep_score_vb_dvf_vs2_vs_tuning_kj>=1,] #uncomment this line if want to use all 6 tools
+viruses_high <- viruses[viruses$keep_score_all>=1,] 
 viruses_high_mod <- viruses_high %>% select(keep_score_vb,keep_score_vb_dvf, 
                                             keep_score_vb_dvf_vs2, keep_score_vb_dvf_vs2_vs, 
-                                            keep_score_vb_dvf_vs2_vs_tuning, keep_score_vb_dvf_vs2_vs_tuning_kj)
+                                            keep_score_vb_dvf_vs2_vs_tv, keep_score_vb_dvf_vs2_vs_tv_tnv)
 #viruses_high_mod <- apply(viruses_high_mod, c(1,2), function(x) {if (x >= 1) {x <- 1} else {x <- 0}})
 viruses_high_mod <- as_tibble(viruses_high_mod)
 
@@ -1366,12 +1366,29 @@ viruses_high_mod <- as_tibble(viruses_high_mod)
 
 ```{r}
 sm_m <- reshape2::melt(viruses_high_mod)
-colnames(sm_m) <- c("method", "score")
+colnames(sm_m) <- c("method", "viral_score")
 ```
 
 ```{r}
+sm_m <- sm_m[sm_m$viral_score>0,]
+
+sm_m$score <- sm_m$viral_score
+
+sm_m$score[sm_m$viral_score==0.5] <- "0.5"
+sm_m$score[sm_m$viral_score>=1] <- "1"
+sm_m$score[sm_m$viral_score>=2] <- "2"
+sm_m$score[sm_m$viral_score>=3] <- "3"
+sm_m$score[sm_m$viral_score>=4] <- "4"
+sm_m$score[sm_m$viral_score>=5] <- "5"
+
+sm_m$score <- factor(sm_m$score, 
+                                       levels=c("0.5", "1", "2","3","4","5"))
+```
+
+
+```{r}
 ggplot(sm_m, aes(x=method, y=score,
-                   fill=as.factor(score))) +
+                   fill=score)) +
   geom_bar(stat="identity") +
   theme_light() +
   coord_flip() +
@@ -1382,9 +1399,9 @@ ggplot(sm_m, aes(x=method, y=score,
     legend.position = "bottom"
   ) +
   scale_fill_manual(name = 'Number of Methods',
-                     values = alpha(c(viridis(14)), 1)) +
-  xlab("Primary Method") +
-  ylab("Count of Viral Contigs") +
+                     values = alpha(c(viridis(6)), 1)) +
+  xlab("") +
+  ylab("Viral Score") +
   coord_flip()
 ```
 
@@ -1394,44 +1411,22 @@ ggplot(sm_m, aes(x=method, y=score,
 viruses$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = F,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
 
-viruses$keep_score_vb_vs2 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+viruses$keep_score_vb_tv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
                                               include_virsorter = F)
-
-viruses$keep_score_vb_vs2_vs <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = T,
-                                              include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = F,
-                                              include_virsorter = T)
-
-viruses$keep_score_vb_vs2_vs_tuning <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = T,
-                                              include_virsorter2 = T,
-                                              include_kaiju = F,
-                                              include_tuning = T,
-                                              include_virsorter = T)
-
-viruses$keep_score_vb_vs2_vs_tuning_kj <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = T,
-                                              include_virsorter2 = T,
-                                              include_kaiju = T,
-                                              include_tuning = T,
-                                              include_virsorter = T)
 ```
 
 ```{r}
-viruses_high <- viruses[viruses$keep_score_high_MCC>=1,] #uncomment this line if want to use all 6 tools
+viruses_high <- viruses[viruses$keep_score_vb_tv>=1,] #uncomment this line if want to use all 6 tools
 viruses_high_mod <- viruses_high %>% select(keep_score_vb, 
-                                            keep_score_vb_vs2, keep_score_vb_vs2_vs, 
-                                            keep_score_vb_vs2_vs_tuning, keep_score_vb_vs2_vs_tuning_kj)
+                                            keep_score_vb_tv)
 #viruses_high_mod <- apply(viruses_high_mod, c(1,2), function(x) {if (x >= 1) {x <- 1} else {x <- 0}})
 viruses_high_mod <- as_tibble(viruses_high_mod)
 
