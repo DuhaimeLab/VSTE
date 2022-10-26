@@ -287,4 +287,4 @@ viruses_filename <- 'merged_viral_feature_outputs.csv'
 write.csv(viruses, paste(dataset_name, viruses_filename, sep='_'))
 ```
 
-Data cleaning is done! Export viruses to tsv and load into identifying_viral_metrics.Rmd for metrics on tool outputs. The code for metrics is also pasted below, but it is not recommended running it in the same R session due to memory issues. The construction of the final dataframe essentially doubles the memory being used, and even with garbage collector can make Rstudio unresponsive.
+Data cleaning is done! Export viruses to tsv and load into identifying_viral_contigs_environmental.Rmd for metrics on tool outputs. The code for metrics is also pasted below, but it is not recommended running it in the same R session due to memory issues. The construction of the final dataframe essentially doubles the memory being used, and even with garbage collector can make Rstudio unresponsive.
