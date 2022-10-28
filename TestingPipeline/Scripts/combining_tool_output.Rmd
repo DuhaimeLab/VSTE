@@ -183,6 +183,9 @@ vs2_c <- fread(vs2_path,
                         'seqname',
                         'dsDNAphage',
                         'ssDNA',
+                        'NCLDV',
+                        'RNA',
+                        'lavidaviridae',
                         'max_score',
                         'max_score_group',
                         'hallmark',
@@ -211,11 +214,6 @@ kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
 kj_c$contig <- sub("\\.", "_", kj_c$contig)
 kj_c <- kj_c[!duplicated(paste(kj_c$contig, kj_c$Index)),]
 ```
-Quick glimpse of cellular vs viral sequence classification by Kaiju by assembly
-```{r}
-table(kj_c$seqtype, kj_c$Kaiju_Viral)
-```
-
 
 ## Merging
 ```{r}
@@ -251,6 +249,7 @@ get rid of NAs for downstream processing
 # checkV
 viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
 viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
+viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
 # VIBRANT
 viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
 # DeepVirFinder
