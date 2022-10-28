@@ -27,6 +27,15 @@ viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 colnames(viruses)
 ```
 
+```{r}
+plot(viruses$RNA, viruses$viral)
+plot(viruses$lavidaviridae, viruses$viral)
+plot(viruses$NCLDV, viruses$viral)
+plot(viruses$ssDNA, viruses$viral)
+```
+
+
+
 
 # Important features by sequence type
 

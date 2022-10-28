@@ -29,9 +29,7 @@ Import the file that combines the results from each of the tools from running "c
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
 
-```{r}
-viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
-```
+
 
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
@@ -93,6 +91,9 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_virsorter2) {
     keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
     keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 0.5
+    keep_score[input_seqs$RNA>=0.9] <- keep_score[input_seqs$RNA>=0.9] + 0.5
+    keep_score[input_seqs$lavidaviridae>=0.9] <- keep_score[input_seqs$lavidaviridae>=0.9] + 0.5
+    keep_score[input_seqs$NCLDV>=0.9] <- keep_score[input_seqs$NCLDV>=0.9] + 0.5
   }
   
   if (include_virsorter) {
@@ -818,8 +819,8 @@ table(viruses$percent_host[viruses$confusion_matrix_high_precision=="false posit
 viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
-                                              include_kaiju = T,
-                                              include_tuning = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
                                               include_virsorter = T)
 ```
 
