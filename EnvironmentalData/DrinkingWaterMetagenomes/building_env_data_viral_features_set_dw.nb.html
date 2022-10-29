@@ -1770,9 +1770,14 @@ pre code {
 <p>Please reach out to James Riddell (<a href="mailto:riddell.26@buckeyemail.osu.edu" class="email">riddell.26@buckeyemail.osu.edu</a>) or Bridget Hegarty (<a href="mailto:beh53@case.edu" class="email">beh53@case.edu</a>) regarding any issues, or open an issue on github.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxubGlicmFyeShwbHlyKVxubGlicmFyeShyZXNoYXBlMilcbmxpYnJhcnkodmlyaWRpcylcbmxpYnJhcnkodGlkeXIpXG5saWJyYXJ5KGRwbHlyKVxubGlicmFyeShyZWFkcilcbmxpYnJhcnkoZGF0YS50YWJsZSlcbmBgYCJ9 -->
-<pre class="r"><code>library(ggplot2)
-library(plyr)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxuYGBgIn0= -->
+<pre class="r"><code>library(ggplot2)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSAxOSB3YXJuaW5ncyAodXNlIHdhcm5pbmdzKCkgdG8gc2VlIHRoZW0pXG4ifQ== -->
+<pre><code>There were 19 warnings (use warnings() to see them)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwbHlyKVxubGlicmFyeShyZXNoYXBlMilcbmxpYnJhcnkodmlyaWRpcylcbmxpYnJhcnkodGlkeXIpXG5saWJyYXJ5KGRwbHlyKVxubGlicmFyeShyZWFkcilcbmxpYnJhcnkoZGF0YS50YWJsZSlcbmBgYCJ9 -->
+<pre class="r"><code>library(plyr)
 library(reshape2)
 library(viridis)
 library(tidyr)
@@ -1896,7 +1901,7 @@ vb_c &lt;- vb_c[!duplicated(vb_c$uniq_contig),]</code></pre>
 <h2>DeepVirFinder</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MgPC0gZnJlYWQoZHZmX3BhdGgsXG4gICAgICAgICAgICAgICBoZWFkZXIgPSBULFxuICAgICAgICAgICAgICAgc2VwID0gXCJcXHRcIixcbiAgICAgICAgICAgICAgIHNlbGVjdCA9IGMoXG4gICAgICAgICAgICAgICAgICAgJ3NhbXBsZScsXG4gICAgICAgICAgICAgICAgICAgJ25hbWUnLFxuICAgICAgICAgICAgICAgICAgICdzY29yZScsXG4gICAgICAgICAgICAgICAgICAgJ3B2YWx1ZSdcbiAgICAgICAgICAgICAgICAgICApXG4gICAgICAgICAgICAgICApICU+JSBcbiAgICByZW5hbWUoXG4gICAgICAgIGNvbnRpZyA9IG5hbWUsXG4gICAgICAgIGFzc2VtYmx5ID0gc2FtcGxlXG4gICAgICAgIClcbmR2Zl9jJGNvbnRpZyA8LSBzdWIoXCJcXFxcLlwiLCBcIl9cIiwgZHZmX2MkY29udGlnKVxuZHZmX2MkYmhfcHZhbHVlIDwtIHAuYWRqdXN0KGR2Zl9jJHB2YWx1ZSwgbWV0aG9kID0gXCJCSFwiKVxuZHZmX2MkdW5pcV9jb250aWcgPC0gcGFzdGUoZHZmX2MkYXNzZW1ibHksIGR2Zl9jJGNvbnRpZywgc2VwID0gXCItLVwiKVxuZHZmX2MgPC0gZHZmX2NbIWR1cGxpY2F0ZWQoZHZmX2MkdW5pcV9jb250aWcpLF1cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MgPC0gZnJlYWQoZHZmX3BhdGgsXG4gICAgICAgICAgICAgICBoZWFkZXIgPSBULFxuICAgICAgICAgICAgICAgc2VwID0gXCJcXHRcIixcbiAgICAgICAgICAgICAgIHNlbGVjdCA9IGMoXG4gICAgICAgICAgICAgICAgICAgJ3NhbXBsZScsXG4gICAgICAgICAgICAgICAgICAgJ25hbWUnLFxuICAgICAgICAgICAgICAgICAgICdzY29yZScsXG4gICAgICAgICAgICAgICAgICAgJ3B2YWx1ZSdcbiAgICAgICAgICAgICAgICAgICApXG4gICAgICAgICAgICAgICApICU+JSBcbiAgICByZW5hbWUoXG4gICAgICAgIGNvbnRpZyA9IG5hbWUsXG4gICAgICAgIGFzc2VtYmx5ID0gc2FtcGxlXG4gICAgICAgIClcbmBgYCJ9 -->
 <pre class="r"><code>dvf_c &lt;- fread(dvf_path,
                header = T,
                sep = &quot;\t&quot;,
@@ -1910,8 +1915,14 @@ vb_c &lt;- vb_c[!duplicated(vb_c$uniq_contig),]</code></pre>
     rename(
         contig = name,
         assembly = sample
-        )
-dvf_c$contig &lt;- sub(&quot;\\.&quot;, &quot;_&quot;, dvf_c$contig)
+        )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoifC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tfFxufD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09fFxuIn0= -->
+<pre><code>|--------------------------------------------------|
+|==================================================|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MkY29udGlnIDwtIHN1YihcIlxcXFwuXCIsIFwiX1wiLCBkdmZfYyRjb250aWcpXG5kdmZfYyRiaF9wdmFsdWUgPC0gcC5hZGp1c3QoZHZmX2MkcHZhbHVlLCBtZXRob2QgPSBcIkJIXCIpXG5kdmZfYyR1bmlxX2NvbnRpZyA8LSBwYXN0ZShkdmZfYyRhc3NlbWJseSwgZHZmX2MkY29udGlnLCBzZXAgPSBcIi0tXCIpXG5kdmZfYyA8LSBkdmZfY1shZHVwbGljYXRlZChkdmZfYyR1bmlxX2NvbnRpZyksXVxuYGBgIn0= -->
+<pre class="r"><code>dvf_c$contig &lt;- sub(&quot;\\.&quot;, &quot;_&quot;, dvf_c$contig)
 dvf_c$bh_pvalue &lt;- p.adjust(dvf_c$pvalue, method = &quot;BH&quot;)
 dvf_c$uniq_contig &lt;- paste(dvf_c$assembly, dvf_c$contig, sep = &quot;--&quot;)
 dvf_c &lt;- dvf_c[!duplicated(dvf_c$uniq_contig),]</code></pre>
@@ -1923,7 +1934,7 @@ dvf_c &lt;- dvf_c[!duplicated(dvf_c$uniq_contig),]</code></pre>
 <h2>VirSorter</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudnNfYyA8LSBmcmVhZCh2c19wYXRoLFxuICAgICAgICAgICAgICBzZWxlY3QgPSBjKFxuICAgICAgICAgICAgICAgICAgJ2Fzc2VtYmx5JyxcbiAgICAgICAgICAgICAgICAgICdjb250aWdfaWQnLFxuICAgICAgICAgICAgICAgICAgJ2NhdGVnb3J5J1xuICAgICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICAgKSAlPiUgXG4gIHJlbmFtZShjb250aWcgPSBjb250aWdfaWQpICU+JVxuICBkcm9wX25hKGNvbnRpZylcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudnNfYyA8LSBmcmVhZCh2c19wYXRoLFxuICAgICAgICAgICAgICBzZWxlY3QgPSBjKFxuICAgICAgICAgICAgICAgICAgJ2Fzc2VtYmx5JyxcbiAgICAgICAgICAgICAgICAgICdjb250aWdfaWQnLFxuICAgICAgICAgICAgICAgICAgJ2NhdGVnb3J5J1xuICAgICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICAgKSAlPiUgXG4gIHJlbmFtZShjb250aWcgPSBjb250aWdfaWQpICU+JVxuICBkcm9wX25hKGNvbnRpZylcbnZzX2MkY29udGlnIDwtIHN1YihcIlZJUlNvcnRlcl9cIiwgXCJcIiwgdnNfYyRjb250aWcpXG52c19jJGNvbnRpZyA8LSBzdWIoXCItY2lyY3VsYVwiLCBcIlwiLCB2c19jJGNvbnRpZylcbnZzX2MkY29udGlnIDwtIHN1YihcInV0aFwiLCBcIlNvdXRoXCIsIHZzX2MkY29udGlnKVxudnNfYyRjb250aWcgPC0gc3ViKFwicGFubmVuYnVyZ1wiLCBcIlNwYW5uZW5idXJnXCIsIHZzX2MkY29udGlnKVxudnNfYyRjb250aWcgPC0gc3ViKFwiXFxcXC5cIiwgXCJfXCIsIHZzX2MkY29udGlnKVxudnNfYyR1bmlxX2NvbnRpZyA8LSBwYXN0ZSh2c19jJGFzc2VtYmx5LCB2c19jJGNvbnRpZywgc2VwID0gXCItLVwiKVxuXG52c19jIDwtIHZzX2NbIWR1cGxpY2F0ZWQodnNfYyR1bmlxX2NvbnRpZyksXVxudnNfYyA8LSB2c19jICU+JSBkcm9wX25hKHVuaXFfY29udGlnKVxuYGBgIn0= -->
 <pre class="r"><code>vs_c &lt;- fread(vs_path,
               select = c(
                   &#39;assembly&#39;,
@@ -1932,7 +1943,16 @@ dvf_c &lt;- dvf_c[!duplicated(dvf_c$uniq_contig),]</code></pre>
                   ),
               ) %&gt;% 
   rename(contig = contig_id) %&gt;%
-  drop_na(contig)</code></pre>
+  drop_na(contig)
+vs_c$contig &lt;- sub(&quot;VIRSorter_&quot;, &quot;&quot;, vs_c$contig)
+vs_c$contig &lt;- sub(&quot;-circula&quot;, &quot;&quot;, vs_c$contig)
+vs_c$contig &lt;- sub(&quot;uth&quot;, &quot;South&quot;, vs_c$contig)
+vs_c$contig &lt;- sub(&quot;pannenburg&quot;, &quot;Spannenburg&quot;, vs_c$contig)
+vs_c$contig &lt;- sub(&quot;\\.&quot;, &quot;_&quot;, vs_c$contig)
+vs_c$uniq_contig &lt;- paste(vs_c$assembly, vs_c$contig, sep = &quot;--&quot;)
+
+vs_c &lt;- vs_c[!duplicated(vs_c$uniq_contig),]
+vs_c &lt;- vs_c %&gt;% drop_na(uniq_contig)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1978,9 +1998,9 @@ vs2_c &lt;- vs2_c[!duplicated(vs2_c$uniq_contig),]</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxua2pfYyA8LSByZWFkX3Rzdihral9wYXRoLCBjb2xfbmFtZXMgPSBUKVxuYGBgIn0= -->
 <pre class="r"><code>kj_c &lt;- read_tsv(kj_path, col_names = T)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG7ilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5jb2xzKFxuICBJbmRleCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgQ2xhc3NpZmllZCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgQ29udGlnID0gY29sX2NoYXJhY3RlcigpLFxuICBOQ0JJX3RheG9uID0gY29sX2RvdWJsZSgpLFxuICBsZW4gPSBjb2xfZG91YmxlKCksXG4gIElEX2Jlc3QgPSBjb2xfbnVtYmVyKCksXG4gIElEc19hbGwgPSBjb2xfY2hhcmFjdGVyKCksXG4gIFNlcSA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgTmFtZSA9IGNvbF9jaGFyYWN0ZXIoKVxuKVxuMTg4NzY2IHBhcnNpbmcgZmFpbHVyZXMuXG5yb3cgY29sICBleHBlY3RlZCAgICBhY3R1YWwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmlsZVxuMTgzICAtLSA5IGNvbHVtbnMgNCBjb2x1bW5zICcvVXNlcnMvaGVnYXJ0eWIvRG9jdW1lbnRzL0JsdWVTa3lQb3N0ZG9jL1ZpcmFsU29ydGluZ1Rvb2xzRXZhbHVhdGlvbi9UZW1wL2thaWp1X291dHB1dHNfbWVyZ2VkLnRzdidcbjMwMCAgLS0gOSBjb2x1bW5zIDQgY29sdW1ucyAnL1VzZXJzL2hlZ2FydHliL0RvY3VtZW50cy9CbHVlU2t5UG9zdGRvYy9WaXJhbFNvcnRpbmdUb29sc0V2YWx1YXRpb24vVGVtcC9rYWlqdV9vdXRwdXRzX21lcmdlZC50c3YnXG4zMTggIC0tIDkgY29sdW1ucyA0IGNvbHVtbnMgJy9Vc2Vycy9oZWdhcnR5Yi9Eb2N1bWVudHMvQmx1ZVNreVBvc3Rkb2MvVmlyYWxTb3J0aW5nVG9vbHNFdmFsdWF0aW9uL1RlbXAva2FpanVfb3V0cHV0c19tZXJnZWQudHN2J1xuMzY5ICAtLSA5IGNvbHVtbnMgNCBjb2x1bW5zICcvVXNlcnMvaGVnYXJ0eWIvRG9jdW1lbnRzL0JsdWVTa3lQb3N0ZG9jL1ZpcmFsU29ydGluZ1Rvb2xzRXZhbHVhdGlvbi9UZW1wL2thaWp1X291dHB1dHNfbWVyZ2VkLnRzdidcbjM4NSAgLS0gOSBjb2x1bW5zIDQgY29sdW1ucyAnL1VzZXJzL2hlZ2FydHliL0RvY3VtZW50cy9CbHVlU2t5UG9zdGRvYy9WaXJhbFNvcnRpbmdUb29sc0V2YWx1YXRpb24vVGVtcC9rYWlqdV9vdXRwdXRzX21lcmdlZC50c3YnXG4uLi4gLi4uIC4uLi4uLi4uLiAuLi4uLi4uLi4gLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLlxuU2VlIHByb2JsZW1zKC4uLikgZm9yIG1vcmUgZGV0YWlscy5cbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG7ilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5jb2xzKFxuICBJbmRleCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgQ2xhc3NpZmllZCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgQ29udGlnID0gY29sX2NoYXJhY3RlcigpLFxuICBOQ0JJX3RheG9uID0gY29sX2RvdWJsZSgpLFxuICBsZW4gPSBjb2xfZG91YmxlKCksXG4gIElEX2Jlc3QgPSBjb2xfbnVtYmVyKCksXG4gIElEc19hbGwgPSBjb2xfY2hhcmFjdGVyKCksXG4gIFNlcSA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgTmFtZSA9IGNvbF9jaGFyYWN0ZXIoKVxuKVxuMTg4NzY2IHBhcnNpbmcgZmFpbHVyZXMuXG5yb3cgY29sICBleHBlY3RlZCAgICBhY3R1YWwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmlsZVxuMTgzICAtLSA5IGNvbHVtbnMgNCBjb2x1bW5zICcvVXNlcnMvaGVnYXJ0eWIvRG9jdW1lbnRzL0JsdWVTa3lQb3N0ZG9jL1ZpcmFsU29ydGluZ1Rvb2xzRXZhbHVhdGlvbi9UZW1wL2thaWp1X291dHB1dHNfbWVyZ2VkLnRzdidcbjMwMCAgLS0gOSBjb2x1bW5zIDQgY29sdW1ucyAnL1VzZXJzL2hlZ2FydHliL0RvY3VtZW50cy9CbHVlU2t5UG9zdGRvYy9WaXJhbFNvcnRpbmdUb29sc0V2YWx1YXRpb24vVGVtcC9rYWlqdV9vdXRwdXRzX21lcmdlZC50c3YnXG4zMTggIC0tIDkgY29sdW1ucyA0IGNvbHVtbnMgJy9Vc2Vycy9oZWdhcnR5Yi9Eb2N1bWVudHMvQmx1ZVNreVBvc3Rkb2MvVmlyYWxTb3J0aW5nVG9vbHNFdmFsdWF0aW9uL1RlbXAva2FpanVfb3V0cHV0c19tZXJnZWQudHN2J1xuMzY5ICAtLSA5IGNvbHVtbnMgNCBjb2x1bW5zICcvVXNlcnMvaGVnYXJ0eWIvRG9jdW1lbnRzL0JsdWVTa3lQb3N0ZG9jL1ZpcmFsU29ydGluZ1Rvb2xzRXZhbHVhdGlvbi9UZW1wL2thaWp1X291dHB1dHNfbWVyZ2VkLnRzdidcbjM4NSAgLS0gOSBjb2x1bW5zIDQgY29sdW1ucyAnL1VzZXJzL2hlZ2FydHliL0RvY3VtZW50cy9CbHVlU2t5UG9zdGRvYy9WaXJhbFNvcnRpbmdUb29sc0V2YWx1YXRpb24vVGVtcC9rYWlqdV9vdXRwdXRzX21lcmdlZC50c3YnXG4uLi4gLi4uIC4uLi4uLi4uLiAuLi4uLi4uLi4gLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLlxuU2VlIHByb2JsZW1zKC4uLikgZm9yIG1vcmUgZGV0YWlscy5cbiJ9 -->
 <pre><code>
-── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+── Column specification ───────────────────────────────────────────────────────────────────────────
 cols(
   Index = col_character(),
   Classified = col_character(),

@@ -273,6 +273,10 @@ viruses$category[is.na(viruses$category)] <- 0
 # Kaiju
 viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
 viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
+
+#adding a combined provirus category
+viruses$provirus <- FALSE
+viruses$provirus[viruses$checkv_provirus=="Yes" | viruses$vibrant_prophage=="Yes" | viruses$category==4] <- TRUE
 ```
 
 ```{r}

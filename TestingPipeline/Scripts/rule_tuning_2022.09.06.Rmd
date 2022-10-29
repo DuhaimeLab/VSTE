@@ -36,32 +36,38 @@ This section defines a viralness score "keep_score" based on the tool classifica
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
 VIBRANT
+    Quality == "Complete Circular": +1
     Quality == "High Quality Draft": +1
     Quality == "Medium Quality Draft": +1
-    Quality == "Low Quality Draft" & provirus == TRUE: +0.5
+    Quality == "Low Quality Draft" & provirus: +0.5
 
 Virsorter2
     Viral >= 50: +0.5
     Viral >= 0.95: +0.5
+    RNA >= 0.9: +1
+    lavidaviridae >= 0.9: +1
+    NCLDV >= 0.9: +1
 
 Virsorter
-    category ==  1,2,4,5: +1
-    category == 3,6: +0.5
+    category ==  1,4: +1
+    category == 2,5: +0.5
 
 DeepVirFinder:
     Score >= 0.7: +0.5
-    Score >= 0.9: +0.5
 
-Kaiju:
-    Kaiju_viral = "cellular organisms": -1
+Tuning - No Viral Signature:
+    Kaiju_viral = "cellular organisms": -0.5
+    If host_genes >50 and NOT provirus: -1 
+    If viral_genes == 0 and host_genes >= 1: -1
+    If 3*viral_genes <= host_genes and NOT provirus: -1
+    If length > 50,000 and hallmark <=1: -1
+    If length < 5000 and checkv completeness <= 75: -0.5
+
+Tuning - Viral Signature:
     Kaiju_viral = "Viruses": +1
-
-CheckV
-    If %unknown >= 75: +0.5
+    If %unknown >= 75 and length < 50000: +0.5
+    If %viral >= 50: +0.5
     Hallmark > 2: +1
-    viral_genes == 0 and host_genes >= 1: keep_score = 0
-    If 3*viral_genes <= host_genes: keep_score = 0
-    If length > 50,000 and hallmark == 0: keep_score = 0
     
 
 This script produces visualizations of these combined viral scorings and
@@ -85,7 +91,7 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$vibrant_quality=="complete circular"] <- keep_score[input_seqs$vibrant_quality=="complete circular"] + 1
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$checkv_provirus=="Yes"] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$checkv_provirus=="Yes"] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
   }
   
   if (include_virsorter2) {
@@ -117,9 +123,9 @@ getting_viral_set_1 <- function(input_seqs,
   
   if (include_tuning_not_viral) {
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 0.5
-    keep_score[input_seqs$checkv_host_genes>50 & input_seqs$checkv_provirus=="No"] <- keep_score[input_seqs$checkv_host_genes>50 & input_seqs$checkv_provirus=="No"] - 1
+    keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] <- keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] - 1
     keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
-    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] - 1 # consider accounting for RNA viruses
+    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] - 1 # consider accounting for RNA viruses
     keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] - 1
     keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] <- keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] - 0.5 # helped with protist contamination
   }
@@ -467,7 +473,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
 ```
 
 ```{r}
-write_tsv(accuracy_scores, "20220927_accuracy_scores.tsv")
+write_tsv(accuracy_scores, "20221029_accuracy_scores.tsv")
 ```
 
 to do: add in clustering and ordination like in the drinking water R notebook
@@ -949,6 +955,7 @@ accuracy:
 ```{r}
 length(grep("true", viruses$confusion_matrix_high_recall))/nrow(viruses)
 ```
+0.887
 
 recall
 ```{r}
@@ -956,7 +963,7 @@ length(grep("true positive", viruses$confusion_matrix_high_recall))/length(grep(
 ```
 recover almost all of the viruses this way, but more protist contamination
 
-
+0.960
 
 
 

@@ -41,31 +41,38 @@ This section defines a viralness score "keep_score" based on the tool classifica
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
 VIBRANT
+    Quality == "Complete Circular": +1
     Quality == "High Quality Draft": +1
     Quality == "Medium Quality Draft": +1
     Quality == "Low Quality Draft" & provirus == TRUE: +0.5
 
 Virsorter2
     Viral >= 50: +0.5
-    Viral >= 0.95: +1
-    Hallmark > 2: +1
+    Viral >= 0.95: +0.5
+    RNA >= 0.9: +1
+    lavidaviridae >= 0.9: +1
+    NCLDV >= 0.9: +1
 
 Virsorter
-    category ==  1,2,4,5: +1
-    category == 3,6: +0.5
+    category ==  1,4: +1
+    category == 2,5: +0.5
 
 DeepVirFinder:
     Score >= 0.7: +0.5
 
-Kaiju:
-    Kaiju_viral = "cellular organisms": -1
-    Kaiju_viral = "Viruses": +1
+Tuning - No Viral Signature:
+    Kaiju_viral = "cellular organisms": -0.5
+    If host_genes >50 and NOT checkv_provirus: -1 
+    If viral_genes == 0 and host_genes >= 1: -1
+    If 3*viral_genes <= host_genes and NOT checkv_provirus: -1
+    If length > 50,000 and hallmark <=1: -1
+    If length < 5000 and checkv completeness <= 75: -0.5
 
-CheckV
-    viral_genes == 0 and host_genes >= 1: keep_score = 0
-    If 3*viral_genes <= host_genes: keep_score = 0
-    If length > 50,000 and hallmark == 0: keep_score = 0
-    If %unknown >= 75: +0.5
+Tuning - Viral Signature:
+    Kaiju_viral = "Viruses": +1
+    If %unknown >= 75 and length < 50000: +0.5
+    If %viral >= 50: +0.5
+    Hallmark > 2: +1
 
 This script produces visualizations of these combined viral scorings and
 includes ecological metrics like alpha diversity.
@@ -277,25 +284,6 @@ ggplot(num_viruses, aes(x=toolcombo, y=num_viruses,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
-  ylab("Num Viruses Predicted")
-```
-
-```{r}
-ggplot(num_viruses, aes(x=numtools, y=num_viruses)) +
-  geom_boxplot(aes()) +
-  geom_point(aes(color=assembly, fill=assembly)) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Number of Tools") +
   ylab("Num Viruses Predicted")
 ```
 
