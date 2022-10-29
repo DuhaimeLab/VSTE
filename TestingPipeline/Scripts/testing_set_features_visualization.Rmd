@@ -32,6 +32,7 @@ plot(viruses$RNA, viruses$viral)
 plot(viruses$lavidaviridae, viruses$viral)
 plot(viruses$NCLDV, viruses$viral)
 plot(viruses$ssDNA, viruses$viral)
+plot(viruses$checkv_completeness, viruses$hallmark)
 ```
 
 

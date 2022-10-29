@@ -27,11 +27,11 @@ library(data.table)
 
 ```{r}
 # dataset name for file organization and outputs for metrics file
-dataset_name <- "drinking_water"
+#dataset_name <- "drinking_water"
 #name from building_env_data_viral_features_set.Rmd
-viruses_filename <- 'merged_viral_feature_outputs.csv'
+#viruses_filename <- 'merged_viral_feature_outputs.csv'
 
-viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
+#viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
 ```
 
 
@@ -85,7 +85,7 @@ getting_viral_set_1 <- function(input_seqs,
   
   keep_score <- rep(0, nrow(input_seqs))
   
-  if (include_vibrant) {
+    if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="complete circular"] <- keep_score[input_seqs$vibrant_quality=="complete circular"] + 1
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
@@ -95,6 +95,9 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_virsorter2) {
     keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
     keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 0.5
+    keep_score[input_seqs$RNA>=0.9] <- keep_score[input_seqs$RNA>=0.9] + 1
+    keep_score[input_seqs$lavidaviridae>=0.9] <- keep_score[input_seqs$lavidaviridae>=0.9] + 1
+    keep_score[input_seqs$NCLDV>=0.9] <- keep_score[input_seqs$NCLDV>=0.9] + 1
   }
   
   if (include_virsorter) {
@@ -122,7 +125,6 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
     keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & input_seqs$checkv_provirus=="No"] - 1 # consider accounting for RNA viruses
     keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] - 1
-    keep_score[input_seqs$checkv_completeness<1 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_completeness<1 & input_seqs$hallmark<=1] - 0.5 
     keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] <- keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] - 0.5 # helped with protist contamination
   }
   
@@ -130,6 +132,51 @@ getting_viral_set_1 <- function(input_seqs,
   
 }
 ```
+
+```{r}
+viruses$keep_score_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_high_recall <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_high_precision <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+```{r}
+sum(viruses$keep_score_all>=1)
+sum(viruses$keep_score_high_recall>=1)
+sum(viruses$keep_score_high_precision>=1)
+sum(viruses$keep_score_high_MCC>=1)
+
+sum(viruses$keep_score_all>=0.5)
+sum(viruses$keep_score_high_recall>=0.5)
+sum(viruses$keep_score_high_precision>=0.5)
+sum(viruses$keep_score_high_MCC>=0.5)
+```
+
+
+not having the rule, gives the same
 
 Create list of contigs considered viral
 ```{r}
@@ -186,6 +233,74 @@ combos_list <- combos_list[-1,]
 
 ```{r}
 viral_scores <- matrix(data=0, nrow=nrow(viruses), ncol=nrow(combos_list))
+num_viruses <- data.frame(toolcombo=rep(0, nrow(combos_list)),
+                          num_viruses=rep(0, nrow(combos_list)))
+for (i in 1:nrow(combos_list)) {
+  viral_scores[,i] <- getting_viral_set_1(viruses, include_vibrant = combos_list$VIBRANT[i],
+                                            include_virsorter = combos_list$VS[i],
+                                            include_virsorter2 = combos_list$VS2[i],
+                                            include_tuning_viral = combos_list$tune_viral[i],
+                                            include_tuning_not_viral = combos_list$tune_not_viral[i],
+                                            include_deepvirfinder = combos_list$DVF[i])
+  
+  if (max(viral_scores[,i])<=0) {
+    num_viruses$num_viruses[i] <- 0
+  }
+  else {
+    num_viruses$num_viruses[i] <- table(viral_scores[,i]>=1)[[2]]
+  }
+  num_viruses$toolcombo[i] <- combos_list$toolcombo[i]
+  
+  num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
+}
+num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
+num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
+num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
+num_viruses$numtools <- as.factor(num_viruses$numtools)
+```
+
+
+```{r}
+ggplot(num_viruses, aes(x=toolcombo, y=num_viruses, 
+                                  color=numtools, fill=numtools)) +
+  geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
+  ylab("Num Viruses Predicted")
+```
+
+```{r}
+ggplot(num_viruses, aes(x=numtools, y=num_viruses)) +
+  geom_boxplot(aes()) +
+  geom_point(aes(color=assembly, fill=assembly)) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Tools") +
+  ylab("Num Viruses Predicted")
+```
+
+```{r}
+viral_scores <- matrix(data=0, nrow=nrow(viruses), ncol=nrow(combos_list))
 
 num_assemblies <- dim(table(viruses$assembly))
 assemblies <- names(table(viruses$assembly))
@@ -210,7 +325,7 @@ for (i in 1:nrow(combos_list)) {
       num_viruses$num_viruses[n] <- 0
     }
     else {
-      num_viruses$num_viruses[n] <- sum(viral_scores[viruses$assembly==assemblies[j],]>=1)
+      num_viruses$num_viruses[n] <- sum(viral_scores[viruses$assembly==assemblies[j],i]>=1)
       num_viruses$prop_vir[n] <- num_viruses$num_viruses[n]/table(viruses$assembly)[[j]]
     }
     
@@ -247,9 +362,31 @@ ggplot(num_viruses, aes(x=toolcombo, y=prop_vir,
   ) +
   xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
   ylab("Proportion of Contigs >3kb Viral")
+```
 
-ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses, 
-                                  color=numtools, fill=numtools)) +
+by only a subset of the assemblies (UK/NL)
+
+```{r}
+num_viruses_uknl <- num_viruses[num_viruses$assembly %in% c("Aberdeen_Man",
+                                                            "Amsterdam_Leid",
+                                                            "Amsterdam_Wee",
+                                                            "Birmingham_Maria",
+                                                            "Cardiff_Maria",
+                                                            "Dundee_Clat",
+                                                            "Dundee_Maria",
+                                                            "Edinburgh_Glen",
+                                                            "Exeter_Maria",
+                                                            "Glasgow_Bal",
+                                                            "Glasgow_Mil",
+                                                            "London_Maria",
+                                                            "Nieuwkoop_DHB",
+                                                            "South_Holland_Dla",
+                                                            "Spannenburg"),]
+```
+
+```{r}
+ggplot(num_viruses_uknl, aes(x=toolcombo, y=prop_vir, 
+                                  shape=numtools, color=assembly, fill=assembly)) +
   geom_point() +
   theme_light() +
   theme(
@@ -262,28 +399,68 @@ ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
-  ylab("Num Viruses Predicted")
+  xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
+  ylab("Proportion of Contigs >3kb Viral")
+```
+
+ordination: sample by tool combo
+
+```{r}
+library(phyloseq)
+```
+
+make the sample by tool combo matrix
+```{r}
+num_viruses_uknl_wide <- num_viruses_uknl %>% 
+  select(toolcombo, assembly, num_viruses) %>%
+  spread(assembly, num_viruses)
+rownames(num_viruses_uknl_wide) <- num_viruses_uknl_wide$toolcombo
+num_viruses_uknl_wide <- num_viruses_uknl_wide[,-1]
+
+num_viruses_uknl_wide <- num_viruses_uknl_wide[rowSums(num_viruses_uknl_wide)>0,]
 ```
 
 ```{r}
-ggplot(num_viruses, aes(x=numtools, y=num_viruses)) +
-  geom_boxplot(aes(color=numtools)) +
-  geom_point(aes(color=numtools, fill=numtools)) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Number of Tools") +
-  ylab("Num Viruses Predicted")
+tooldata <- combos_list
+rownames(tooldata) <- tooldata$toolcombo
+
+tooldata <- tooldata[c(rownames(num_viruses_uknl_wide)),]
+
+tooldata$numtools <- str_count(tooldata$toolcombo, "1")
+
+tooldata$numtools <- as.factor(tooldata$numtools)
+
+tooldata$total_viruses <- rowSums(num_viruses_uknl_wide)
 ```
+
+to reduce arch effect:
+```{r}
+num_viruses_uknl_wide <- num_viruses_uknl_wide/rowSums(num_viruses_uknl_wide)
+```
+
+
+```{r}
+physeq_pooled <- phyloseq(otu_table(num_viruses_uknl_wide, taxa_are_rows = F),
+                                     sample_data(tooldata))
+```
+
+```{r}
+ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
+```
+
+```{r}
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", 
+                          color="total_viruses") + 
+  geom_point(size = 3) +
+  theme_bw() +
+  scale_shape_manual(name="Num Tools",
+                     values = c(21,22,23,24,4,8)) +
+  scale_color_viridis_c()
+```
+each point is tool combination
+
+
 
 
 ```{r}
