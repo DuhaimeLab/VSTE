@@ -29,9 +29,6 @@ Import the file that combines the results from each of the tools from running "c
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
 
-
-
-
 This section defines a viralness score "keep_score" based on the tool classifications. 
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
 
@@ -473,6 +470,121 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
 ```
 
 ```{r}
+accuracy_scores_melt <- accuracy_scores %>% 
+  select(testing_set_index, precision, recall, MCC, numtools, toolcombo) %>%
+  pivot_longer(cols=c(precision, recall, MCC), 
+               names_to="performance_metric",
+               values_to="performance_metric_score")
+```
+
+
+```{r}
+ggplot(accuracy_scores_melt, aes(x=numtools, y=performance_metric_score, 
+                                  color=numtools, fill=numtools)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Number of Tools") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  facet_wrap(~performance_metric)
+  
+```
+comparing metric with and without tuning rules
+```{r}
+accuracy_scores_melt$tuning_inc <- "no"
+accuracy_scores_melt$tuning_inc[substring(accuracy_scores_melt$toolcombo, 1, 1)==1] <- "tv"
+accuracy_scores_melt$tuning_inc[substring(accuracy_scores_melt$toolcombo, 3, 3)==1] <- "tnv"
+accuracy_scores_melt$tuning_inc[substring(accuracy_scores_melt$toolcombo, 1, 1)==1 &
+                                  substring(accuracy_scores_melt$toolcombo, 3, 3)==1] <- "both"
+```
+
+```{r}
+ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
+  geom_boxplot() +
+  geom_point(aes(color=numtools, fill=numtools), alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Number of Tools") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score,
+                                 color=numtools, fill=numtools)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Number of Tools") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
+  geom_boxplot() +
+  geom_boxplot(aes(color=numtools, fill=numtools)) +
+ # geom_point(aes(color=numtools, fill=numtools), alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Number of Tools") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  facet_wrap(~performance_metric)
+  
+```
+
+
+```{r}
 write_tsv(accuracy_scores, "20221029_accuracy_scores.tsv")
 ```
 
@@ -573,13 +685,6 @@ recall
 length(grep("true positive", viruses$confusion_matrix_high_MCC))/length(grep("virus", viruses$seqtype))
 ```
 
-```{r}
-viruses$size_class <- "3-10kb"
-viruses$size_class[viruses$checkv_length>10000] <- ">10kb"
-```
-
-
-
 visualizing confusion matrix by taxa
 ```{r}
 confusion_by_taxa <- viruses %>% count(confusion_matrix_high_MCC, seqtype, Index)
@@ -621,9 +726,14 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(index),
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
 ```
-percent viral
 
-visualizing confusion matrix by taxa
+differences based on genome size
+```{r}
+viruses$size_class <- "3-5kb"
+viruses$size_class[viruses$checkv_length>5000] <- "5-10kb"
+viruses$size_class[viruses$checkv_length>10000] <- ">10kb"
+```
+
 ```{r}
 confusion_by_taxa <- viruses %>% count(confusion_matrix_high_MCC, seqtype, size_class, Index)
 
@@ -646,6 +756,9 @@ for (i in c(1:nrow(confusion_vir_called))) {
 confusion_vir_called <- confusion_vir_called %>% group_by(seqtype, size) %>%
   summarise(mean=mean(per_viral), 
             sd=sd(per_viral))
+
+confusion_vir_called$size <- factor(confusion_vir_called$size,
+                                    levels = c("3-5kb", "5-10kb", ">10kb"))
 ```
 
 ```{r}
@@ -670,9 +783,11 @@ ggplot(confusion_vir_called, aes(y=mean, x=size,
                      values = alpha(rev(pal(6)), 0.5)) +
   scale_color_manual(name="",
                      values = alpha(rev(pal(6)), 1)) +
-  xlab("Length (bp)") +
+  xlab("Length") +
   ylab("Sequences Called Viral (%)") 
 ```
+
+
 
 ```{r}
 viruses$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
@@ -816,6 +931,195 @@ ggplot(viruses, aes(x=as.factor(Index),
   ylab("Sequence Count") +
   facet_wrap(~confusion_matrix_high_MCC, scales = "free")
 
+```
+
+## clustering
+```{r}
+viral_scores <- matrix(data=0, nrow=nrow(viruses), ncol=nrow(combos_list))
+num_viruses <- data.frame(toolcombo=rep(0, nrow(combos_list)),
+                          num_viruses=rep(0, nrow(combos_list)))
+
+for (i in 1:nrow(combos_list)) {
+  viral_scores[,i] <- getting_viral_set_1(viruses, include_vibrant = combos_list$VIBRANT[i],
+                                            include_virsorter = combos_list$VS[i],
+                                            include_virsorter2 = combos_list$VS2[i],
+                                            include_tuning_viral = combos_list$tune_viral[i],
+                                            include_tuning_not_viral = combos_list$tune_not_viral[i],
+                                            include_deepvirfinder = combos_list$DVF[i])
+  
+  if (max(viral_scores[,i])<=0) {
+    num_viruses$num_viruses[i] <- 0
+  }
+  else {
+    num_viruses$num_viruses[i] <- table(viral_scores[,i]>=1)[[2]]
+  }
+  
+  num_viruses$toolcombo[i] <- combos_list$toolcombo[i]
+  
+  num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
+}
+
+num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
+num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
+num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
+num_viruses$numtools <- as.factor(num_viruses$numtools)
+```
+
+
+
+```{r}
+viral_scores_nozeros <- viral_scores[rowSums(viral_scores)>0,]
+viral_scores_nozeros <- viral_scores_nozeros + 1
+viral_scores_nozeros <- as.data.frame(viral_scores_nozeros)
+
+colnames(viral_scores_nozeros) <- num_viruses$toolcombo
+```
+
+```{r}
+library(phyloseq)
+```
+
+
+```{r}
+tooldata <- num_viruses
+
+rownames(tooldata) <- tooldata$toolcombo
+```
+
+```{r}
+physeq_pooled <- phyloseq(otu_table(viral_scores_nozeros, taxa_are_rows = T),
+                                     sample_data(tooldata))
+```
+
+```{r}
+ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw() +
+  geom_label(label=tooldata$toolcombo)
+
+phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
+                          shape="numtools", color="num_viruses") + 
+  geom_point(size = 3) +
+  theme_bw()
+```
+
+```{r}
+bray_dist <- phyloseq::distance(physeq_pooled, method="bray")
+clusters <- hclust(dist(bray_dist))
+plot(clusters)
+
+myclusters <- cutree(clusters, h=0.8)
+```
+
+
+```{r}
+#names(myclusters[myclusters==1])
+#names(myclusters[myclusters==2])
+#names(myclusters[myclusters==3])
+#names(myclusters[myclusters==4])
+#names(myclusters[myclusters==5])
+
+myclusters_df <- tibble(combo=names(myclusters),
+                            cluster_index=myclusters)
+
+myclusters_df <- separate(myclusters_df, col=combo, into=c("tnv", "DVF",
+                                                            "tv", "VB",
+                                                            "VS", "VS2"),
+                          sep=" ", remove = F)
+
+
+tool_count <- as.data.frame(rbind(table(myclusters_df$tnv, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$DVF, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$tv, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VB, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VS, myclusters_df$cluster_index)[2,],
+                          table(myclusters_df$VS2, myclusters_df$cluster_index)[2,])
+                    )
+
+tool_count <- data.frame(t(apply(tool_count, c(1), function(x) {x <- x/table(myclusters_df$cluster_index)})))
+
+
+
+tool_count$method <- c("tnv", "DVF", "tv", "VB", "VS", "VS2")
+
+tool_count <- melt(tool_count)
+
+colnames(tool_count) <- c("tool", "cluster_index", "tool_count_norm")
+```
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+ggplot(tool_count, aes(x=tool, y=tool_count_norm,
+                   fill=tool,
+                   color=tool)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "none",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    #legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  xlab("Tool") +
+  ylab("Proportion of Times in Cluster") + 
+  facet_wrap(~cluster_index, nrow=1)
+```
+
+```{r}
+accuracy_scores_melt <- accuracy_scores %>% 
+  select(precision, recall, MCC, numtools, toolcombo) %>%
+  group_by(numtools, toolcombo) %>%
+  summarise(precision=mean(precision),
+            recall=mean(recall),
+            MCC=mean(MCC)) %>%
+  pivot_longer(cols=c(precision, recall, MCC), 
+               names_to="performance_metric",
+               values_to="performance_metric_score")
+```
+
+
+```{r}
+myclusters_df <- inner_join(accuracy_scores_melt, myclusters_df, 
+                            by=c("toolcombo"="combo"))
+
+myclusters_df$cluster_index <- as.factor(myclusters_df$cluster_index)
+```
+
+```{r}
+ggplot(myclusters_df, aes(x=cluster_index, y=performance_metric_score, 
+                                  color=cluster_index, fill=cluster_index)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Cluster") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(9)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(9)), 1)) +
+  facet_wrap(~performance_metric)
 ```
 
 

@@ -283,7 +283,7 @@ ggplot(num_viruses, aes(x=toolcombo, y=num_viruses,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("Num Viruses Predicted")
 ```
 
@@ -348,9 +348,73 @@ ggplot(num_viruses, aes(x=toolcombo, y=prop_vir,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("Proportion of Contigs >3kb Viral")
 ```
+
+only plotting the average
+
+```{r}
+num_viruses$numtools <- as.numeric(num_viruses$numtools)
+
+median_prop_vir_by_tool <- num_viruses %>% 
+  select(toolcombo, prop_vir, numtools) %>%
+  group_by(toolcombo) %>%
+  summarize(median=median(prop_vir),
+         #sd=sd(prop_vir),
+         numtools=mean(numtools)) 
+
+median_prop_vir_by_tool$toolcombo <- factor(median_prop_vir_by_tool$toolcombo, 
+                                          levels = median_prop_vir_by_tool$toolcombo[order(median_prop_vir_by_tool$median, decreasing = F)])
+
+median_prop_vir_by_tool$numtools <- as.factor(median_prop_vir_by_tool$numtools)
+```
+
+```{r}
+ggplot(median_prop_vir_by_tool, aes(y=median, x=toolcombo,
+                                  color=numtools, fill=numtools, shape=numtools))  +
+  geom_hline(yintercept=0, color="grey") +
+  geom_point() +
+#  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2,
+#                 position=position_dodge(.9)) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
+  ylab("Proportion of Contigs >3kb Viral")
+```
+```{r}
+ggplot(median_prop_vir_by_tool, aes(x=numtools, y=median, 
+                                  color=numtools, fill=numtools)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Proportion Viruses (%)") +
+  xlab("Number of Tools") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1))
+```
+
 
 by only a subset of the assemblies (UK/NL)
 
@@ -370,12 +434,52 @@ num_viruses_uknl <- num_viruses[num_viruses$assembly %in% c("Aberdeen_Man",
                                                             "Nieuwkoop_DHB",
                                                             "South_Holland_Dla",
                                                             "Spannenburg"),]
+
+num_viruses_uknl$residual <- "residual"
+num_viruses_uknl$residual[num_viruses_uknl$assembly=="Amsterdam_Leid" |
+                          num_viruses_uknl$assembly=="Amsterdam_Wee" |
+                          num_viruses_uknl$assembly=="Nieuwkoop_DHB" |
+                          num_viruses_uknl$assembly=="South_Holland_Dla" |
+                          num_viruses_uknl$assembly=="Spannenburg"
+                          ] <- "no residual"
 ```
 
 ```{r}
-ggplot(num_viruses_uknl, aes(x=toolcombo, y=prop_vir, 
-                                  shape=numtools, color=assembly, fill=assembly)) +
-  geom_point() +
+num_viruses_uknl$numtools <- as.numeric(num_viruses_uknl$numtools)
+
+mean_prop_vir_by_tool <- num_viruses_uknl %>% 
+  select(toolcombo, prop_vir, numtools, residual) %>%
+  group_by(toolcombo, residual) %>%
+  summarize(prop_vir=mean(prop_vir),
+         #sd_per_vir=sd(prop_vir),
+         numtools=mean(numtools)) 
+
+mean_uknl <- mean_prop_vir_by_tool %>% 
+  group_by(toolcombo) %>%
+  summarize(mean=mean(prop_vir)) 
+
+mean_prop_vir_by_tool$toolcombo <- factor(mean_prop_vir_by_tool$toolcombo, 
+                                          levels = mean_uknl$toolcombo[order(mean_uknl$mean, decreasing = F)])
+
+mean_prop_vir_by_tool$numtools <- as.factor(mean_prop_vir_by_tool$numtools)
+```
+
+```{r}
+num_viruses_uknl$toolcombo <- factor(num_viruses_uknl$toolcombo, 
+                                          levels = levels(mean_prop_vir_by_tool$toolcombo))
+num_viruses_uknl$numtools <- as.factor(num_viruses_uknl$numtools)
+
+```
+
+
+```{r}
+ggplot(num_viruses_uknl) +
+  geom_hline(yintercept=0, color="grey") +
+  geom_point(aes(color=numtools, fill=numtools, y=prop_vir, x=toolcombo, shape=residual), alpha=0.5) +
+  geom_point(data=mean_prop_vir_by_tool, aes(x=toolcombo, 
+                                               y=prop_vir,
+                                             shape=residual),
+             color="black") +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -387,9 +491,20 @@ ggplot(num_viruses_uknl, aes(x=toolcombo, y=prop_vir,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tv, DVF, ntv, VB, VS, VS2)") +
-  ylab("Proportion of Contigs >3kb Viral")
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
+  ylab("Proportion of Contigs >3kb Viral") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1))
 ```
+```{r}
+t.test(num_viruses_uknl$prop_vir[num_viruses_uknl$residual=="residual"],
+       num_viruses_uknl$prop_vir[num_viruses_uknl$residual=="no residual"]
+       )
+```
+
+
 
 ordination: sample by tool combo
 

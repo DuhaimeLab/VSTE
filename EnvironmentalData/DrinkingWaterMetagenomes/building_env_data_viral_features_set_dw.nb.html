@@ -1773,8 +1773,8 @@ pre code {
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxuYGBgIn0= -->
 <pre class="r"><code>library(ggplot2)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSAxOSB3YXJuaW5ncyAodXNlIHdhcm5pbmdzKCkgdG8gc2VlIHRoZW0pXG4ifQ== -->
-<pre><code>There were 19 warnings (use warnings() to see them)</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSA1MCBvciBtb3JlIHdhcm5pbmdzICh1c2Ugd2FybmluZ3MoKSB0byBzZWUgdGhlIGZpcnN0IDUwKVxuIn0= -->
+<pre><code>There were 50 or more warnings (use warnings() to see the first 50)</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwbHlyKVxubGlicmFyeShyZXNoYXBlMilcbmxpYnJhcnkodmlyaWRpcylcbmxpYnJhcnkodGlkeXIpXG5saWJyYXJ5KGRwbHlyKVxubGlicmFyeShyZWFkcilcbmxpYnJhcnkoZGF0YS50YWJsZSlcbmBgYCJ9 -->
 <pre class="r"><code>library(plyr)
@@ -1901,7 +1901,7 @@ vb_c &lt;- vb_c[!duplicated(vb_c$uniq_contig),]</code></pre>
 <h2>DeepVirFinder</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MgPC0gZnJlYWQoZHZmX3BhdGgsXG4gICAgICAgICAgICAgICBoZWFkZXIgPSBULFxuICAgICAgICAgICAgICAgc2VwID0gXCJcXHRcIixcbiAgICAgICAgICAgICAgIHNlbGVjdCA9IGMoXG4gICAgICAgICAgICAgICAgICAgJ3NhbXBsZScsXG4gICAgICAgICAgICAgICAgICAgJ25hbWUnLFxuICAgICAgICAgICAgICAgICAgICdzY29yZScsXG4gICAgICAgICAgICAgICAgICAgJ3B2YWx1ZSdcbiAgICAgICAgICAgICAgICAgICApXG4gICAgICAgICAgICAgICApICU+JSBcbiAgICByZW5hbWUoXG4gICAgICAgIGNvbnRpZyA9IG5hbWUsXG4gICAgICAgIGFzc2VtYmx5ID0gc2FtcGxlXG4gICAgICAgIClcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MgPC0gZnJlYWQoZHZmX3BhdGgsXG4gICAgICAgICAgICAgICBoZWFkZXIgPSBULFxuICAgICAgICAgICAgICAgc2VwID0gXCJcXHRcIixcbiAgICAgICAgICAgICAgIHNlbGVjdCA9IGMoXG4gICAgICAgICAgICAgICAgICAgJ3NhbXBsZScsXG4gICAgICAgICAgICAgICAgICAgJ25hbWUnLFxuICAgICAgICAgICAgICAgICAgICdzY29yZScsXG4gICAgICAgICAgICAgICAgICAgJ3B2YWx1ZSdcbiAgICAgICAgICAgICAgICAgICApXG4gICAgICAgICAgICAgICApICU+JSBcbiAgICByZW5hbWUoXG4gICAgICAgIGNvbnRpZyA9IG5hbWUsXG4gICAgICAgIGFzc2VtYmx5ID0gc2FtcGxlXG4gICAgICAgIClcbmR2Zl9jJGNvbnRpZyA8LSBzdWIoXCJcXFxcLlwiLCBcIl9cIiwgZHZmX2MkY29udGlnKVxuZHZmX2MkYmhfcHZhbHVlIDwtIHAuYWRqdXN0KGR2Zl9jJHB2YWx1ZSwgbWV0aG9kID0gXCJCSFwiKVxuZHZmX2MkdW5pcV9jb250aWcgPC0gcGFzdGUoZHZmX2MkYXNzZW1ibHksIGR2Zl9jJGNvbnRpZywgc2VwID0gXCItLVwiKVxuZHZmX2MgPC0gZHZmX2NbIWR1cGxpY2F0ZWQoZHZmX2MkdW5pcV9jb250aWcpLF1cbmBgYCJ9 -->
 <pre class="r"><code>dvf_c &lt;- fread(dvf_path,
                header = T,
                sep = &quot;\t&quot;,
@@ -1915,14 +1915,8 @@ vb_c &lt;- vb_c[!duplicated(vb_c$uniq_contig),]</code></pre>
     rename(
         contig = name,
         assembly = sample
-        )</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoifC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tfFxufD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09fFxuIn0= -->
-<pre><code>|--------------------------------------------------|
-|==================================================|</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHZmX2MkY29udGlnIDwtIHN1YihcIlxcXFwuXCIsIFwiX1wiLCBkdmZfYyRjb250aWcpXG5kdmZfYyRiaF9wdmFsdWUgPC0gcC5hZGp1c3QoZHZmX2MkcHZhbHVlLCBtZXRob2QgPSBcIkJIXCIpXG5kdmZfYyR1bmlxX2NvbnRpZyA8LSBwYXN0ZShkdmZfYyRhc3NlbWJseSwgZHZmX2MkY29udGlnLCBzZXAgPSBcIi0tXCIpXG5kdmZfYyA8LSBkdmZfY1shZHVwbGljYXRlZChkdmZfYyR1bmlxX2NvbnRpZyksXVxuYGBgIn0= -->
-<pre class="r"><code>dvf_c$contig &lt;- sub(&quot;\\.&quot;, &quot;_&quot;, dvf_c$contig)
+        )
+dvf_c$contig &lt;- sub(&quot;\\.&quot;, &quot;_&quot;, dvf_c$contig)
 dvf_c$bh_pvalue &lt;- p.adjust(dvf_c$pvalue, method = &quot;BH&quot;)
 dvf_c$uniq_contig &lt;- paste(dvf_c$assembly, dvf_c$contig, sep = &quot;--&quot;)
 dvf_c &lt;- dvf_c[!duplicated(dvf_c$uniq_contig),]</code></pre>
