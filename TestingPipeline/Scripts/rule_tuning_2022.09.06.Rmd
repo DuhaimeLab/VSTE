@@ -22,6 +22,7 @@ library(dplyr)
 library(readr)
 library(data.table)
 library(pROC)
+library("stringr")
 ```
 
 Import the file that combines the results from each of the tools from running "combining_tool_output.Rmd":
@@ -273,10 +274,6 @@ for (i in 2:10) {
 ```
 
 ```{r}
-library("stringr")
-```
-
-```{r}
 accuracy_scores$numtools <- str_count(accuracy_scores$toolcombo, "1")
 #accuracy_scores <- accuracy_scores[order(accuracy_scores$numtools, decreasing=F),]
 accuracy_scores <- accuracy_scores[order(accuracy_scores$MCC, decreasing=F),]
@@ -451,6 +448,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP,
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Bacterial False Positives")
+
 ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -467,6 +465,74 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Viral False Negatives")
+
+ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  ylab("Viral False Negatives")
+
+ggplot(accuracy_scores, aes(x=protist_FP, y=fungal_FP, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Protist FP") +
+  ylab("Fungal FP")
+
+ggplot(accuracy_scores, aes(x=recall, y=fungal_FP, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Recall") +
+  ylab("Fungal FP")
+
+ggplot(accuracy_scores, aes(x=recall, y=protist_FP, 
+                                  color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Recall") +
+  ylab("Protist FP")
 ```
 
 ```{r}
@@ -583,7 +649,6 @@ ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
   
 ```
 
-
 ```{r}
 write_tsv(accuracy_scores, "20221029_accuracy_scores.tsv")
 ```
@@ -685,6 +750,46 @@ recall
 length(grep("true positive", viruses$confusion_matrix_high_MCC))/length(grep("virus", viruses$seqtype))
 ```
 
+```{r}
+TP <- table(viruses$confusion_matrix_high_MCC)[4]
+FP <- table(viruses$confusion_matrix_high_MCC)[2]
+TN <- table(viruses$confusion_matrix_high_MCC)[3]
+FN <- table(viruses$confusion_matrix_high_MCC)[1]
+
+precision <- TP/(TP+FP)
+precision
+recall <- TP/(TP+FN)
+recall
+F1 <- 2*precision*recall/(precision+recall)
+F1
+
+MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC
+```
+
+precision=66%, recall=91%, MCC=74%
+
+precision adjusting size to be equal viral/not viral
+```{r}
+TP <- table(viruses$confusion_matrix_high_MCC)[4]
+FP <- table(viruses$confusion_matrix_high_MCC)[2]*.11
+TN <- table(viruses$confusion_matrix_high_MCC)[3]*.11
+FN <- table(viruses$confusion_matrix_high_MCC)[1]
+
+precision <- TP/(TP+FP)
+precision
+recall <- TP/(TP+FN)
+recall
+F1 <- 2*precision*recall/(precision+recall)
+F1
+
+MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC
+```
+
+precision=0.94, recall=0.90, F1=0.92, MCC=0.85
+
+
 visualizing confusion matrix by taxa
 ```{r}
 confusion_by_taxa <- viruses %>% count(confusion_matrix_high_MCC, seqtype, Index)
@@ -726,6 +831,7 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(index),
   facet_wrap(~seqtype, scales = "free") +
   coord_flip()
 ```
+
 
 differences based on genome size
 ```{r}
@@ -1122,8 +1228,6 @@ ggplot(myclusters_df, aes(x=cluster_index, y=performance_metric_score,
   facet_wrap(~performance_metric)
 ```
 
-
-
 ## all 6 tools example
 ```{r}
 viruses$keep_score_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
@@ -1141,6 +1245,25 @@ viruses$confusion_matrix_all[viruses$seqtype=="virus" & viruses$keep_score_all<1
 viruses$confusion_matrix_all[viruses$seqtype=="virus" & viruses$keep_score_all>=1] <- "true positive"
 viruses$confusion_matrix_all[viruses$seqtype!="virus" & viruses$keep_score_all>=1] <- "false positive"
 ```
+
+```{r}
+TP <- table(viruses$confusion_matrix_all)[4]
+FP <- table(viruses$confusion_matrix_all)[2]
+TN <- table(viruses$confusion_matrix_all)[3]
+FN <- table(viruses$confusion_matrix_all)[1]
+
+precision <- TP/(TP+FP)
+precision
+recall <- TP/(TP+FN)
+recall
+F1 <- 2*precision*recall/(precision+recall)
+F1
+
+MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC
+```
+precision=62%, recall=92%, MCC=73%
+
 
 visualizing confusion matrix by taxa
 ```{r}
@@ -1268,6 +1391,46 @@ length(grep("true positive", viruses$confusion_matrix_high_recall))/length(grep(
 recover almost all of the viruses this way, but more protist contamination
 
 0.960
+
+## few tools, high MCC example
+```{r}
+viruses$keep_score_few_tools <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+
+```{r}
+viruses$confusion_matrix_few_tools <- "true negative"
+viruses$confusion_matrix_few_tools[viruses$seqtype=="virus" & viruses$keep_score_few_tools<1] <- "false negative"
+viruses$confusion_matrix_few_tools[viruses$seqtype=="virus" & viruses$keep_score_few_tools>=1] <- "true positive"
+viruses$confusion_matrix_few_tools[viruses$seqtype!="virus" & viruses$keep_score_few_tools>=1] <- "false positive"
+```
+
+```{r}
+TP <- table(viruses$confusion_matrix_few_tools)[4]
+FP <- table(viruses$confusion_matrix_few_tools)[2]
+TN <- table(viruses$confusion_matrix_few_tools)[3]
+FN <- table(viruses$confusion_matrix_few_tools)[1]
+
+precision <- TP/(TP+FP)
+precision
+recall <- TP/(TP+FN)
+recall
+F1 <- 2*precision*recall/(precision+recall)
+F1
+
+MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC
+```
+precision=77%, recall=76%, MCC=74%
+
+
+
+
 
 
 

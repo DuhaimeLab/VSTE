@@ -516,7 +516,7 @@ make the sample by tool combo matrix
 ```{r}
 num_viruses_uknl_wide <- num_viruses_uknl %>% 
   select(toolcombo, assembly, num_viruses) %>%
-  spread(assembly, num_viruses)
+  pivot_wider(assembly, num_viruses)
 rownames(num_viruses_uknl_wide) <- num_viruses_uknl_wide$toolcombo
 num_viruses_uknl_wide <- num_viruses_uknl_wide[,-1]
 
@@ -845,5 +845,43 @@ ggplot(sm_m, aes(x=method, y=score,
   coord_flip()
 ```
 
+
+Comparing three recommendations
+
+```{r}
+viruses$keep_score_few_tools <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+
+```{r}
+viruses$keep_score_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+```
+
+
+```{r}
+viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+```
+
+```{r}
+table(viruses$keep_score_all>=1)/nrow(viruses)
+table(viruses$keep_score_high_MCC>=1)/nrow(viruses)
+table(viruses$keep_score_few_tools>=1)/nrow(viruses)
+
+```
 
 
