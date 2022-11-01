@@ -1,0 +1,153 @@
+# Read mapping 
+
+#to run snakemake: conda activate snakemake
+
+#set a workflow config file
+#configfile: "Config/assemblies_samples_combos.yaml"
+samples=list(range(1,21,1))
+#assemblies=config['assembly']
+#combos=config['combinations']
+
+#if want to run on just some files
+#sample = ["B"]
+
+rule all_mappingcompetitively:
+    input:
+        all="Bowtie2/Results/merged_sample2assembly_mapping.txt",
+        counts=lambda wildcards: ["Bowtie2/Results/Sample2Assembly/Counts_reads_mapped_Sample{0}.txt".format(sample) for sample in samples],
+        assemblies="Bowtie2/BowtieBuilds/A2_contigs.rev.1.bt2"
+
+
+rule bowtie_univec:
+    input:
+        read_file_1="/nfs/turbo/cee-kwigg/hegartyb/AnnArborMicrobiomeSamples/Sample{samples}_trimmed.filtered_neg_removed.R1.fq.gz",
+        read_file_2="/nfs/turbo/cee-kwigg/hegartyb/AnnArborMicrobiomeSamples/Sample{samples}_trimmed.filtered_neg_removed.R1.fq.gz",
+        index_build="Bowtie2/UniVecCore/univec_core.rev.1.bt2"
+    params:
+        score_min="G,20,8",
+        p="8",
+        mapping_ref="Bowtie2/UniVecCore/univec_core"
+    output:
+        sam="Bowtie2/UniVecCore/univec_core_Samples{samples}.sam"
+    shell:
+        """
+        module load bowtie2/2.4.1
+        bowtie2 -x {params.mapping_ref} -1 {input.read_file_1} -2 {input.read_file_2} -q --score-min {params.score_min} --local -t -p {params.p} -S {output.sam}
+        """
+
+rule view_sam_univec:
+    input:
+        sam="Bowtie2/UniVecCore/univec_core_Samples{samples}.sam"
+    params:
+        F1="2"
+    output:
+        sam="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}.sam"
+    shell:
+        """
+        module load samtools/1.13
+        samtools view -hS -F {params.F1} {input.sam} > {output.sam}
+        """
+
+rule sam_to_fasta_univec:
+    input:
+        sam="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}.sam"
+    output:
+        fastqF="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}_F.fq",
+        fastqR="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}_R.fq"
+    shell:
+        """
+        module load samtools/1.13
+        samtools fastq -1 {output.fastqF} -2 {output.fastqR} -0 /dev/null -s /dev/null -n {input.sam}
+        """
+
+# MAP TO ALL CONTIGS
+
+rule bowtie_build:
+    input:
+        mapping_file="/nfs/turbo/cee-kwigg/hegartyb/AnnArborMicrobiomeSamples/contigs_3000.fasta"
+    params:
+        mapping_ref="Bowtie2/BowtieBuilds/A2_contigs"
+    output:
+        mapping_ref="Bowtie2/BowtieBuilds/A2_contigs.rev.1.bt2",
+        mapping_ref2="Bowtie2/BowtieBuilds/A2_contigs.1.bt2"
+    shell:
+        """
+        module load bowtie2/2.4.1
+        bowtie2-build -f {input.mapping_file} {params.mapping_ref}
+        """
+
+rule bowtie_virus:
+    input:
+        read_file_1="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}_F.fq",
+        read_file_2="Bowtie2/UniVecCore/univec_core_removed_Samples{samples}_R.fq",
+        index_build="Bowtie2/BowtieBuilds/A2_contigs.rev.1.bt2"
+    params:
+        score_min="G,20,8",
+        p="8",
+        mapping_ref="Bowtie2/BowtieBuilds/A2_contigs"
+    output:
+        sam="Bowtie2/Results/Sample2Assembly/Reads_align_Sample{samples}.sam"
+    shell:
+        """
+        module load bowtie2/2.4.1
+        bowtie2 -x {params.mapping_ref} -1 {input.read_file_1} -2 {input.read_file_2} -q --score-min {params.score_min} --local -t -p {params.p} -S {output.sam}
+        """
+
+rule view_sam_virus:
+    input:
+        sam="Bowtie2/Results/Sample2Assembly/Reads_align_Sample{samples}.sam"
+    params:
+        F="2"
+    output:
+        sam="Bowtie2/Results/Sample2Assembly/Reads_mapped_Sample{samples}.sam"
+    shell:
+        """
+        module load samtools/1.13
+        samtools view -hS -f {params.F} {input.sam} > {output.sam}
+        """
+
+rule view_bam_virus:
+    input:
+        sam="Bowtie2/Results/Sample2Assembly/Reads_mapped_Sample{samples}.sam"
+
+    output:
+        bam="Bowtie2/Results/Sample2Assembly/Reads_mapped_Sample{samples}.bam"
+    shell:
+        """
+        module load samtools/1.13
+        samtools view -bS {input.sam} > {output.bam}
+        """
+
+rule sort_virus:
+    input:
+        bam="Bowtie2/Results/Sample2Assembly/Reads_mapped_Sample{samples}.bam"
+
+    output:
+        sort="Bowtie2/Results/Sample2Assembly/Sorted_reads_mapped_Sample{samples}.bam"
+    shell:
+        """
+        module load samtools/1.13
+        samtools sort {input.bam} -o {output.sort}
+        """
+
+rule counts_virus:
+    input:
+        bam="Bowtie2/Results/Sample2Assembly/Sorted_reads_mapped_Sample{samples}.bam"
+    output:
+        counts="Bowtie2/Results/Sample2Assembly/Counts_reads_mapped_Sample{samples}.txt"
+    shell:
+        """
+        module load samtools/1.13
+        samtools view {input.bam} | cut -f1,3 | sort | uniq | cut -f2 | sort | uniq -c > {output.counts}
+        """
+
+rule merge_counts_virus:
+    input:
+        counts=lambda wildcards: ["Bowtie2/Results/Sample2Assembly/Counts_reads_mapped_Sample{0}.txt".format(sample) for sample in samples]
+    params:
+        split="_mapped_"
+    output:
+        merge="Bowtie2/Results/merged_sample2assembly_mapping.txt"
+    script:
+        "Scripts/merge_readmappingcounts.py"
+

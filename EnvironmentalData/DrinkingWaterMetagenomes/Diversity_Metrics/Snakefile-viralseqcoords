@@ -1,0 +1,83 @@
+# Getting viral read coverage  
+
+#to run snakemake: conda activate snakemake
+
+samples=list(range(1,21))
+
+rule all_viralseqcoords:
+    input:
+        counts="FeatureCounts/merged_viral_contigs_count.txt"
+
+rule blastdb:
+    input:
+        fasta="/nfs/turbo/cee-kwigg/hegartyb/AnnArborMicrobiomeSamples/contigs_3000.fasta"
+    params:
+        basepath="Blast/A2_db"
+    output:
+        o1="Blast/A2_db.nsq",
+        o2="Blast/A2_db.nin",
+        o3="Blast/A2_db.nhr"
+    shell:
+        """
+        module load ncbi-blast/2.9.0
+        makeblastdb -in {input.fasta} -dbtype nucl -out {params.basepath}
+        """
+
+rule blast_nf:
+    input:
+        fa="ViralSeqsTrimmed/A2_3000_viralonly.fa",
+        i1="Blast/A2_db.nhr"
+    output:
+        o="Blast/A2_results.txt"
+    params:
+        db="Blast/A2_db",
+        threads=15,
+        numalign=5
+    shell:
+        """
+        module load ncbi-blast/2.9.0
+        blastn -num_threads {params.threads} -num_alignments {params.numalign} \
+        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore" \
+        -db {params.db} -query {input.fa} -out {output.o}
+        """
+
+rule blast2gff:
+    input:
+        blast="Blast/A2_results.txt"
+    params:
+        type="viral"
+    output:
+        gff="Blast/A2.gff"
+    shell:
+        "python Scripts/blast2gff.py {input.blast} {output.gff} {params.type}"
+
+rule featureCounts:
+    input:
+        gff="Blast/A2.gff",
+        bam="Bowtie2/Results/Sample2Assembly/Sorted_reads_mapped_Sample{samples}.bam",
+        inputgff="Blast/A2.gff"
+    output:
+        output="FeatureCounts/{samples}_viral_contigs_count.txt"
+    params:
+        type="viral",
+
+        g="ID"
+    shell:
+        """
+        module load singularity
+        singularity exec /nfs/turbo/lsa-dudelabs/containers/subreads/subreads.sif featureCounts -p -t {params.type} -a {input.inputgff} -g {params.g} -o {output.output} {input.bam}
+        """
+
+rule mergefeatureCounts:
+    input: 
+        counts=lambda wildcards: ["FeatureCounts/{0}_viral_contigs_count.txt".format(sample) for sample in samples]
+    output:
+        merged="FeatureCounts/merged_viral_contigs_count.txt"
+    shell:
+        "python Scripts/merge_orf_mapping.py {output.merged} {input.counts}"
+
+
+
+
+
+

@@ -1,0 +1,21 @@
+# Contig processing, blast on viral sequences against mycobacteriophages, pulling out all mycobacteriophage contigs
+
+#to run snakemake: conda activate cluster_kaiju
+
+rule all_getallviral:
+    input:
+         m="ViralSeqsTrimmed/A2_3000_viralonly.fa"
+
+rule get_virus_fasta:
+    input:
+        checkv_fasta="CheckV/A2/proviruses.fna",
+        virsorter2_fasta="VirSorter2/A2_final_viral_combined.fa",
+        vibrant_fasta="Vibrant/VIBRANT_contigs_3000/VIBRANT_phages_contigs_3000/contigs_3000.phages_combined.fna",
+        free_fasta="/nfs/turbo/cee-kwigg/hegartyb/AnnArborMicrobiomeSamples/contigs_3000.fasta",
+        clist="viral_contigs_method_identified_by_virfinder_vibrant_polish_with_checkv_20211204.txt"
+    params:
+        contig_column="14"
+    output:
+        fasta="ViralSeqsTrimmed/A2_3000_viralonly.fa"
+    script:
+        "Scripts/get_trimmed_viral_contigs.py"

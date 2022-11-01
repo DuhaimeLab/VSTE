@@ -1,0 +1,33 @@
+# Read mapping 
+
+#to run snakemake: conda activate snakemake
+
+rule all_ani_clustering:
+    input:
+        counts="ClusterGenomes/merged_3000_trimmed_viruses_only_20211112_95-85_parsed.tsv"
+
+rule cluster_genomes:
+    input:
+        fasta="ViralSeqsTrimmed/A2_3000_viralonly.fa"
+    params:
+        basepath="ClusterGenomes"
+    conda:
+        "Envs/nucmer.yaml"
+    output:
+        o1="ClusterGenomes/merged_3000_trimmed_viruses_only_20211112_95-85.clstr"
+    shell:
+        """
+        cd /nfs/turbo/cee-kwigg/hegartyb/SnakemakeAssemblies3000/Scripts/bin
+        export PATH=$PATH:"$PWD"
+        Cluster_genomes.py -f {input.fasta} -c 85 -i 95 -o {params.basepath}
+        """
+
+rule parse_genome_clusters:
+    input:
+        cluster_list="ClusterGenomes/merged_3000_trimmed_viruses_only_20211112_95-85.clstr"
+    output:
+        cluster_list="ClusterGenomes/merged_3000_trimmed_viruses_only_20211112_95-85_parsed.tsv"
+    shell:
+        """
+        python Scripts/parse_genome_clusters.py {input.cluster_list} {output.cluster_list}
+        """

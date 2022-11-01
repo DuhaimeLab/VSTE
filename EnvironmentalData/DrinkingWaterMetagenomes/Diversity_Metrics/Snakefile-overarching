@@ -1,0 +1,23 @@
+# Processing of the Contigs
+
+#to run snakemake: conda activate cluster_kaiju
+
+
+#Mapping reads to contigs
+include: "Snakefile-sample2assembly"
+
+#Getting trimmed viral seqs
+include: "Snakefile-getviraltrimmed"
+
+#Getting viral seq read counts
+include: "Snakefile-viralseqcoords"
+
+#Clustering viral populations by ANI
+include: "Snakefile-ANIclustering"
+
+rule all:
+	input: 
+		"Bowtie2/Results/merged_sample2assembly_mapping.txt",
+		"ViralSeqsTrimmed/A2_3000_viralonly.fa",
+		"FeatureCounts/merged_viral_contigs_count.txt",
+		"ClusterGenomes/merged_3000_trimmed_viruses_only_20211112_95-85_parsed.tsv"
