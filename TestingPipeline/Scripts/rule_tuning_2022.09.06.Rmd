@@ -62,10 +62,10 @@ Tuning - No Viral Signature:
     If length < 5000 and checkv completeness <= 75: -0.5
 
 Tuning - Viral Signature:
-    Kaiju_viral = "Viruses": +1
+    Kaiju_viral = "Viruses": +0.5
     If %unknown >= 75 and length < 50000: +0.5
     If %viral >= 50: +0.5
-    Hallmark > 2: +1
+    Hallmark > 2: +0.5
     
 
 This script produces visualizations of these combined viral scorings and
@@ -112,7 +112,7 @@ getting_viral_set_1 <- function(input_seqs,
   
   if (include_tuning_viral) {
     keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 0.5
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
+    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 0.5
     keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] <- keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] + 0.5
     keep_score[input_seqs$percent_viral>=50] <- keep_score[input_seqs$percent_viral>=50] + 0.5
   }
@@ -806,21 +806,6 @@ MCC
 precision=0.95, recall=0.87, F1=0.91, MCC=0.82
 
 
-stats for different types of sequences
-```{r}
-TP <- table(viruses$confusion_matrix_high_MCC)[4]
-FN <- table(viruses$confusion_matrix_high_MCC)[1]
-
-recall <- as.numeric(TP/(TP+FN))
-recall
-```
-
-precision=0.95, recall=0.87, F1=0.91, MCC=0.82
-
-```{r}
-head(viruses$contig[viruses$seqtype=="virus"])
-tail(viruses$contig[viruses$seqtype=="virus"])
-```
 
 
 

@@ -258,28 +258,35 @@ viruses$percent_unknown <- 100-(viruses$checkv_host_genes+viruses$checkv_viral_g
 
 get rid of NAs for downstream processing
 ```{r}
-
 # checkV
 viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
 viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
 viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
-
 # VIBRANT
 viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
-
 # DeepVirFinder
 viruses$score[is.na(viruses$score)] <- 0
 viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
-
 # VirSorter2
 viruses$viral[is.na(viruses$viral)] <- 0
 viruses$hallmark[is.na(viruses$hallmark)] <- 0
-
+viruses$RNA <- 0
+viruses$RNA[is.na(viruses$RNA)] <- 0
+viruses$lavidaviridae <- 0
+viruses$lavidaviridae[is.na(viruses$lavidaviridae)] <- 0
+viruses$NCLDV <- 0
+viruses$NCLDV[is.na(viruses$NCLDV)] <- 0
+viruses$ssDNA[is.na(viruses$ssDNA)] <- 0
+viruses$dsDNAphage[is.na(viruses$dsDNAphage)] <- 0
+viruses$viral[is.na(viruses$max_score)] <- 0
 #Virsorter
 viruses$category[is.na(viruses$category)] <- 0
-
 # Kaiju
 viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
+viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
+#adding a combined provirus category
+viruses$provirus <- FALSE
+viruses$provirus[viruses$checkv_provirus=="Yes" | viruses$vibrant_prophage=="Yes" | viruses$category==4] <- TRUE
 ```
 
 ```{r}
