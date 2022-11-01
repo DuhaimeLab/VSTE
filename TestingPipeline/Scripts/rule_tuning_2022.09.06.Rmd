@@ -93,11 +93,9 @@ getting_viral_set_1 <- function(input_seqs,
   }
   
   if (include_virsorter2) {
-    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
+    keep_score[input_seqs$viral>=50 | input_seqs$lavidaviridae>=0.95 | input_seqs$NCLDV>=0.95] <- keep_score[input_seqs$viral>=50 | input_seqs$lavidaviridae>=0.95 | input_seqs$NCLDV>=0.95] + 0.5
     keep_score[input_seqs$viral>=95] <- keep_score[input_seqs$viral>=95] + 0.5
-    keep_score[input_seqs$RNA>=0.9] <- keep_score[input_seqs$RNA>=0.9] + 1
-    keep_score[input_seqs$lavidaviridae>=0.9] <- keep_score[input_seqs$lavidaviridae>=0.9] + 1
-    keep_score[input_seqs$NCLDV>=0.9] <- keep_score[input_seqs$NCLDV>=0.9] + 1
+    keep_score[input_seqs$RNA>=0.95] <- keep_score[input_seqs$RNA>=0.95] + 1
   }
   
   if (include_virsorter) {
@@ -123,9 +121,9 @@ getting_viral_set_1 <- function(input_seqs,
     keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 0.5
     keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] <- keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] - 1
     keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
-    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] - 1 # consider accounting for RNA viruses
+    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] - 1 
     keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] - 1
-    keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] <- keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] - 0.5 # helped with protist contamination
+    keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] <- keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] - 0.5 
   }
   
   return(keep_score)
@@ -350,6 +348,24 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
   ) +
   xlab("Precision") +
   ylab("Recall")
+
+ggplot(accuracy_scores[accuracy_scores$testing_set_index==1,], aes(x=precision, y=recall)) +
+  geom_label(alpha=0.7, label=accuracy_scores$toolcombo[accuracy_scores$testing_set_index==1]) +
+  geom_point(alpha=0.5, aes(color=numtools, fill=numtools)) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Precision") +
+  ylab("Recall")
+
 ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall), 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -756,18 +772,18 @@ FP <- table(viruses$confusion_matrix_high_MCC)[2]
 TN <- table(viruses$confusion_matrix_high_MCC)[3]
 FN <- table(viruses$confusion_matrix_high_MCC)[1]
 
-precision <- TP/(TP+FP)
+precision <- as.numeric(TP/(TP+FP))
 precision
-recall <- TP/(TP+FN)
+recall <- as.numeric(TP/(TP+FN))
 recall
-F1 <- 2*precision*recall/(precision+recall)
+F1 <- as.numeric(2*precision*recall/(precision+recall))
 F1
 
-MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC <- as.numeric((TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN)))
 MCC
 ```
 
-precision=66%, recall=91%, MCC=74%
+precision=69%, recall=87%, MCC=77%
 
 precision adjusting size to be equal viral/not viral
 ```{r}
@@ -776,18 +792,36 @@ FP <- table(viruses$confusion_matrix_high_MCC)[2]*.11
 TN <- table(viruses$confusion_matrix_high_MCC)[3]*.11
 FN <- table(viruses$confusion_matrix_high_MCC)[1]
 
-precision <- TP/(TP+FP)
+precision <- as.numeric(TP/(TP+FP))
 precision
-recall <- TP/(TP+FN)
+recall <- as.numeric(TP/(TP+FN))
 recall
-F1 <- 2*precision*recall/(precision+recall)
+F1 <- as.numeric(2*precision*recall/(precision+recall))
 F1
 
-MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
+MCC <- as.numeric((TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN)))
 MCC
 ```
 
-precision=0.94, recall=0.90, F1=0.92, MCC=0.85
+precision=0.95, recall=0.87, F1=0.91, MCC=0.82
+
+
+stats for different types of sequences
+```{r}
+TP <- table(viruses$confusion_matrix_high_MCC)[4]
+FN <- table(viruses$confusion_matrix_high_MCC)[1]
+
+recall <- as.numeric(TP/(TP+FN))
+recall
+```
+
+precision=0.95, recall=0.87, F1=0.91, MCC=0.82
+
+```{r}
+head(viruses$contig[viruses$seqtype=="virus"])
+tail(viruses$contig[viruses$seqtype=="virus"])
+```
+
 
 
 visualizing confusion matrix by taxa

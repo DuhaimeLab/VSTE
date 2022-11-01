@@ -384,7 +384,37 @@ rownames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
 
 
 
+# Comparing RefSeq vs VS2 database
+VS2 sequences used: (/scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/NCLDV/env/NCLDV_env.fna /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/lavidaviridae/env/HQ_virophages.fna /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/dsDNAphage/env/* /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/dsDNAphage/provirus/VirSorterCuratedDataset_HQ_contigs.fna)
 
+```{r}
+refseq_vir <- read_tsv("../IntermediaryFiles/refseq_viral_genome_ids.txt",col_names = F)
+refseq_vir$X1 <- sub(">", "", refseq_vir$X1)
+refseq_vir <- separate(refseq_vir, col=X1, sep=" ", remove=T, into="id")
+refseq_vir$id <- sub("\\.", "_", refseq_vir$id)
+```
+
+```{r}
+table(refseq_vir$id %in% viruses$contig)
+```
+
+```{r}
+viruses_refseq_vir <- viruses[viruses$contig %in% refseq_vir$id,]
+viruses_not_refseq_vir <- viruses[!(viruses$contig %in% refseq_vir$id) & viruses$seqtype=="virus",]
+```
+
+```{r}
+table(viruses_refseq_vir$max_score_group)
+table(viruses_not_refseq_vir$max_score_group)
+```
+recall
+```{r}
+length(grep("true positive", viruses_refseq_vir$confusion_matrix_high_MCC))/nrow(viruses_refseq_vir)
+```
+
+```{r}
+length(grep("true positive", viruses_not_refseq_vir$confusion_matrix_high_MCC))/nrow(viruses_not_refseq_vir)
+```
 
 
 

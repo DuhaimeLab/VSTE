@@ -28,15 +28,54 @@ colnames(viruses)
 ```
 
 ```{r}
-plot(viruses$RNA, viruses$viral)
-plot(viruses$lavidaviridae, viruses$viral)
-plot(viruses$NCLDV, viruses$viral)
-plot(viruses$ssDNA, viruses$viral)
-plot(viruses$checkv_completeness, viruses$hallmark)
+ggplot(viruses, aes(x=RNA, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("RNA VS2 Score") +
+  ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=RNA, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~confusion_matrix_high_MCC, scales = "free") +
+  xlab("RNA VS2 Score") +
+  ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=NCLDV, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("NCLDV VS2 Score") +
+  ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=NCLDV, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~confusion_matrix_high_MCC, scales = "free") +
+  xlab("NCLDV VS2 Score") +
+  ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=lavidaviridae, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Lavidaviridae VS2 Score") +
+  ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=lavidaviridae, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~confusion_matrix_high_MCC, scales = "free") +
+  xlab("Lavidaviridae VS2 Score") +
+  ylab("VS2 Viral Score")
 ```
-
-
-
 
 # Important features by sequence type
 
@@ -103,6 +142,21 @@ ggplot(viruses, aes(x=hallmark, y=checkv_length)) +
   xlab("Number of Hallmark Genes") +
   ylab("Length of Sequence") 
 ```
+
+```{r}
+ggplot(viruses, aes(x=checkv_host_genes, y=checkv_length)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Length of Sequence") +
+  ylab("Number of Host Genes")
+```
+```{r}
+table(viruses$checkv_host_genes>=50, viruses$seqtype)
+```
+
+
 
 ```{r}
 ggplot(viruses, aes(x=checkv_length, y=checkv_completeness)) +
@@ -195,7 +249,7 @@ keep_score <- rep(0, nrow(viruses))
 
 keep_score[viruses$hallmark>2] <- keep_score[viruses$hallmark>2] + 1
 table(keep_score, viruses$seqtype)
-keep_score[viruses$checkv_host_genes>50 & viruses$checkv_provirus=="No"] <- keep_score[viruses$checkv_host_genes>50 & viruses$checkv_provirus=="No"] - 1
+keep_score[viruses$checkv_host_genes>50 & viruses$provirus=="No"] <- keep_score[viruses$checkv_host_genes>50 & viruses$provirus=="No"] - 1
 table(keep_score, viruses$seqtype)
 keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] <- keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] + 0.5
 table(keep_score, viruses$seqtype)
@@ -204,10 +258,13 @@ table(keep_score, viruses$seqtype)
     #keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] <- keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] + 1 #add some ratio
 keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] <- keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] - 1
 table(keep_score, viruses$seqtype)
-keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"] <- keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$checkv_provirus=="No"] - 1 # consider accounting for provirus designation
+keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$provirus=="No"] <- keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$provirus=="No"] - 1 # consider accounting for provirus designation
 table(keep_score, viruses$seqtype)
 #    keep_score[(viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes] <- 0 # consider accounting for provirus designation
 keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] <- keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] - 1
 table(keep_score, viruses$seqtype)
 ```
+
+
+
 
