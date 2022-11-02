@@ -272,11 +272,11 @@ for (i in 2:10) {
 ```
 
 ```{r}
-accuracy_scores$numtools <- str_count(accuracy_scores$toolcombo, "1")
-#accuracy_scores <- accuracy_scores[order(accuracy_scores$numtools, decreasing=F),]
+accuracy_scores$numrules <- str_count(accuracy_scores$toolcombo, "1")
+#accuracy_scores <- accuracy_scores[order(accuracy_scores$numrules, decreasing=F),]
 accuracy_scores <- accuracy_scores[order(accuracy_scores$MCC, decreasing=F),]
 accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
-accuracy_scores$numtools <- as.factor(accuracy_scores$numtools)
+accuracy_scores$numrules <- as.factor(accuracy_scores$numrules)
 ```
 
 
@@ -284,7 +284,7 @@ accuracy_scores$numtools <- as.factor(accuracy_scores$numtools)
 ```{r}
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
 p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -301,7 +301,7 @@ p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1,
   ylab("F1 Score")
 p2
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -317,7 +317,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Precision")
 ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -333,7 +333,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Recall")
 ggplot(accuracy_scores, aes(x=precision, y=recall, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -351,7 +351,7 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
 
 ggplot(accuracy_scores[accuracy_scores$testing_set_index==1,], aes(x=precision, y=recall)) +
   geom_label(alpha=0.7, label=accuracy_scores$toolcombo[accuracy_scores$testing_set_index==1]) +
-  geom_point(alpha=0.5, aes(color=numtools, fill=numtools)) +
+  geom_point(alpha=0.5, aes(color=numrules, fill=numrules)) +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -367,7 +367,7 @@ ggplot(accuracy_scores[accuracy_scores$testing_set_index==1,], aes(x=precision, 
   ylab("Recall")
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall), 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -383,7 +383,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall),
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Precision-Recall")
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -399,7 +399,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("MCC")
 ggplot(accuracy_scores, aes(x=toolcombo, y=AUC, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -415,7 +415,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=AUC,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("AUC")
 ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -432,7 +432,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP,
   ylab("Fungal False Positives")
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=protist_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -449,7 +449,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=protist_FP,
   ylab("Protist False Positives")
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -466,7 +466,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP,
   ylab("Bacterial False Positives")
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -483,7 +483,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
   ylab("Viral False Negatives")
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -500,7 +500,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN,
   ylab("Viral False Negatives")
 
 ggplot(accuracy_scores, aes(x=protist_FP, y=fungal_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -517,7 +517,7 @@ ggplot(accuracy_scores, aes(x=protist_FP, y=fungal_FP,
   ylab("Fungal FP")
 
 ggplot(accuracy_scores, aes(x=recall, y=fungal_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -534,7 +534,7 @@ ggplot(accuracy_scores, aes(x=recall, y=fungal_FP,
   ylab("Fungal FP")
 
 ggplot(accuracy_scores, aes(x=recall, y=protist_FP, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -553,7 +553,7 @@ ggplot(accuracy_scores, aes(x=recall, y=protist_FP,
 
 ```{r}
 accuracy_scores_melt <- accuracy_scores %>% 
-  select(testing_set_index, precision, recall, MCC, numtools, toolcombo) %>%
+  select(testing_set_index, precision, recall, MCC, numrules, toolcombo) %>%
   pivot_longer(cols=c(precision, recall, MCC), 
                names_to="performance_metric",
                values_to="performance_metric_score")
@@ -561,8 +561,8 @@ accuracy_scores_melt <- accuracy_scores %>%
 
 
 ```{r}
-ggplot(accuracy_scores_melt, aes(x=numtools, y=performance_metric_score, 
-                                  color=numtools, fill=numtools)) +
+ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
   geom_boxplot() +
   geom_point(alpha=0.5) +
   theme_light() +
@@ -577,7 +577,7 @@ ggplot(accuracy_scores_melt, aes(x=numtools, y=performance_metric_score,
     axis.title=element_text(size=16),
   ) +
   ylab("MCC") +
-  xlab("Number of Tools") +
+  xlab("Number of Rule Sets") +
   scale_fill_manual(name="",
                      values = alpha(rev(pal(6)), 0.5)) +
   scale_color_manual(name="",
@@ -597,7 +597,7 @@ accuracy_scores_melt$tuning_inc[substring(accuracy_scores_melt$toolcombo, 1, 1)=
 ```{r}
 ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
   geom_boxplot() +
-  geom_point(aes(color=numtools, fill=numtools), alpha=0.5) +
+  geom_point(aes(color=numrules, fill=numrules), alpha=0.5) +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -618,7 +618,7 @@ ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
   facet_wrap(~performance_metric)
 
 ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score,
-                                 color=numtools, fill=numtools)) +
+                                 color=numrules, fill=numrules)) +
   geom_boxplot() +
   geom_point(alpha=0.5) +
   theme_light() +
@@ -642,8 +642,8 @@ ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score,
 
 ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
   geom_boxplot() +
-  geom_boxplot(aes(color=numtools, fill=numtools)) +
- # geom_point(aes(color=numtools, fill=numtools), alpha=0.5) +
+  geom_boxplot(aes(color=numrules, fill=numrules)) +
+ # geom_point(aes(color=numrules, fill=numrules), alpha=0.5) +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -656,7 +656,7 @@ ggplot(accuracy_scores_melt, aes(x=tuning_inc, y=performance_metric_score)) +
     axis.title=element_text(size=16),
   ) +
   ylab("MCC") +
-  xlab("Number of Tools") +
+  xlab("") +
   scale_fill_manual(name="",
                      values = alpha(rev(pal(6)), 0.5)) +
   scale_color_manual(name="",
@@ -1084,11 +1084,11 @@ for (i in 1:nrow(combos_list)) {
   num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
 }
 
-num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses$numrules <- str_count(num_viruses$toolcombo, "1")
 num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
 num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
 num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
-num_viruses$numtools <- as.factor(num_viruses$numtools)
+num_viruses$numrules <- as.factor(num_viruses$numrules)
 ```
 
 
@@ -1120,13 +1120,13 @@ physeq_pooled <- phyloseq(otu_table(viral_scores_nozeros, taxa_are_rows = T),
 ```{r}
 ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
 phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
-                          shape="numtools", color="num_viruses") + 
+                          shape="numrules", color="num_viruses") + 
   geom_point(size = 3) +
   theme_bw() +
   geom_label(label=tooldata$toolcombo)
 
 phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
-                          shape="numtools", color="num_viruses") + 
+                          shape="numrules", color="num_viruses") + 
   geom_point(size = 3) +
   theme_bw()
 ```
@@ -1204,8 +1204,8 @@ ggplot(tool_count, aes(x=tool, y=tool_count_norm,
 
 ```{r}
 accuracy_scores_melt <- accuracy_scores %>% 
-  select(precision, recall, MCC, numtools, toolcombo) %>%
-  group_by(numtools, toolcombo) %>%
+  select(precision, recall, MCC, numrules, toolcombo) %>%
+  group_by(numrules, toolcombo) %>%
   summarise(precision=mean(precision),
             recall=mean(recall),
             MCC=mean(MCC)) %>%
@@ -1712,17 +1712,17 @@ for (i in 1:nrow(combos_list)) {
   num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
 }
 
-num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses$numrules <- str_count(num_viruses$toolcombo, "1")
 num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
 num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
 num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
-num_viruses$numtools <- as.factor(num_viruses$numtools)
+num_viruses$numrules <- as.factor(num_viruses$numrules)
 ```
 
 
 ```{r}
 ggplot(num_viruses, aes(x=toolcombo, y=num_viruses, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point() +
   theme_light() +
   theme(
@@ -1739,7 +1739,7 @@ ggplot(num_viruses, aes(x=toolcombo, y=num_viruses,
   ylab("Num Viruses Predicted")
 
 ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses, 
-                                  color=numtools, fill=numtools)) +
+                                  color=numrules, fill=numrules)) +
   geom_point() +
   theme_light() +
   theme(
@@ -1757,9 +1757,9 @@ ggplot(num_viruses, aes(x=toolcombo2, y=num_viruses,
 ```
 
 ```{r}
-ggplot(num_viruses, aes(x=numtools, y=num_viruses)) +
-  geom_boxplot(aes(color=numtools)) +
-  geom_point(aes(color=numtools, fill=numtools)) +
+ggplot(num_viruses, aes(x=numrules, y=num_viruses)) +
+  geom_boxplot(aes(color=numrules)) +
+  geom_point(aes(color=numrules, fill=numrules)) +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -1803,13 +1803,13 @@ physeq_pooled <- phyloseq(otu_table(viral_scores_nozeros, taxa_are_rows = T),
 ```{r}
 ordination <- phyloseq::ordinate(physeq =physeq_pooled, method = "PCoA", distance = "bray")
 phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
-                          shape="numtools", color="num_viruses") + 
+                          shape="numrules", color="num_viruses") + 
   geom_point(size = 3) +
   theme_bw() +
   geom_label(label=tooldata$toolcombo)
 
 phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
-                          shape="numtools", color="num_viruses") + 
+                          shape="numrules", color="num_viruses") + 
   geom_point(size = 3) +
   theme_bw()
 ```
