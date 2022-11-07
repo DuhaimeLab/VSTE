@@ -266,6 +266,9 @@ num_viruses$numtools <- as.factor(num_viruses$numtools)
 
 
 ```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+# add this
 ggplot(num_viruses, aes(x=toolcombo, y=num_viruses, 
                                   color=numtools, fill=numtools)) +
   geom_point() +
@@ -643,8 +646,6 @@ colnames(tool_count) <- c("tool", "cluster_index", "tool_count")
 ```
 
 ```{r}
-pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
-
 ggplot(tool_count, aes(x=cluster_index, y=tool_count,
                    fill=cluster_index,
                    color=cluster_index)) +
