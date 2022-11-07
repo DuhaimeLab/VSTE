@@ -242,28 +242,114 @@ phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
   theme_bw()
 ```
 
-use of each tuning rule
+# Viral Addition Tuning Rules
+
 ```{r}
-keep_score <- rep(0, nrow(viruses))
-
-
-keep_score[viruses$hallmark>2] <- keep_score[viruses$hallmark>2] + 1
-table(keep_score, viruses$seqtype)
-keep_score[viruses$checkv_host_genes>50 & viruses$provirus=="No"] <- keep_score[viruses$checkv_host_genes>50 & viruses$provirus=="No"] - 1
-table(keep_score, viruses$seqtype)
-keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] <- keep_score[viruses$percent_unknown>=75 & viruses$checkv_length<50000] + 0.5
-table(keep_score, viruses$seqtype)
-keep_score[viruses$percent_viral>=50] <- keep_score[viruses$percent_viral>=50] + 0.5
-table(keep_score, viruses$seqtype)
-    #keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] <- keep_score[viruses$hallmark>=(viruses$checkv_viral_genes/5)] + 1 #add some ratio
-keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] <- keep_score[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] - 1
-table(keep_score, viruses$seqtype)
-keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$provirus=="No"] <- keep_score[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$provirus=="No"] - 1 # consider accounting for provirus designation
-table(keep_score, viruses$seqtype)
-#    keep_score[(viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes] <- 0 # consider accounting for provirus designation
-keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] <- keep_score[viruses$checkv_length>500000 & viruses$hallmark==0] - 1
-table(keep_score, viruses$seqtype)
+viruses_sankey_tv <- data.frame(seqtype=viruses$seqtype,
+                             kj_cel=rep(0,nrow(viruses)),
+                             hall=rep(0,nrow(viruses)),
+                             pv=rep(0,nrow(viruses)),
+                             cvl_pu=rep(0, nrow(viruses)))
 ```
+
+```{r}
+viruses_sankey_tv$kj_cel[viruses$Kaiju_Viral=="Viruses"] <- 0.5
+viruses_sankey_tv$hall[viruses$hallmark>2] <- 0.5
+viruses_sankey_tv$pv[viruses$percent_viral>=50] <- 0.5
+viruses_sankey_tv$cvl_pu[viruses$checkv_length>50000 & viruses$percent_unknown<=75] <- 0.5    
+
+viruses_sankey_tv$all <- rowSums(viruses_sankey_tv[,2:5])
+```
+
+```{r}
+viruses_sankey_tv %>%
+  count(seqtype, all) %>% spread(key = all, value=n)
+```
+
+```{r}
+viruses_sankey_tv <- viruses_sankey_tv %>%
+  count(seqtype, kj_cel, hall, pv, cvl_pu, all) %>%
+  mutate(viral_score=factor(all))
+```
+
+```{r}
+ggplot(viruses_sankey_tv,
+       aes(axis1 = kj_cel, axis2 = hall, axis3 = pv, axis4 = cvl_pu, y=n)) +
+  geom_alluvium(aes(fill=viral_score),
+                width = 0, knot.pos = 0, reverse = FALSE) +
+  geom_stratum(width = 1/5) +
+  theme_bw() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)),
+            reverse = FALSE) +
+  theme(
+        axis.text.x=element_text(size=14, angle = 90)
+        ) +
+  scale_x_continuous(breaks=c(1,2,3,4),
+    labels=c("kaiju", "hallmark", "% viral", "% unknown")) +
+  facet_wrap(~seqtype, scales="free_y") 
+``` 
+
+# Viral Removal Tuning Rules
+
+```{r}
+viruses_sankey_tnv <- data.frame(seqtype=viruses$seqtype,
+                             kj_cel=rep(0,nrow(viruses)),
+                             hg_pro=rep(0,nrow(viruses)),
+                             vg_hg=rep(0,nrow(viruses)),
+                             vg_hg_pro=rep(0, nrow(viruses)),
+                             cvl_hm=rep(0, nrow(viruses)),
+                             cvl_cp=rep(0,nrow(viruses)))
+```
+
+```{r}
+viruses_sankey_tnv$kj_cel[viruses$Kaiju_Viral=="cellular organisms"] <- -0.5
+viruses_sankey_tnv$hg_pro[viruses$checkv_host_genes>50 & viruses$provirus==FALSE] <- -1
+viruses_sankey_tnv$vg_hg[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] <- -1
+viruses_sankey_tnv$vg_hg_pro[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & viruses$provirus==FALSE] <- -1
+viruses_sankey_tnv$cvl_hm[viruses$checkv_length>500000 & viruses$hallmark<=1] <- -1
+viruses_sankey_tnv$cvl_cp[viruses$checkv_length>5000 & viruses$checkv_completeness<=75] <- -0.5             
+viruses_sankey_tnv$all <- rowSums(viruses_sankey_tnv[,2:7])
+```
+
+```{r}
+viruses_sankey_tnv %>%
+  count(seqtype, all) %>% spread(key = all, value=n)
+```
+
+
+```{r}
+viruses_sankey_tnv <- viruses_sankey_tnv %>%
+  count(seqtype, kj_cel, hg_pro, vg_hg, vg_hg_pro, cvl_hm, cvl_cp, all) %>%
+  mutate(viral_score=factor(all))
+```
+
+```{r}
+ggplot(viruses_sankey_tnv,
+       aes(axis1 = kj_cel, axis2 = hg_pro, axis3 = vg_hg, axis4 = cvl_hm, axis5=cvl_hm, axis6=cvl_cp, 
+           y=n)) +
+  geom_alluvium(aes(fill=viral_score),
+                width = 0, knot.pos = 0, reverse = FALSE) +
+  geom_stratum(width = 1/5) +
+  theme_bw() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)),
+            reverse = FALSE) +
+  theme(
+        axis.text.x=element_text(size=14, angle = 90)
+        ) +
+  scale_x_continuous(breaks=c(1,2,3,4,5,6),
+    labels=c("kaiju", "host genes", "viral and host", "provirus",
+             "hallmark", "complete")) +
+  facet_wrap(~seqtype, scales="free_y") 
+``` 
+
+
+
+
+
+
+
+
+
 
 
 

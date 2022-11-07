@@ -1009,6 +1009,98 @@ ggplot(sm_m, aes(x=method, y=score,
   ylab("Number of Sequences") +
   coord_flip()
 ```
+## Another way of visualizing between rule sets
+
+```{r}
+viruses_mcc_alluvial <- data.frame(seqtype=viruses$seqtype,
+                                   keep_score_high_MCC=viruses$keep_score_high_MCC,
+                                   confusion_matrix_high_MCC=viruses$confusion_matrix_high_MCC)
+
+
+viruses_mcc_alluvial$keep_score_vb <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses_mcc_alluvial$keep_score_dvf <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses_mcc_alluvial$keep_score_vs <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses_mcc_alluvial$keep_score_vs2 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses_mcc_alluvial$keep_score_tv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses_mcc_alluvial$keep_score_tnv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+```{r}
+viruses_mcc_alluvial %>%
+  count(seqtype, keep_score_high_MCC) %>% 
+  spread(key = keep_score_high_MCC, value=n)
+```
+
+
+```{r}
+viruses_mcc_alluvial <- viruses_mcc_alluvial %>%
+  count(seqtype, keep_score_dvf, keep_score_vb, keep_score_vs,
+        keep_score_vs2, keep_score_tv, keep_score_tnv, keep_score_high_MCC) %>%
+  mutate(high_mcc_viral_score=factor(round(keep_score_high_MCC)))
+```
+
+```{r}
+ggplot(viruses_mcc_alluvial,
+       aes(axis1 = keep_score_dvf, axis2 = keep_score_vb, 
+           axis3 = keep_score_vs, axis4 = keep_score_vs2, 
+           axis5 = keep_score_tv, axis6 = keep_score_tnv, 
+           y=n)) +
+  geom_alluvium(aes(fill=high_mcc_viral_score),
+                width = 0, knot.pos = 0, reverse = FALSE) +
+  geom_stratum(width = 1/5) +
+  theme_bw() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)),
+            reverse = FALSE) +
+  theme(
+        axis.text.x=element_text(size=14, angle = 90)
+        ) +
+  scale_x_continuous(breaks=c(1,2,3,4,5,6),
+    labels=c("dvf", "kj", "vs", "vs2",
+             "tv", "tnv")) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  facet_wrap(~seqtype, scales="free_y") 
+``` 
+
+
+
+
+
+
 ## Visualizing confusion matrix by number of tools
 
 
@@ -1411,6 +1503,14 @@ recover almost all of the viruses this way, but more protist contamination
 
 0.960
 
+```{r}
+confusion_by_taxa <- viruses %>% count(confusion_matrix_high_recall, seqtype, size_class)
+
+colnames(confusion_by_taxa) <- c("confusion_matrix", "seqtype","size", "count")
+```
+
+
+
 ## few tools, high MCC example
 ```{r}
 viruses$keep_score_few_tools <- getting_viral_set_1(viruses, include_deepvirfinder = F,
@@ -1446,6 +1546,19 @@ MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*
 MCC
 ```
 precision=77%, recall=76%, MCC=74%
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
