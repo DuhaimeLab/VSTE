@@ -706,10 +706,10 @@ pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
 ```
 
 ```{r}
-ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
+ggplot(confusion_by_taxa, aes(y=count, x=confusion_matrix,
                    fill=confusion_matrix,
                    color=confusion_matrix)) +
-  geom_bar(stat="identity") +
+  geom_boxplot() +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -731,8 +731,7 @@ ggplot(confusion_by_taxa, aes(x=count, y=as.factor(Index),
                              "true negative", "true positive")) +
   xlab("Number of Sequences") +
   ylab("") + 
-  facet_wrap(~seqtype, scales = "free") +
-  coord_flip()
+  facet_wrap(~seqtype, scales = "free")
 ```
 this rule set had the highest precision, but as you can see, this comes with a big sacrifice in recall
 
@@ -1548,6 +1547,101 @@ MCC
 precision=77%, recall=76%, MCC=74%
 
 
+## Visualizing the different sets
+
+```{r}
+confusion_by_taxa_method <- viruses %>% 
+  select(contains("confusion_matrix"), seqtype, Index) %>%
+  pivot_longer(cols=contains("confusion_matrix"), 
+               names_to="confusion_matrix_type",
+               values_to="confusion_matrix_value") %>%
+  count(seqtype, Index, confusion_matrix_type, confusion_matrix_value)
+```
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(confusion_by_taxa_method, aes(y=n, x=confusion_matrix_type,
+                   fill=confusion_matrix_value,
+                   color=confusion_matrix_value)) +
+  geom_boxplot() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1),
+                    labels=c("false negative", "false positive", 
+                             "true negative", "true positive")) +
+  xlab("Number of Sequences") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free")
+```
+
+```{r}
+confusion_by_taxa_method <- viruses %>% 
+  select(contains("confusion_matrix"), seqtype, Index) %>%
+  pivot_longer(cols=contains("confusion_matrix"), 
+               names_to="confusion_matrix_type",
+               values_to="confusion_matrix_value") %>%
+  count(seqtype, Index, confusion_matrix_type, confusion_matrix_value) %>%
+  filter(grepl("true", confusion_matrix_value)) %>%
+  mutate(confusion_matrix_type=sub("confusion_matrix_", "", confusion_matrix_type))
+```
+
+```{r}
+ggplot(confusion_by_taxa_method, aes(y=n, x=confusion_matrix_type,
+                   fill=confusion_matrix_value,
+                   color=confusion_matrix_value)) +
+  geom_boxplot() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=10, angle=90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4))[3:4], 0.5),
+                    labels=c( 
+                             "true negative", "true positive")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4))[3:4], 1),
+                    labels=c(
+                             "true negative", "true positive")) +
+  xlab("Tool Set") +
+  ylab("Contig Count") + 
+  facet_wrap(~seqtype, scales = "free")
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2271,4 +2365,64 @@ ggplot(viruses_false_negative, aes(x=hallmark, y=checkv_length,
 table(viruses$hallmark[viruses$confusion_matrix_high_precision=="false positive"]>0)
 
 table(viruses$percent_host[viruses$confusion_matrix_high_precision=="false positive"]<50)
+```
+
+
+## Visualizing confusion matrix by number of tools
+
+```{r}
+confusion_by_keep_score <- viruses %>% 
+  select(contains("keep_score"), seqtype, Index) %>%
+  pivot_longer(cols=contains("keep_score"), 
+               names_to="pipeline_type",
+               values_to="pipeline_value") %>%
+  mutate(pipeline_type=sub("keep_score_", "", pipeline_type)) %>%
+  count(seqtype, Index, pipeline_type, pipeline_value)
+```
+
+```{r}
+confusion_by_keep_score$confusion_matrix <- "true negative"
+confusion_by_keep_score$confusion_matrix[confusion_by_keep_score$seqtype=="virus" & confusion_by_keep_score$pipeline_value<1] <- "false negative"
+confusion_by_keep_score$confusion_matrix[confusion_by_keep_score$seqtype=="virus" & confusion_by_keep_score$pipeline_value>=1] <- "true positive"
+confusion_by_keep_score$confusion_matrix[confusion_by_keep_score$seqtype!="virus" & confusion_by_keep_score$pipeline_value>=1] <- "false positive"
+```
+
+```{r}
+confusion_by_keep_score$keep_score_visualize <- confusion_by_keep_score$pipeline_value
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value>1] <- "> 1"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value==1] <- "1"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value==0.5] <- "0.5"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value==0] <- "0"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value==-0.5] <- "-0.5"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value==-1] <- "-1"
+confusion_by_keep_score$keep_score_visualize[confusion_by_keep_score$pipeline_value<=-1] <- "< -1"
+
+confusion_by_keep_score$keep_score_visualize <- factor(confusion_by_keep_score$keep_score_visualize, 
+                                       levels=c("< -1", "-1", "-0.5", "0", "0.5","1", "> 1"))
+```
+
+```{r}
+ggplot(confusion_by_keep_score, aes(x=confusion_matrix, y=n,
+                   fill=keep_score_visualize, color=keep_score_visualize)) +
+  geom_boxplot() +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16)
+  ) +
+  scale_color_manual(name = 'Viral Score',
+                     values = alpha(c(viridis(6)), 1)) +
+  scale_fill_manual(name = 'Viral Score',
+                     values = alpha(c(viridis(6)), 0.5)) +
+  xlab("Index") +
+  ylab("Sequence Count") +
+  facet_wrap(~pipeline_type, scales = "free")
+
 ```
