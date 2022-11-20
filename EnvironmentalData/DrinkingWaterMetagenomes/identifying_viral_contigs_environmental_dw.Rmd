@@ -27,15 +27,11 @@ library(data.table)
 
 ```{r}
 # dataset name for file organization and outputs for metrics file
-#dataset_name <- "drinking_water"
+dataset_name <- "drinking_water_uknl"
 #name from building_env_data_viral_features_set.Rmd
-#viruses_filename <- 'merged_viral_feature_outputs.csv'
-
-#viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
+viruses_filename <- 'merged_viral_feature_outputs.tsv'
+viruses2 <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
 ```
-
-
-TODO: ADD ENVIRONMENTAL METRICS LIKE SHANNON, ALPHA DIVERSITY. 
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
@@ -516,7 +512,8 @@ make the sample by tool combo matrix
 ```{r}
 num_viruses_uknl_wide <- num_viruses_uknl %>% 
   select(toolcombo, assembly, num_viruses) %>%
-  pivot_wider(assembly, num_viruses)
+  pivot_wider(names_from=assembly, values_from=num_viruses)
+num_viruses_uknl_wide <- as.data.frame(num_viruses_uknl_wide)
 rownames(num_viruses_uknl_wide) <- num_viruses_uknl_wide$toolcombo
 num_viruses_uknl_wide <- num_viruses_uknl_wide[,-1]
 
@@ -562,6 +559,11 @@ phyloseq::plot_ordination(physeq = physeq_pooled, ordination = ordination,
   scale_color_viridis_c()
 ```
 each point is tool combination
+
+
+
+
+
 
 
 
