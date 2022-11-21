@@ -27,9 +27,9 @@ library(data.table)
 # dataset name for file organization and outputs for metrics file
 dataset_name <- "drinking_water" #replace with the dataset_name from "building_env_data_viral_features_set.Rmd"
 #name from building_env_data_viral_features_set.Rmd
-viruses_filename <- 'merged_viral_feature_outputs.csv'
+viruses_filename <- 'merged_viral_feature_outputs_nluk.csv'
 
-viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
+viruses <- read_tsv(viruses_filename)
 ```
 
 

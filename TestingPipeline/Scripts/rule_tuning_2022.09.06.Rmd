@@ -957,6 +957,58 @@ viruses$keep_score_vb_dvf_vs2_vs_tv_tnv <- getting_viral_set_1(viruses, include_
                                               include_virsorter = T)
 ```
 
+```{r}
+viruses$true_virus <- "not"
+viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
+
+viruses_long_scores <- viruses %>% 
+  select(contains("keep_score_vb"), size_class, true_virus) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, size_class, true_virus) %>%
+  summarise(n = n())
+
+viruses_long_scores$size_class <- factor(viruses_long_scores$size_class,
+                                    levels = c("3-5kb", "5-10kb", ">10kb"))
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~true_virus, scales = "free")
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(size_class~true_virus, scales = "free")
+```
+
+
 # Considering how each method contributes to the final prediction
 ```{r}
 viruses_high <- viruses[viruses$keep_score_vb_dvf_vs2_vs_tv>=1,] 
@@ -1631,7 +1683,57 @@ ggplot(confusion_by_taxa_method, aes(y=n, x=confusion_matrix_type,
   facet_wrap(~seqtype, scales = "free")
 ```
 
+## another way of visualizing the different tool sets scores
+```{r}
+viruses$true_virus <- "not"
+viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
 
+viruses_long_scores <- viruses %>% 
+  select(contains("keep_score_high"), contains("keep_score_all"), size_class, true_virus) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, size_class, true_virus) %>%
+  summarise(n = n())
+
+viruses_long_scores$size_class <- factor(viruses_long_scores$size_class,
+                                    levels = c("3-5kb", "5-10kb", ">10kb"))
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~true_virus, scales = "free")
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(size_class~true_virus, scales = "free")
+```
 
 
 
