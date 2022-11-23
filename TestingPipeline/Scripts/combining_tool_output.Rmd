@@ -47,7 +47,10 @@ make sure they match across tools.
 to be higher or lower, but going lower will greatly increase the size of the
 dataframe and memory usage.
 
-
+5) This script only keeps each fragment once. This has two purposes: (1) it 
+deals with the duplicate entries for fragments labeled as "complete" (the second
+entry gives the quality); (2) it keeps only one instance of sequences that have
+multiple viral fragments on them.
 
 ```{r inputs}
 # dataset name for file organization and outputs for metrics file
