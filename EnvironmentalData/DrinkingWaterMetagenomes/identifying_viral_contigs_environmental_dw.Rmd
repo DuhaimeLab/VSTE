@@ -30,7 +30,7 @@ library(data.table)
 dataset_name <- "drinking_water_uknl"
 #name from building_env_data_viral_features_set.Rmd
 viruses_filename <- 'merged_viral_feature_outputs.tsv'
-viruses2 <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
+viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
 ```
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
@@ -175,6 +175,10 @@ sum(viruses$keep_score_high_precision>=0.5)
 sum(viruses$keep_score_high_MCC>=0.5)
 ```
 
+```{r}
+write_csv(viruses[,c(1,43:46)], "drinking_water_top_viral_scores.csv")
+```
+
 
 not having the rule, gives the same
 
@@ -253,13 +257,12 @@ for (i in 1:nrow(combos_list)) {
   
   num_viruses$toolcombo2[i] <- combos_list$toolcombo2[i]
 }
-num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses$numtools <- stringr::str_count(num_viruses$toolcombo, "1")
 num_viruses <- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
 num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
 num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
 num_viruses$numtools <- as.factor(num_viruses$numtools)
 ```
-
 
 ```{r}
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
@@ -280,7 +283,11 @@ ggplot(num_viruses, aes(x=toolcombo, y=num_viruses,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
-  ylab("Num Viruses Predicted")
+  ylab("Num Viruses Predicted") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1))
 ```
 
 ```{r}
@@ -321,13 +328,16 @@ for (i in 1:nrow(combos_list)) {
   }
 }
 
-num_viruses$numtools <- str_count(num_viruses$toolcombo, "1")
+num_viruses$numtools <- stringr::str_count(num_viruses$toolcombo, "1")
 num_viruses <- num_viruses[order(num_viruses$prop_vir, decreasing=F),]
 num_viruses$toolcombo <- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
 num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
 num_viruses$numtools <- as.factor(num_viruses$numtools)
 ```
 
+```{r}
+write_csv(num_viruses, "drinking_water_num_viruses.csv")
+```
 
 ```{r}
 ggplot(num_viruses, aes(x=toolcombo, y=prop_vir, 

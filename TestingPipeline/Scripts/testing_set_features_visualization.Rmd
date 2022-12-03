@@ -23,6 +23,87 @@ library(data.table)
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
 
+# Looking at each rule
+
+  
+  if (include_virsorter) {
+    vscore$vscore[viruses$category==1] <- vscore$vscore[viruses$category==1] + 1
+    vscore$vscore[viruses$category==2] <- vscore$vscore[viruses$category==2] + 0.5
+    vscore$vscore[viruses$category==4] <- vscore$vscore[viruses$category==4] + 1
+    vscore$vscore[viruses$category==5] <- vscore$vscore[viruses$category==5] + 0.5
+  }
+  
+  if (include_deepvirfinder) {
+    vscore$vscore[viruses$score>=0.7 & viruses$checkv_length<20000] <- vscore$vscore[viruses$score>=0.7 & viruses$checkv_length<20000] + 0.5
+    vscore$vscore[viruses$score>=0.9 & viruses$checkv_length<20000] <- vscore$vscore[viruses$score>=0.9 & viruses$checkv_length<20000] + 0.5
+  }
+  
+  if (include_tuning_viral) {
+    vscore$vscore[viruses$Kaiju_Viral=="Viruses"] <- vscore$vscore[viruses$Kaiju_Viral=="Viruses"] + 0.5
+    vscore$vscore[viruses$hallmark>2] <- vscore$vscore[viruses$hallmark>2] + 0.5
+    vscore$vscore[viruses$percent_unknown>=75 & viruses$checkv_length<50000] <- vscore$vscore[viruses$percent_unknown>=75 & viruses$checkv_length<50000] + 0.5
+    vscore$vscore[viruses$viral>=50] <- vscore$vscore[viruses$viral>=50] + 0.5
+  }
+  
+  if (include_tuning_not_viral) {
+    vscore$vscore[viruses$Kaiju_Viral=="cellular organisms"] <- vscore$vscore[viruses$Kaiju_Viral=="cellular organisms"] - 0.5
+    vscore$vscore[viruses$checkv_host_genes>50 & !viruses$provirus] <- vscore$vscore[viruses$checkv_host_genes>50 & !viruses$provirus] - 1
+    vscore$vscore[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] <- vscore$vscore[viruses$checkv_viral_genes==0 & viruses$checkv_host_genes>=1] - 1
+    vscore$vscore[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & !viruses$provirus] <- vscore$vscore[((viruses$checkv_viral_genes*3) <= viruses$checkv_host_genes) & !viruses$provirus] - 1 
+    vscore$vscore[viruses$checkv_length>500000 & viruses$hallmark<=1] <- vscore$vscore[viruses$checkv_length>500000 & viruses$hallmark<=1] - 1
+    vscore$vscore[(viruses$checkv_completeness<=75 | viruses$vibrant_quality=="complete circular")& viruses$checkv_length<=5000] <- vscore$vscore[viruses$checkv_completeness<=75 & viruses$checkv_length<=5000] - 0.5 
+  }
+  
+  return(keep_score)
+  
+}
+
+# VIBRANT
+```{r}
+vscore <- tibble(seqtype=viruses$seqtype,
+                 vscore=rep(0, nrow(viruses)))
+
+vscore$vscore[viruses$vibrant_quality=="high quality draft"] <- vscore$vscore[viruses$vibrant_quality=="high quality draft"] + 1
+vscore$vscore[viruses$vibrant_quality=="medium quality draft"] <- vscore$vscore[viruses$vibrant_quality=="medium quality draft"] + 1
+vscore$vscore[viruses$vibrant_quality=="low quality draft" & viruses$provirus] <- vscore$vscore[viruses$vibrant_quality=="low quality draft" & viruses$provirus] + 0.5
+
+vscore$confusion_matrix <- "true negative"
+vscore$confusion_matrix[vscore$seqtype=="virus" & vscore$vscore<1] <- "false negative"
+vscore$confusion_matrix[vscore$seqtype=="virus" & vscore$vscore>=1] <- "true positive"
+vscore$confusion_matrix[vscore$seqtype!="virus" & vscore$vscore>=1] <- "false positive"
+
+table(vscore$seqtype, vscore$confusion_matrix)
+
+pheatmap::pheatmap(table(vscore$seqtype, vscore$confusion_matrix)/c(rowSums(table(vscore$seqtype, vscore$confusion_matrix))),
+                   color=c("black", viridis(100)))
+```
+
+# VIBRANT
+```{r}
+vscore <- tibble(seqtype=viruses$seqtype,
+                 vscore=rep(0, nrow(viruses)))
+
+vscore$vscore[viruses$max_score>=0.5] <- vscore$vscore[viruses$max_score>=0.5] + 0.5
+vscore$vscore[viruses$max_score>=0.95] <- vscore$vscore[viruses$max_score>=0.95] + 0.5
+
+vscore$confusion_matrix <- "true negative"
+vscore$confusion_matrix[vscore$seqtype=="virus" & vscore$vscore<1] <- "false negative"
+vscore$confusion_matrix[vscore$seqtype=="virus" & vscore$vscore>=1] <- "true positive"
+vscore$confusion_matrix[vscore$seqtype!="virus" & vscore$vscore>=1] <- "false positive"
+
+table(vscore$seqtype, vscore$confusion_matrix)
+
+pheatmap::pheatmap(table(vscore$seqtype, vscore$confusion_matrix)/c(rowSums(table(vscore$seqtype, vscore$confusion_matrix))),
+                   color=c("black", viridis(100)))
+```
+
+
+
+
+
+
+# Looking at Features
+
 ```{r}
 colnames(viruses)
 ```
@@ -75,6 +156,14 @@ ggplot(viruses, aes(x=lavidaviridae, y=viral)) +
   facet_wrap(~confusion_matrix_high_MCC, scales = "free") +
   xlab("Lavidaviridae VS2 Score") +
   ylab("VS2 Viral Score")
+
+ggplot(viruses, aes(x=viral, y=percent_viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("VS2 Percent Viral") +
+  ylab("CheckV Percent Viral")
 ```
 
 # Important features by sequence type

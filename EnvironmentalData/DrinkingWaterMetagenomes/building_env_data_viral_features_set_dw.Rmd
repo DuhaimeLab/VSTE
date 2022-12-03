@@ -199,6 +199,7 @@ vs2_c <- fread(vs2_path,
                   )
 vs2_c$contig <- sub("\\.", "_", vs2_c$contig)
 vs2_c <- vs2_c[!duplicated(vs2_c$contig),]
+vs2_c <- vs2_c[!grep("seqname", vs2_c$contig),]
 ```
 
 
@@ -262,10 +263,15 @@ viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
 viruses$viral[is.na(viruses$viral)] <- 0
 viruses$hallmark[is.na(viruses$hallmark)] <- 0
 viruses$RNA[is.na(viruses$RNA)] <- 0
+viruses$RNA[grep("nan", viruses$RNA)] <- 0
 viruses$lavidaviridae[is.na(viruses$lavidaviridae)] <- 0
+viruses$lavidaviridae[grep("nan", viruses$lavidaviridae)] <- 0
 viruses$NCLDV[is.na(viruses$NCLDV)] <- 0
+viruses$NCLDV[grep("nan", viruses$NCLDV)] <- 0
 viruses$ssDNA[is.na(viruses$ssDNA)] <- 0
+viruses$ssDNA[grep("nan", viruses$ssDNA)] <- 0
 viruses$dsDNAphage[is.na(viruses$dsDNAphage)] <- 0
+viruses$dsDNAphage[grep("nan", viruses$dsDNAphage)] <- 0
 viruses$viral[is.na(viruses$max_score)] <- 0
 
 #Virsorter

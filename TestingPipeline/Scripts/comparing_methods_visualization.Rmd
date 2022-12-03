@@ -204,6 +204,95 @@ num_viruses$numtools <- as.factor(num_viruses$numtools)
 dim(viral_scores)
 ```
 
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+viruses_1 <- viruses[viruses$Index=="1",]
+
+ann_col = data.frame(
+    tnv = combos_list$tune_not_viral,
+    tv = combos_list$tune_viral,
+    dvf = combos_list$DVF,
+    vb = combos_list$VIBRANT,
+    vs = combos_list$VS,
+    vs2 = combos_list$VS2
+)
+
+ann_row = data.frame(
+    seqtype = viruses_1$seqtype
+)
+
+ann_colors = list(
+  tnv = c("black", pal(6)[1]),
+  tv = c("black", pal(6)[3]),
+  dvf = c("black", pal(6)[2]),
+  vb = c("black", pal(6)[4]),
+  vs = c("black", pal(6)[5]),
+  vs2 = c("black", pal(6)[6]),
+  seqtype = c("archaea"=pal(6)[1], "bacteria"=pal(6)[2], "fungi"=pal(6)[3],
+              "plasmid"=pal(6)[4], "protist"=pal(6)[5], "virus"=pal(6)[6])
+)
+
+rownames(ann_col) <- combos_list$toolcombo
+rownames(ann_row) <- viruses_1$contig
+
+viral_scores_1 <- viral_scores[viruses$Index=="1",]
+
+colnames(viral_scores_1) <- combos_list$toolcombo
+rownames(viral_scores_1) <- viruses_1$contig
+```
+
+```{r}
+pheatmap::pheatmap(t(viral_scores_1[(viruses_1$seqtype=="virus"),]),
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  #border_color = "black",
+                  color = c(rev(RColorBrewer::brewer.pal(3,"Oranges")),
+                            RColorBrewer::brewer.pal(5,"Purples") 
+                            ),
+                  show_rownames = F,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows=F#,
+                 # filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png"
+                  )
+```
+
+```{r}
+pheatmap::pheatmap(t(viral_scores_1[(viruses_1$seqtype=="bacteria"),]),
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  #border_color = "black",
+                  color = c(rev(RColorBrewer::brewer.pal(5,"Oranges")),
+                            RColorBrewer::brewer.pal(4,"Purples") 
+                            ),
+                  show_rownames = F,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows=F#,
+                 # filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png"
+                  )
+```
+
+```{r}
+pheatmap::pheatmap(t(viral_scores_1),
+                  annotation_col = ann_row,
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  #border_color = "black",
+                  color = c(rev(RColorBrewer::brewer.pal(5,"Oranges")),
+                            RColorBrewer::brewer.pal(5,"Purples") 
+                            ),
+                  show_rownames = F,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows = F,
+                  cluster_cols = F#,
+                 # filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png"
+                  )
+```
+
+
 ##matrix of number in agreement between tools
 ### number predicted together
 ```{r}

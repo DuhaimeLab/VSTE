@@ -262,6 +262,7 @@ viruses$score[is.na(viruses$score)] <- 0
 viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
 
 # VirSorter2
+viruses$max_score[is.na(viruses$max_score)] <- 0
 viruses$viral[is.na(viruses$viral)] <- 0
 viruses$hallmark[is.na(viruses$hallmark)] <- 0
 viruses$RNA[is.na(viruses$RNA)] <- 0
