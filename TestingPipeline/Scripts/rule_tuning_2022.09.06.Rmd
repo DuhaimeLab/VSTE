@@ -29,6 +29,7 @@ Import the file that combines the results from each of the tools from running "c
 ```{r}
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
+(this is still the old rules)
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
 A final keep_score above 1 indicates we will keep that sequence and call it viral.
@@ -73,6 +74,8 @@ includes ecological metrics like alpha diversity.
 You can decide which combination is appropriate for them and only need use the
 tools appropriate for your data.
 
+# Trying new rule set
+this set is based on optimizing for the 
 ```{r getting_viral_set_1}
 getting_viral_set_1 <- function(input_seqs,
                                 include_vibrant=FALSE, 
@@ -83,7 +86,7 @@ getting_viral_set_1 <- function(input_seqs,
                                 include_virsorter=FALSE) {
   
   keep_score <- rep(0, nrow(input_seqs))
-  
+
   if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
@@ -91,43 +94,121 @@ getting_viral_set_1 <- function(input_seqs,
   }
   
   if (include_virsorter2) {
-    #keep_score[input_seqs$viral>=50 | input_seqs$lavidaviridae>=0.95 | input_seqs$NCLDV>=0.95] <- keep_score[input_seqs$viral>=50 | input_seqs$lavidaviridae>=0.95 | input_seqs$NCLDV>=0.95] + 0.5
     keep_score[input_seqs$max_score>=50] <- keep_score[input_seqs$max_score>=50] + 0.5
-    keep_score[input_seqs$max_score>=95] <- keep_score[input_seqs$max_score>=95] + 0.5
-    #keep_score[input_seqs$RNA>=0.95] <- keep_score[input_seqs$RNA>=0.95] + 1
+    keep_score[input_seqs$max_score>=95] <- keep_score[input_seqs$max_score>=95] + 0.5  
   }
   
   if (include_virsorter) {
     keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
     keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
     keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
-    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5 
+    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5 
   }
   
   if (include_deepvirfinder) {
-    keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] <- keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] + 0.5
+    # remove if DVF calls it not viral
+    keep_score[input_seqs$score<=0.7 & input_seqs$pvalue<=0.05] <- keep_score[input_seqs$score<=0.7 & input_seqs$pvalue<=0.05] - 1
+    # add if DVF calls viral
     keep_score[input_seqs$score>=0.9 & input_seqs$checkv_length<20000] <- keep_score[input_seqs$score>=0.9 & input_seqs$checkv_length<20000] + 0.5
+    keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] <- keep_score[input_seqs$score>=0.7 & input_seqs$checkv_length<20000] + 0.5
   }
   
   if (include_tuning_viral) {
-    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 0.5
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 0.5
+  # tuning addition
+    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
+    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
+    #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
+    #note: having kaiju removal rule didn't help
     keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] <- keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] + 0.5
-    keep_score[input_seqs$viral>=50] <- keep_score[input_seqs$viral>=50] + 0.5
+    keep_score[input_seqs$viral>=50 | input_seqs$percent_viral>=50] <- keep_score[input_seqs$viral>=50 | input_seqs$percent_viral>=50] + 0.5 
+    keep_score[(input_seqs$checkv_completeness>=75 | input_seqs$vibrant_quality=="complete circular") & (input_seqs$viral>=50 | input_seqs$percent_viral>=50)] <- keep_score[(input_seqs$checkv_completeness>=75 | input_seqs$vibrant_quality=="complete circular") & (input_seqs$viral>=50 | input_seqs$percent_viral>=50)] + 0.5 
   }
   
   if (include_tuning_not_viral) {
-    keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] <- keep_score[input_seqs$Kaiju_Viral=="cellular organisms"] - 0.5
-    keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] <- keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] - 1
+    # tuning removal 
+    keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] <- 0
     keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
     keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] - 1 
-    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] - 1
-    keep_score[(input_seqs$checkv_completeness<=75 | input_seqs$vibrant_quality=="complete circular")& input_seqs$checkv_length<=5000] <- keep_score[input_seqs$checkv_completeness<=75 & input_seqs$checkv_length<=5000] - 0.5 
+    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- 0
+    keep_score[(input_seqs$checkv_completeness<=75) & input_seqs$checkv_length<=5000] <- keep_score[(input_seqs$checkv_completeness<=75) & input_seqs$checkv_length<=5000] - 0.5 
   }
   
   return(keep_score)
   
 }
+```
+
+## Trying with all of the rules
+```{r}
+viruses$keep_score_all_2 <- getting_viral_set_1(viruses,
+                                                include_vibrant=TRUE, 
+                                                include_virsorter2=TRUE,
+                                                include_deepvirfinder=TRUE,
+                                                include_tuning_viral=TRUE,
+                                                include_tuning_not_viral=TRUE,
+                                                include_virsorter=TRUE)
+
+viruses$confusion_matrix_all_2 <- "true negative"
+viruses$confusion_matrix_all_2[viruses$seqtype=="virus" & viruses$keep_score_all_2<1] <- "false negative"
+viruses$confusion_matrix_all_2[viruses$seqtype=="virus" & viruses$keep_score_all_2>=1] <- "true positive"
+viruses$confusion_matrix_all_2[viruses$seqtype!="virus" & viruses$keep_score_all_2>=1] <- "false positive"
+
+viruses$accurate_all_2 <- "false"
+viruses$accurate_all_2[grep("true", viruses$confusion_matrix_all_2)] <- "true"
+```
+
+accuracy:
+```{r}
+length(grep("true", viruses$accurate_all_2))/nrow(viruses)
+```
+
+precision
+```{r}
+length(grep("true positive", viruses$confusion_matrix_all_2))/length(grep("positive", viruses$confusion_matrix_all_2))
+```
+
+recall
+```{r}
+length(grep("true positive", viruses$confusion_matrix_all_2))/(length(grep("true positive", viruses$confusion_matrix_all_2))+length(grep("false negative", viruses$confusion_matrix_all_2)))
+```
+
+visualizing accuracy by taxa
+```{r}
+accurate_by_taxa <- melt(table(viruses$accurate_all_2, viruses$seqtype, viruses$Index))
+colnames(accurate_by_taxa) <- c("accurate", "seqtype","Index", "count")
+```
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(accurate_by_taxa, aes(y=count, x=accurate,
+                   fill=accurate,
+                   color=accurate)) +
+  geom_boxplot() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(2)), 0.5),
+                    labels=c("false", "true")) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(2)), 1),
+                    labels=c("false", "true")) +
+  xlab("Number of Sequences") +
+  ylab("") + 
+  facet_wrap(~seqtype, scales = "free")
 ```
 
 # Assessing performance against the "truth"
@@ -159,16 +240,8 @@ assess_performance <- function(seqtype, keep_score) {
   
   auc <- round(auc(truepositive, keep_score),4)
   
-  #by type metrics
-  fungal_FP <- table(confusion_matrix[seqtype=="fungi"])[2]
-  protist_FP <- table(confusion_matrix[seqtype=="protist"])[2]
-  bacterial_FP <- table(confusion_matrix[seqtype=="bacteria"])[2]
-  viral_FN <- table(confusion_matrix[seqtype=="virus"])[1]
-  
-  performance <- c(precision, recall, F1, MCC, auc, fungal_FP, 
-                   protist_FP, bacterial_FP, viral_FN)
-  names(performance) <- c("precision", "recall", "F1", "MCC", "AUC", "fungal_FP",
-                          "protist_FP", "bacterial_FP", "viral_FN")
+  performance <- c(precision, recall, F1, MCC, auc)
+  names(performance) <- c("precision", "recall", "F1", "MCC", "AUC")
   
   return(performance)
 }
@@ -222,11 +295,7 @@ build_score_list <- function(input_seqs, combos) {
                        recall=rep(0, nrow(combos)),
                        F1=rep(0, nrow(combos)),
                        MCC=rep(0, nrow(combos)),
-                       AUC=rep(0, nrow(combos)),
-                       fungal_FP=rep(0, nrow(combos)),
-                       protist_FP=rep(0, nrow(combos)),
-                       bacterial_FP=rep(0, nrow(combos)),
-                       viral_FN=rep(0, nrow(combos)))
+                       AUC=rep(0, nrow(combos)))
   for (i in 1:nrow(combos)) {
     keep_score <- getting_viral_set_1(input_seqs, include_vibrant = combos$VIBRANT[i],
                                             include_virsorter = combos$VS[i],
@@ -235,7 +304,7 @@ build_score_list <- function(input_seqs, combos) {
                                             include_tuning_not_viral = combos$tune_not_viral[i],
                                             include_deepvirfinder = combos$DVF[i])
   
-    output[i,1:9] <- assess_performance(input_seqs$seqtype, keep_score)
+    output[i,1:5] <- assess_performance(input_seqs$seqtype, keep_score)
     
     output$toolcombo[i] <- paste(combos$tune_viral[i],combos$DVF[i],
                                  combos$tune_not_viral[i], combos$VIBRANT[i],
@@ -255,11 +324,7 @@ accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*10),
                        recall=rep(0, nrow(combos_list)*10),
                        F1=rep(0, nrow(combos_list)*10),
                        MCC=rep(0, nrow(combos_list)*10), 
-                      AUC=rep(0, nrow(combos_list)*10),
-                      fungal_FP=rep(0, nrow(combos_list)*10),
-                      protist_FP=rep(0, nrow(combos_list)*10),
-                      bacterial_FP=rep(0, nrow(combos_list)*10),
-                      viral_FN=rep(0, nrow(combos_list)*10))
+                      AUC=rep(0, nrow(combos_list)*10))
 
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==1,], combos_list))
@@ -270,13 +335,37 @@ for (i in 2:10) {
 }
 ```
 
+
 ```{r}
 accuracy_scores$numrules <- str_count(accuracy_scores$toolcombo, "1")
 #accuracy_scores <- accuracy_scores[order(accuracy_scores$numrules, decreasing=F),]
 accuracy_scores <- accuracy_scores[order(accuracy_scores$MCC, decreasing=F),]
 accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
-accuracy_scores$numrules <- as.factor(accuracy_scores$numrules)
 ```
+
+accounting for rules that have multiple tools in them
+```{r}
+accuracy_scores$numtools <- accuracy_scores$numrules
+
+for (i in 1:nrow(accuracy_scores)) {
+  toolcombo <- as.character(accuracy_scores$toolcombo[i])
+  if (substr(toolcombo, 1, 1)=="1") {
+    accuracy_scores$numtools[i] <- accuracy_scores$numtools[i] + 3
+  }
+  
+  if (substr(toolcombo, 5, 5)=="1") {
+    accuracy_scores$numtools[i] <- accuracy_scores$numtools[i] + 4
+  }
+}
+
+accuracy_scores$numtools[accuracy_scores$numtools>6] <- 6
+```
+
+```{r}
+accuracy_scores$numrules <- as.factor(accuracy_scores$numrules)
+accuracy_scores$numtools <- as.factor(accuracy_scores$numtools)
+```
+
 
 ```{r}
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
@@ -300,7 +389,11 @@ p2 <- ggplot(accuracy_scores, aes(x=toolcombo, y=F1,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("F1 Score")
+  ylab("F1 Score") +
+  scale_fill_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 1))
 p2
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
@@ -318,7 +411,12 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Precision")
+  ylab("Precision") +
+  scale_fill_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 1))
+
 ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
                                   color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
@@ -334,7 +432,11 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Recall")
+  ylab("Recall") +
+  scale_fill_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="Number of Rules",
+                     values = alpha(rev(pal(6)), 1))
 
 ggplot(accuracy_scores, aes(x=precision, y=recall, 
                                   color=numrules, fill=numrules)) +
@@ -352,30 +454,13 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
   ) +
   xlab("Precision") +
   ylab("Recall") +
-  scale_fill_manual(name="",
+  scale_fill_manual(name="Number of Rules",
                      values = alpha(rev(pal(6)), 0.5)) +
-  scale_color_manual(name="",
+  scale_color_manual(name="Number of Rules",
                      values = alpha(rev(pal(6)), 1))
 
-ggplot(accuracy_scores[accuracy_scores$testing_set_index==1,], aes(x=precision, y=recall)) +
-  geom_label(alpha=0.7, label=accuracy_scores$toolcombo[accuracy_scores$testing_set_index==1]) +
-  geom_point(alpha=0.5, aes(color=numrules, fill=numrules)) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Precision") +
-  ylab("Recall")
-
-ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall), 
-                                  color=numrules, fill=numrules)) +
+ggplot(accuracy_scores, aes(x=precision, y=recall, 
+                                  color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -386,10 +471,16 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=abs(precision-recall),
     axis.text.y=element_text(size=14),
     axis.text.x=element_text(size=14, angle = 90),
     legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
+    axis.title=element_text(size=20),
   ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Precision-Recall")
+  xlab("Precision") +
+  ylab("Recall") +
+  scale_fill_manual(name="Number of Tools",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="Number of Tools",
+                     values = alpha(rev(pal(6)), 1))
+
+
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numrules, fill=numrules)) +
   geom_point(alpha=0.5) +
@@ -410,9 +501,9 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
                      values = alpha(rev(pal(6)), 0.5)) +
   scale_color_manual(name="Number of Rule Sets",
                      values = alpha(rev(pal(6)), 1))
-  
-ggplot(accuracy_scores, aes(x=toolcombo, y=AUC, 
-                                  color=numrules, fill=numrules)) +
+
+ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
+                                  color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -423,150 +514,19 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=AUC,
     axis.text.y=element_text(size=14),
     axis.text.x=element_text(size=14, angle = 90),
     legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
+    axis.title=element_text(size=20),
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("AUC")
-ggplot(accuracy_scores, aes(x=toolcombo, y=fungal_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Fungal False Positives")
-
-ggplot(accuracy_scores, aes(x=toolcombo, y=protist_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Protist False Positives")
-
-ggplot(accuracy_scores, aes(x=toolcombo, y=bacterial_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Bacterial False Positives")
-
-ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Viral False Negatives")
-
-ggplot(accuracy_scores, aes(x=toolcombo, y=viral_FN, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("Viral False Negatives")
-
-ggplot(accuracy_scores, aes(x=protist_FP, y=fungal_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Protist FP") +
-  ylab("Fungal FP")
-
-ggplot(accuracy_scores, aes(x=recall, y=fungal_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Recall") +
-  ylab("Fungal FP")
-
-ggplot(accuracy_scores, aes(x=recall, y=protist_FP, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Recall") +
-  ylab("Protist FP")
+  ylab("MCC") +
+  scale_fill_manual(name="Number of Tools",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="Number of Tools",
+                     values = alpha(rev(pal(6)), 1))
 ```
 
 ```{r}
 accuracy_scores_melt <- accuracy_scores %>% 
-  select(testing_set_index, precision, recall, MCC, numrules, toolcombo) %>%
+  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo) %>%
   pivot_longer(cols=c(precision, recall, MCC), 
                names_to="performance_metric",
                values_to="performance_metric_score")
@@ -595,6 +555,28 @@ ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric=="MCC",], ae
   scale_color_manual(name="",
                      values = alpha(rev(pal(6)), 1)) 
   
+
+ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric=="MCC",], aes(x=numrules, y=performance_metric_score, 
+                                  color=numtools, fill=numtools)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("MCC") +
+  xlab("Number of Rule Sets") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) 
 ```
 
 ```{r}
