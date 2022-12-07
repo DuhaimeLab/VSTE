@@ -270,7 +270,7 @@ viruses$lavidaviridae[is.na(viruses$lavidaviridae)] <- 0
 viruses$NCLDV[is.na(viruses$NCLDV)] <- 0
 viruses$ssDNA[is.na(viruses$ssDNA)] <- 0
 viruses$dsDNAphage[is.na(viruses$dsDNAphage)] <- 0
-viruses$viral[is.na(viruses$max_score)] <- 0
+viruses$max_score[is.na(viruses$max_score)] <- 0
 
 #Virsorter
 viruses$category[is.na(viruses$category)] <- 0

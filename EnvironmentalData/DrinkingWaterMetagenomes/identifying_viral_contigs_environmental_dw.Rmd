@@ -395,7 +395,11 @@ ggplot(median_prop_vir_by_tool, aes(y=median, x=toolcombo,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
-  ylab("Proportion of Contigs >3kb Viral")
+  ylab("Proportion of Contigs >3kb Viral") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1))
 ```
 ```{r}
 ggplot(median_prop_vir_by_tool, aes(x=numtools, y=median, 
@@ -550,8 +554,8 @@ num_viruses_uknl_wide <- num_viruses_uknl_wide/rowSums(num_viruses_uknl_wide)
 
 
 ```{r}
-physeq_pooled <- phyloseq(otu_table(num_viruses_uknl_wide, taxa_are_rows = F),
-                                     sample_data(tooldata))
+physeq_pooled <- phyloseq::phyloseq(phyloseq::otu_table(num_viruses_uknl_wide, taxa_are_rows = F),
+                                     phyloseq::sample_data(tooldata))
 ```
 
 ```{r}

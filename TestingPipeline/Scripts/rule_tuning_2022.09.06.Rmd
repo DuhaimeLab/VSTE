@@ -1,5 +1,5 @@
 ---
-title: "Viral Sequence Sorting Tools Evaluation"
+title: "Viral Sequence Sorting Tools Rule Tuning"
 author: Bridget Hegarty, James Riddell
 date: 07-22-2022
 output: html_notebook
