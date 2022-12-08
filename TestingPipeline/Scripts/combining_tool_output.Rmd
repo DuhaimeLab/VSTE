@@ -260,6 +260,7 @@ viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
 # DeepVirFinder
 viruses$score[is.na(viruses$score)] <- 0
 viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
+viruses$pvalue[is.na(viruses$pvalue)] <- 0
 
 # VirSorter2
 viruses$max_score[is.na(viruses$max_score)] <- 0
