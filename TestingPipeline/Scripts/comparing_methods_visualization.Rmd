@@ -303,24 +303,19 @@ pheatmap::pheatmap(t(viral_scores_1),
 ### number predicted together
 ```{r}
 num_high_viruses <- matrix(data=NA, nrow=63, ncol=63)
+prop_high_viruses <- matrix(data=NA, nrow=63, ncol=63)
 
 for (i in 1:63) {
   for (j in 1:63) {
     num_high_viruses[i,j] <- sum(viral_scores[,i]>=1 & viral_scores[,j]>=1)
+    
+    prop_high_viruses[i,j] <- sum(viral_scores[,i]>=1 & viral_scores[,j]>=1)
+    prop_high_viruses[i,j] <- prop_high_viruses[i,j]/sum(viral_scores[,i]>=1 | viral_scores[,j]>=1)
   }
 }
 
 rownames(num_high_viruses) <- combos_list$toolcombo
 colnames(num_high_viruses) <- combos_list$toolcombo
-
-prop_high_viruses <- matrix(data=NA, nrow=63, ncol=63)
-
-for (i in 1:63) {
-  for (j in 1:63) {
-    prop_high_viruses[i,j] <- sum(viral_scores[,i]>=1 & viral_scores[,j]>=1)
-    prop_high_viruses[i,j] <- prop_high_viruses[i,j]/sum(viral_scores[,i]>=1 | viral_scores[,j]>=1)
-  }
-}
 
 rownames(prop_high_viruses) <- combos_list$toolcombo
 colnames(prop_high_viruses) <- combos_list$toolcombo
@@ -837,6 +832,93 @@ for (i in 1:n) {
 colnames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
 rownames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
 ```
+
+
+```{r}
+viral_scores_two_comb
+```
+
+comparing VS2 and VIBRANT viruses
+```{r}
+vs2_vb <- data.frame(vs2=viral_scores_two[,1],
+                     vb=viral_scores_two[,3],
+                     comb_score=viral_scores_two[,1]+viral_scores_two[,3],
+                     comb="neither",
+                     seqtype=viruses$seqtype)
+
+vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb>=1] <- "either"
+vs2_vb$comb[vs2_vb$vs2==0.5 & vs2_vb$vb==0.5] <- "together"
+vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb==0] <- "vs2_only"
+vs2_vb$comb[vs2_vb$vs2==0 & vs2_vb$vb>=1] <- "vb_only"
+
+#vs2_vb$true_virus <- "not"
+#vs2_vb$true_virus[vs2_vb$seqtype=="virus"] <- "virus"
+
+vs2_vb_seqtype <- vs2_vb %>% 
+  group_by(comb, comb_score, seqtype) %>%
+  summarise(n = n())
+```
+
+```{r}
+table(vs2_vb$comb)
+```
+
+```{r}
+ggplot(vs2_vb_seqtype, aes(y=n, x=comb,
+                   fill=as.factor(comb_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~seqtype, scales = "free")
+```
+
+comparing rule set individually
+```{r}
+ind <- data.frame(vs2_scores=viral_scores_two[,1],
+                  vs_scores=viral_scores_two[,2],
+                  vb_scores=viral_scores_two[,3],
+                  tv_scores=viral_scores_two[,4],
+                  dvf_scores=viral_scores_two[,5],
+                  tnv_scores=viral_scores_two[,6],
+                  seqtype=viruses$seqtype
+                     )
+
+ind_scores <- ind %>% 
+  select(contains("scores"), seqtype) %>%
+  pivot_longer(cols=contains("_scores"), 
+               names_to="rule_set",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_set, viral_score, seqtype) %>%
+  summarise(n = n())
+```
+
+
+```{r}
+ggplot(ind_scores, aes(y=n, x=rule_set,
+                   fill=as.factor(viral_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~seqtype, scales = "free")
+```
+
 
 
 

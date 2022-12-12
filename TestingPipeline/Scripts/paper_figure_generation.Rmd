@@ -39,7 +39,10 @@ getting_viral_set_1 <- function(input_seqs,
                                 include_virsorter2=FALSE,
                                 include_deepvirfinder=FALSE,
                                 include_tuning_viral=FALSE,
+                                tv_1=T, tv_2=T, tv_3=T, tv_4=T, tv_5=T,
                                 include_tuning_not_viral=FALSE,
+                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=T, ntv_6=T,
+                                
                                 include_virsorter=FALSE) {
   
   keep_score <- rep(0, nrow(input_seqs))
@@ -71,30 +74,90 @@ getting_viral_set_1 <- function(input_seqs,
   }
   
   if (include_tuning_viral) {
-  # tuning addition
-    keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
-    #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
-    #note: having kaiju removal rule didn't help
-    keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] <- keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] + 0.5
-    keep_score[input_seqs$viral>=50 | input_seqs$percent_viral>=50] <- keep_score[input_seqs$viral>=50 | input_seqs$percent_viral>=50] + 0.5 
-    keep_score[(input_seqs$checkv_completeness>=75 | input_seqs$vibrant_quality=="complete circular") & (input_seqs$viral>=50 | input_seqs$percent_viral>=50)] <- keep_score[(input_seqs$checkv_completeness>=75 | input_seqs$vibrant_quality=="complete circular") & (input_seqs$viral>=50 | input_seqs$percent_viral>=50)] + 0.5 
+    keep_score <- tuning_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=tv_1,
+                         include_tv_2=tv_2,
+                         include_tv_3=tv_3,
+                         include_tv_4=tv_4,
+                         include_tv_5=tv_5)
   }
   
   if (include_tuning_not_viral) {
     # tuning removal 
-    keep_score[input_seqs$checkv_host_genes>50 & !input_seqs$provirus] <- 0
-    keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] <- keep_score[input_seqs$checkv_viral_genes==0 & input_seqs$checkv_host_genes>=1] - 1
-    keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] <- keep_score[((input_seqs$checkv_viral_genes*3) <= input_seqs$checkv_host_genes) & !input_seqs$provirus] - 1 
-    keep_score[input_seqs$checkv_length>500000 & input_seqs$hallmark<=1] <- 0
-    keep_score[(input_seqs$checkv_completeness<=75) & input_seqs$checkv_length<=5000] <- keep_score[(input_seqs$checkv_completeness<=75) & input_seqs$checkv_length<=5000] - 0.5 
-    # remove if DVF calls it not viral
-    keep_score[input_seqs$score<=0.7 & input_seqs$pvalue<=0.05] <- keep_score[input_seqs$score<=0.7 & input_seqs$pvalue<=0.05] - 1
+    keep_score <- tuning_not_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=ntv_1,
+                         include_tv_2=ntv_2,
+                         include_tv_3=ntv_3,
+                         include_tv_4=ntv_4,
+                         include_tv_5=ntv_5,
+                         include_tv_6=ntv_6)
    
   }
   
   return(keep_score)
   
+}
+
+tuning_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T,
+                         include_tv_5=T) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[ins$hallmark>2] <- current_score[ins$hallmark>2] + 1
+  }
+  if (include_tv_2) {
+    current_score[ins$Kaiju_Viral=="Viruses"] <- current_score[ins$Kaiju_Viral=="Viruses"] + 1
+  }
+    #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
+    #note: having kaiju removal rule didn't help
+  if (include_tv_3) {
+    current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] <- current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] + 0.5
+  }
+  if (include_tv_4) {
+    current_score[ins$viral>=50 | ins$percent_viral>=50] <- current_score[ins$viral>=50 | ins$percent_viral>=50] + 0.5 
+  }
+  if (include_tv_5) {
+    current_score[(ins$checkv_completeness>=75 | ins$vibrant_quality=="complete circular") & (ins$viral>=50 | ins$percent_viral>=50)] <- current_score[(ins$checkv_completeness>=75 | ins$vibrant_quality=="complete circular") & (ins$viral>=50 | ins$percent_viral>=50)] + 0.5 
+  }
+  
+  return(current_score)
+}
+
+tuning_not_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T,
+                         include_tv_5=T,
+                         include_tv_6=T) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[ins$checkv_host_genes>50 & !ins$provirus] <- 0
+  }
+  if (include_tv_2) {
+    current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] <- current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] - 1
+  }
+  if (include_tv_3) {
+    current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] - 1
+  }
+  if (include_tv_4) {
+    current_score[ins$checkv_length>500000 & ins$hallmark<=1] <- 0
+  }
+  if (include_tv_5) {
+    current_score[(ins$checkv_completeness<=75) & ins$checkv_length<=5000] <- current_score[(ins$checkv_completeness<=75) & ins$checkv_length<=5000] - 0.5 
+  }
+  
+  if (include_tv_6) {
+    # remove if DVF calls it not viral
+    current_score[ins$score<=0.7 & ins$pvalue<=0.05] <- current_score[ins$score<=0.7 & ins$pvalue<=0.05] - 1 
+  }
+  
+  return(current_score)
 }
 ```
 
@@ -259,6 +322,14 @@ pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
 ```
 
 
+```{r}
+accuracy_scores_melt <- accuracy_scores %>% 
+  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo) %>%
+  pivot_longer(cols=c(precision, recall, MCC), 
+               names_to="performance_metric",
+               values_to="performance_metric_score")
+```
+
 ## Visualize how the precision, recall, and MCC changes across pipelines.
 precision
 ```{r}
@@ -406,16 +477,6 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_color_manual(name="Number of Tools",
                      values = alpha(rev(pal(6)), 1))
 ```
-
-```{r}
-accuracy_scores_melt <- accuracy_scores %>% 
-  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo) %>%
-  pivot_longer(cols=c(precision, recall, MCC), 
-               names_to="performance_metric",
-               values_to="performance_metric_score")
-```
-
-
 ```{r}
 ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!="MCC",], aes(x=numrules, y=performance_metric_score, 
                                   color=numrules, fill=numrules)) +
@@ -486,6 +547,37 @@ ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!="MCC",], ae
                      values = alpha(rev(pal(6)), 1)) +
   facet_wrap(~performance_metric)
   
+```
+```{r}
+one.way <- aov(precision ~ numrules, data = accuracy_scores)
+
+summary(one.way)
+
+TukeyHSD(one.way)
+```
+
+```{r}
+one.way <- aov(recall ~ numrules, data = accuracy_scores)
+
+summary(one.way)
+
+TukeyHSD(one.way)
+```
+
+```{r}
+one.way <- aov(MCC ~ numrules, data = accuracy_scores)
+
+summary(one.way)
+
+TukeyHSD(one.way)
+```
+
+```{r}
+one.way <- aov(MCC ~ numtools, data = accuracy_scores)
+
+summary(one.way)
+
+TukeyHSD(one.way)
 ```
 
 ## differences based on genome size
@@ -558,7 +650,7 @@ ggplot(confusion_vir_called, aes(y=mean, x=size,
 
 ## visualizing a select set of tools
 ```{r}
-viruses$keep_score_high_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+viruses$keep_score_high_all <- getting_viral_set_1(viruses, include_deepvirfinder = F,
                                               include_vibrant = T,
                                               include_virsorter2 = T,
                                               include_tuning_viral = T,
@@ -582,9 +674,7 @@ viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinde
                                               include_tuning_viral = T,
                                               include_tuning_not_viral = T,
                                               include_virsorter = F)
-```
 
-```{r}
 viruses$true_virus <- "not"
 viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
 
@@ -617,6 +707,7 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
   ylab("Number of Sequences") + 
   facet_grid(~true_virus, scales = "free")
 ```
+
 ### Effect of combining tools
 ```{r}
 viruses$keep_score_dvf <- getting_viral_set_1(viruses, include_deepvirfinder = T,
@@ -665,12 +756,12 @@ viruses$true_virus <- "not"
 viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
 
 viruses_long_scores <- viruses %>% 
-  select(contains("keep_score_dvf"), size_class, true_virus) %>%
+  select(contains("keep_score_dvf"), size_class, seqtype) %>%
   pivot_longer(cols=contains("keep_score_"), 
                names_to="rule_combination",
                values_to="viral_score") %>% 
   mutate(viral_score=as.factor(round(viral_score))) %>%
-  group_by(rule_combination, viral_score, size_class, true_virus) %>%
+  group_by(rule_combination, viral_score, size_class, seqtype) %>%
   summarise(n = n())
 
 viruses_long_scores$size_class <- factor(viruses_long_scores$size_class,
@@ -693,12 +784,207 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
   ylab("Number of Sequences") + 
   scale_x_discrete(labels=c("DVF", "DVF+VS", "DVF+VS+VB", "DVF+VS+VB+VS2",
                             "DVF+VS+VB+VS2+addition", "DVF+VS+VB+VS2+addition-removal")) +
-  facet_grid(~true_virus, scales = "free")
+  facet_grid(~seqtype, scales = "free")
 ```
 
+### Effect of tuning addition rules
+```{r}
+viruses$keep_score_all_tv_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
 
+viruses$keep_score_all_tv_1 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=F, tv_3=F, tv_4=F, tv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
 
+viruses$keep_score_all_tv_2 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=T, tv_3=F, tv_4=F, tv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
 
+viruses$keep_score_all_tv_3 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=T, tv_4=F, tv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_4 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=T, tv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_5 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=F, tv_5=T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_0 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=F, tv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$true_virus <- "not"
+viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
+
+viruses_long_scores <- viruses %>% 
+  select(contains("keep_score_all_tv"), size_class, seqtype) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, size_class, seqtype) %>%
+  summarise(n = n())
+
+viruses_long_scores$size_class <- factor(viruses_long_scores$size_class,
+                                    levels = c("3-5kb", "5-10kb", ">10kb"))
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+ # scale_x_discrete(labels=c("DVF", "DVF+VS", "DVF+VS+VB", "DVF+VS+VB+VS2",
+ #                          "DVF+VS+VB+VS2+addition", "DVF+VS+VB+VS2+addition-removal")) + 
+  facet_grid(size_class~seqtype, scales = "free")
+```
+
+### Effect of tuning removal rules
+```{r}
+viruses$keep_score_all_ntv_all <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_1 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=T, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_2 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=T, ntv_3=F, ntv_4=F, ntv_5=F, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_3 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=T, ntv_4=F, ntv_5=F, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_4 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=T, ntv_5=F, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_5 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=T, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+viruses$keep_score_all_ntv_5 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=T, ntv_6=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_6 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=T, ntv_6=T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_0 <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F, ntv_6=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$true_virus <- "not"
+viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
+
+viruses_long_scores <- viruses %>% 
+  select(contains("keep_score_all_ntv"), size_class, seqtype) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, size_class, seqtype) %>%
+  summarise(n = n())
+
+viruses_long_scores$size_class <- factor(viruses_long_scores$size_class,
+                                    levels = c("3-5kb", "5-10kb", ">10kb"))
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+ # scale_x_discrete(labels=c("DVF", "DVF+VS", "DVF+VS+VB", "DVF+VS+VB+VS2",
+ #                          "DVF+VS+VB+VS2+addition", "DVF+VS+VB+VS2+addition-removal")) + 
+  facet_grid(size_class~seqtype, scales = "free")
+```
 
 
 
