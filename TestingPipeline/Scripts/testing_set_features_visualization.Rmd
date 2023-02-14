@@ -352,13 +352,58 @@ ggplot(viruses_sankey_tnv,
   facet_wrap(~seqtype, scales="free_y") 
 ``` 
 
+```{r}
+ggplot(viruses, aes(x=max_score, y=RNA)) +
+  geom_point() +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~max_score_group, scales = "free") +
+  xlab("VirSorter2 Max Score") +
+  ylab("VirSorter2 RNA Score")
+```
+
+```{r}
+viruses$hallmark_color <- "less than 2"
+viruses$hallmark_color[viruses$hallmark>=2] <- "greater than or equal to 2"
+```
+
+
+```{r}
+ggplot(viruses, aes(x=hallmark, color=hallmark_color, fill=hallmark_color)) +
+  geom_histogram() +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  scale_color_viridis_d(begin=0.2, end=0.8) +
+  scale_fill_viridis_d(begin=0.2, end=0.8, alpha=0.2) +
+  xlab("VS2 Hallmark Genes")
+```
 
 
 
 
+```{r}
+ggplot(viruses, aes(x=percent_unknown, y=checkv_length)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Percent Unknown") +
+  ylab("Contig Length") +
+  geom_hline(yintercept=50000) +
+  geom_vline(xintercept=75)
+```
 
-
-
+```{r}
+ggplot(viruses, aes(x=percent_viral, y=viral)) +
+  geom_hex(bins = 30) +
+  scale_fill_continuous(type = "viridis", trans="log10") +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  xlab("Percent Viral - CheckV") +
+  ylab("Percent Viral - VirSorter2") +
+  geom_hline(yintercept=50) +
+  geom_vline(xintercept=50)
+```
 
 
 

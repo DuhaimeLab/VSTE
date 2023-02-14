@@ -1,0 +1,346 @@
+---
+title: "Examining False Negatives - Fragments"
+author: Bridget Hegarty, James Riddell
+date: 10-30-2022
+output: html_notebook
+---
+This Rmarkdown file examines the false positives from the output of CheckV, DeepVirFinder, Kaiju,
+VIBRANT, VirSorter, and VirSorter2 on multiple training sets of microbial DNA, 
+primarily from NCBI. Created from fungal, viral, bacterial, archeael, protist,
+and plasmid DNA sequences
+
+Please reach out to James Riddell (riddell.26@buckeyemail.osu.edu) or
+Bridget Hegarty (beh53@case.edu) regarding any issues, or open an issue on github.
+
+```{r setup-library}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(viridis)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(data.table)
+library(pROC)
+```
+
+Import the file that combines the results from each of the tools from running "combining_tool_output.Rmd":
+```{r}
+viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined-fragments.tsv")
+```
+
+
+
+```{r getting_viral_set_1}
+getting_viral_set_1 <- function(input_seqs,
+                                include_vibrant=FALSE, 
+                                include_virsorter2=FALSE,
+                                include_deepvirfinder=FALSE,
+                                include_tuning_viral=FALSE,
+                                tv_1=T, tv_2=T, tv_3=T, tv_4=T,
+                                include_tuning_not_viral=FALSE,
+                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=F,
+                                include_virsorter=FALSE) {
+  
+  keep_score <- rep(0, nrow(input_seqs))
+
+  if (include_vibrant) {
+    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
+  }
+  
+  if (include_virsorter2) {
+    keep_score[input_seqs$max_score>=0.50] <- keep_score[input_seqs$max_score>=0.50] + 0.5
+    keep_score[input_seqs$max_score>=0.95] <- keep_score[input_seqs$max_score>=0.95] + 0.5  
+  }
+  
+  if (include_virsorter) {
+    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
+    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
+    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5 
+    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5 
+  }
+  
+  if (include_deepvirfinder) {
+     # add if DVF calls viral
+    keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
+    keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
+  }
+  
+  if (include_tuning_viral) {
+    keep_score <- tuning_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=tv_1,
+                         include_tv_2=tv_2,
+                         include_tv_3=tv_3,
+                         include_tv_4=tv_4)
+  }
+  
+  if (include_tuning_not_viral) {
+    # tuning removal 
+    keep_score <- tuning_not_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=ntv_1,
+                         include_tv_2=ntv_2,
+                         include_tv_3=ntv_3,
+                         include_tv_4=ntv_4,
+                         include_tv_5=ntv_5)
+   
+  }
+  
+  return(keep_score)
+  
+}
+
+tuning_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[ins$hallmark>2] <- current_score[ins$hallmark>2] + 1
+  }
+  if (include_tv_2) {
+    current_score[ins$Kaiju_Viral=="Viruses" & ins$kaiju_match_ratio>=0.3] <- current_score[ins$Kaiju_Viral=="Viruses" & ins$kaiju_match_ratio>=0.3] + 1
+  }
+    #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
+    #note: having kaiju removal rule didn't help
+  if (include_tv_3) {
+    current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] <- current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] + 0.5
+  }
+  if (include_tv_4) {
+    current_score[ins$viral>=50 | ins$percent_viral>=50] <- current_score[ins$viral>=50 | ins$percent_viral>=50] + 0.5 
+  }
+  return(current_score)
+}
+
+tuning_not_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T,
+                         include_tv_5=F) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[(ins$checkv_host_genes>50) & !ins$provirus] <- 0
+  }
+  if (include_tv_2) {
+    current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] <- current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] - 1
+  }
+  if (include_tv_3) {
+    current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] - 1
+  }
+  if (include_tv_4) {
+    current_score[ins$checkv_length>500000 & ins$hallmark<=1] <- 0
+  }
+  
+  if (include_tv_5) {
+    # remove if DVF calls it not viral
+    current_score[ins$score<=0.7 & ins$pvalue<=0.05] <- current_score[ins$score<=0.7 & ins$pvalue<=0.05] - 1 
+  }
+  
+  return(current_score)
+}
+```
+
+
+```{r}
+viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+```
+
+```{r}
+viruses$confusion_matrix_high_MCC <- "true negative"
+viruses$confusion_matrix_high_MCC[viruses$seqtype=="virus" & viruses$keep_score_high_MCC<1] <- "false negative"
+viruses$confusion_matrix_high_MCC[viruses$seqtype=="virus" & viruses$keep_score_high_MCC>=1] <- "true positive"
+viruses$confusion_matrix_high_MCC[viruses$seqtype!="virus" & viruses$keep_score_high_MCC>=1] <- "false positive"
+```
+
+getting a list of false positive bacteria and plasmids from testing set 1
+```{r}
+fp_bacteria_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="bacteria" &
+                                     viruses$confusion_matrix_high_MCC=="false positive"]
+
+fp_plasmid_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="plasmid" &
+                                     viruses$confusion_matrix_high_MCC=="false positive"]
+
+fp_protist_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="protist" &
+                                     viruses$confusion_matrix_high_MCC=="false positive"]
+
+fp_fungi_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="fungi" &
+                                     viruses$confusion_matrix_high_MCC=="false positive"]
+
+fp_archaea_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="archaea" &
+                                     viruses$confusion_matrix_high_MCC=="false positive"]
+
+tp_virus_list <- viruses$contig[viruses$Index==1 & 
+                                     viruses$seqtype=="virus" &
+                                     viruses$confusion_matrix_high_MCC=="true positive"]
+```
+
+
+vibrant annotations
+```{r}
+annotations_vb <- read_tsv("../ToolOutput/Fragments_Results/VIBRANT_annotations_fractionated_test_set_1.tsv")
+```
+```{r}
+annotations_vb <- separate(annotations_vb, col="scaffold", into=c("seqtype", "contig"),
+                           sep="--")
+annotations_vb$contig <- sub("\\.", "_", annotations_vb$contig)
+```
+
+
+```{r}
+head(annotations_vb)
+```
+```{r}
+table(annotations_vb$contig %in% fp_bacteria_list)
+table(annotations_vb$contig %in% fp_plasmid_list)
+```
+
+```{r}
+annotations_vb_fp <- rbind(annotations_vb[annotations_vb$contig %in% fp_bacteria_list,],
+                           annotations_vb[annotations_vb$contig %in% fp_plasmid_list,],
+                           annotations_vb[annotations_vb$contig %in% tp_virus_list,],
+                           annotations_vb[annotations_vb$contig %in% fp_archaea_list,],
+                           )
+```
+
+```{r}
+annotations_vb_fp
+```
+
+
+```{r}
+annotations_vb_fp_vog_count <- annotations_vb_fp %>%
+  select(contig, VOG, seqtype) %>%
+  group_by(contig, seqtype) %>%
+  summarize(num_vog=table(is.na(VOG))[[1]],
+            prop_vog=table(is.na(VOG))[[1]]/length(VOG),
+            num_orfs=length(VOG))
+```
+
+```{r}
+annotations_vb_fp_vog_count$confusion_matrix <- "false positive"
+annotations_vb_fp_vog_count$confusion_matrix[annotations_vb_fp_vog_count$seqtype=="virus"] <- "true positive"
+```
+
+
+```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+```{r}
+ggplot(annotations_vb_fp_vog_count, 
+       aes(x=seqtype, y=prop_vog, 
+           color=seqtype, fill=seqtype)) +
+  geom_jitter(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Proportion Genes VOGs") +
+  xlab("Sequence Type") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1)) +
+  facet_wrap(~confusion_matrix, scales="free_x")
+```
+```{r}
+t.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="bacteria"],
+       annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="virus"])
+```
+```{r}
+t.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="plasmid"],
+       annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="virus"])
+```
+
+```{r}
+ggplot(annotations_vb_fp_vog_count, 
+       aes(x=num_vog, y=prop_vog, 
+           color=seqtype, fill=seqtype)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Proportion Genes VOGs") +
+  xlab("Number of VOGs") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(4)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(4)), 1))
+```
+
+# Thinking about short protists
+```{r}
+viruses[viruses$confusion_matrix_high_MCC=="false positive" & viruses$seqtype=="protist",]
+
+table(viruses$confusion_matrix_high_MCC[viruses$seqtype=="protist"], 
+      viruses$max_score_group[viruses$seqtype=="protist"])
+
+table(viruses$Kingdom[viruses$seqtype=="protist" &  viruses$confusion_matrix_high_MCC=="false positive"], 
+      viruses$max_score_group[viruses$seqtype=="protist" & viruses$confusion_matrix_high_MCC=="false positive"])
+
+table(viruses$percent_viral[viruses$seqtype=="protist" &  viruses$confusion_matrix_high_MCC=="false positive"]>20, 
+      viruses$max_score_group[viruses$seqtype=="protist" & viruses$confusion_matrix_high_MCC=="false positive"])
+```
+
+```{r}
+ggplot(viruses, aes(y=percent_viral, x=confusion_matrix_high_MCC)) +
+  geom_violin() +
+  geom_point(alpha=0.5) +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") 
+```
+```{r}
+table(viruses$confusion_matrix_high_MCC[viruses$checkv_length>=5000])
+```
+
+```{r}
+ggplot(viruses, aes(y=viral, x=confusion_matrix_high_MCC)) +
+  geom_violin() +
+  geom_point(alpha=0.2) +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") 
+```
+
+
+```{r}
+table(viruses$seqtype)
+```
+
+
+
+
+
+
+

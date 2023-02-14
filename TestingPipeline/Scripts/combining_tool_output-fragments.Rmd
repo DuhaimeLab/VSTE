@@ -1,0 +1,301 @@
+---
+title: "Combining Tool Output - Fragments"
+output: html_notebook
+---
+
+This Rmarkdown file combines the output of CheckV, DeepVirFinder, Kaiju,
+VIBRANT, VirSorter, and VirSorter2 on multiple training sets of microbial DNA, 
+primarily from NCBI. Created from fungal, viral, bacterial, archeael, protist,
+and plasmid DNA sequences
+
+Please reach out to James Riddell (riddell.26@buckeyemail.osu.edu) or
+Bridget Hegarty (beh53@case.edu) regarding any issues, or open an issue on github.
+
+```{r setup-library}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(viridis)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(data.table)
+```
+
+# Inputs
+1) For this script's inputs, the user must merge each viral identification 
+tool output file into one tab-separated file. 
+Replace the filenames with their paths if needed into the variables in the 
+'inputs' chunk.
+
+    General filenames for each tool:
+        Checkv: quality_summary.tsv
+        VIBRANT: VIBRANT_genome_quality_${assembly}.tsv
+        Virsorter: VIRSorter_global-phage-signal.csv
+        Virsorter2: final-viral-score.tsv
+        DeepVirFinder: ${assembly}.fasta_gt2500bp_dvfpred.txt
+        Kaiju: ${assembly}.kaiju.names.out
+
+2) Make sure all fasta headers (assembly, contig) are consistent within and
+across tools. Chunks for each tool do contain some lines for cleaning up these 
+features, but due to their variability it will be the user's responsibility to 
+make sure they match across tools.
+
+3) Check each chunk and ensure all columns are accounted for.
+
+4) This script is designed for contigs > 3000 basepairs. It can be modified
+to be higher or lower, but going lower will greatly increase the size of the
+dataframe and memory usage.
+
+5) This script only keeps each fragment once. This has two purposes: (1) it 
+deals with the duplicate entries for fragments labeled as "complete" (the second
+entry gives the quality); (2) it keeps only one instance of sequences that have
+multiple viral fragments on them.
+
+```{r inputs}
+# dataset name for file organization and outputs for metrics file
+dataset_name <- "testing_set-fragments"
+# checkV
+checkV_path <- "../ToolOutput/Fragments_Results/merged_checkv_assemblies.tsv"
+# VIBRANT
+vibrant_path <- "../ToolOutput/Fragments_Results/merged_vibrant_assemblies.tsv"
+# DeepVirFinder
+dvf_path <- "../ToolOutput/Fragments_Results/merged_dvf_assemblies.tsv"
+# Virsorter
+vs_path <- "../ToolOutput/Fragments_Results/merged_virsorter_assemblies.tsv"
+# Virsorter2
+vs2_path <- "../ToolOutput/Fragments_Results/merged_vs2_assemblies.tsv"
+# Kaiju
+kj_path <- "../ToolOutput/Fragments_Results/merged_kaiju_assemblies.tsv"
+# KB cutoff
+KB_CUTOFF <- 3000
+```
+
+# All Viral Contigs
+
+## checkV
+```{r}
+checkV <- fread(checkV_path, 
+                sep="\t",
+                header = T, 
+                select = c(
+                    'index',
+                    'contig_id',
+                    'provirus',
+                    'completeness',
+                    'contamination',
+                    'viral_genes',
+                    'host_genes',
+                    'gene_count',
+                    'contig_length',
+                    'checkv_quality'
+                    )
+                ) %>% 
+    rename(
+        Index = index,
+        contig = contig_id,
+        checkv_provirus = provirus,
+        checkv_completeness = completeness,
+        checkv_contamination = contamination,
+        checkv_viral_genes = viral_genes,
+        checkv_host_genes = host_genes,
+        checkv_total_genes = gene_count,
+        checkv_length = contig_length
+        )
+checkV$method = 'checkv'
+checkV <- separate(checkV, col = contig, into = c("seqtype", "contig"), sep="--")
+checkV$contig <- sub("\\.", "_", checkV$contig)
+checkV$contig <- sub("\\|", "_", checkV$contig)
+checkV <- checkV[!duplicated(paste(checkV$contig, checkV$Index)),]
+```
+
+## VIBRANT
+```{r}
+vb_c <- fread(vibrant_path,
+              header = T,
+              sep = "\t",
+              select = c(
+                  'index',
+                  'scaffold',
+                  'type',
+                  'Quality'
+                  )
+              ) %>%
+    rename(
+        Index = index,
+        contig = scaffold,
+        vibrant_quality = Quality
+        )
+vb_c$method <- "vibrant"
+vb_c$vibrant_prophage <- "No"
+vb_c$vibrant_prophage[grep("_fragment_", vb_c$contig)] <- "Yes"
+vb_c <- separate(vb_c, col = contig, into = c("seqtype", "contig"), sep="--")
+vb_c$contig <- gsub("_fragment_.*", "", vb_c$contig)
+vb_c$contig <- sub("\\.", "_", vb_c$contig)
+vb_c <- separate(vb_c, col=contig, into="contig", remove=T, sep = " ")
+vb_c <- vb_c[!duplicated(paste(vb_c$contig, vb_c$Index)),]
+```
+
+## DeepVirFinder
+```{r}
+dvf_c <- fread(dvf_path,
+               header = T,
+               sep = "\t",
+               select = c(
+                   'index',
+                   'name',
+                   'score',
+                   'pvalue'
+                   )
+               ) %>% 
+    rename(
+        Index = index,
+        contig = name
+        )
+dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
+dvf_c <- separate(dvf_c, col = contig, into = c("seqtype", "contig"), sep="--")
+dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method="BH")
+dvf_c <- dvf_c[!duplicated(paste(dvf_c$contig, dvf_c$Index)),]
+```
+
+## VirSorter
+```{r}
+vs_c <- fread(vs_path,
+              select = c(
+                  '## Contig_id',
+                  'Category'
+                  )
+              ) %>% 
+    rename(
+        contig = '## Contig_id',
+        category = Category,
+        )
+vs_c <- vs_c[!grep("#", vs_c$contig),]
+vs_c <- separate(vs_c, col = `contig`, into = c("Index", "type", "contig"), sep="--")
+vs_c$seqtype <- sub("VIRSorter_", "", vs_c$type)
+vs_c$contig <- sub("\\.", "_", vs_c$contig)
+vs_c <- vs_c %>% drop_na(contig)
+vs_c <- vs_c[!duplicated(paste(vs_c$contig, vs_c$Index)),]
+vs_c$Index <- as.numeric(vs_c$Index)
+vs_c$category <- as.numeric(vs_c$category)
+```
+
+
+## VirSorter2 
+```{r}
+vs2_c <- fread(vs2_path,
+                    header = T,
+                    sep = '\t',
+                    select = c(
+                        'index',
+                        'seqname',
+                        'dsDNAphage',
+                        'ssDNA',
+                        'NCLDV',
+                        'RNA',
+                        'lavidaviridae',
+                        'max_score',
+                        'max_score_group',
+                        'hallmark',
+                        'viral',
+                        'cellular'
+                    )
+               ) %>% 
+            rename(
+                Index = index
+            ) %>%
+              separate(
+                  col = seqname,
+                  into = c("contig", "vs2type"), 
+                  sep = "\\|\\|",
+                  remove = T
+                  )
+vs2_c$contig <- sub("\\.", "_", vs2_c$contig)
+vs2_c <- separate(vs2_c, col = contig, into = c("seqtype", "contig"), sep="--")
+vs2_c <- vs2_c[!duplicated(paste(vs2_c$contig, vs2_c$Index)),]
+```
+
+
+## Kaiju 
+```{r}
+kj_c <- read_tsv(kj_path, col_names = T)
+colnames(kj_c)[2] <- "Contig"
+colnames(kj_c)[ncol(kj_c)] <- "Index"
+kj_c$Contig <- sub("\\.", "_", kj_c$Contig)
+kj_c <- separate(kj_c, col = Contig, into = c("seqtype", "contig"), sep="--")
+kj_c <- separate(kj_c, col = taxonomy, into = c("Kaiju_Viral","Kingdom"), sep=";")
+kj_c$contig <- sub("\\.", "_", kj_c$contig)
+kj_c <- kj_c[!duplicated(paste(kj_c$contig, kj_c$Index)),]
+```
+
+## Merging
+```{r}
+viruses <- full_join(x=checkV, y=kj_c, by = c("Index", "contig", "seqtype"))
+viruses <- full_join(x=viruses, y=dvf_c, by = c("Index", "contig", "seqtype"))
+viruses <- full_join(x=viruses, y=vb_c, by = c("Index", "contig", "seqtype"))
+viruses <- full_join(x=viruses, y=vs_c, by = c("Index", "contig", "seqtype"))
+viruses <- full_join(x=viruses, y=vs2_c, by = c("Index", "contig", "seqtype"))
+```
+
+Remove contigs not greater than the basepair length cutoff (3000)
+```{r}
+viruses <- viruses %>% filter(checkv_length > KB_CUTOFF)
+```
+
+
+Use the next code chunk to check if any contigs are missing from checkv.
+If yes, then there is a mix up in contig names since checkv should contain
+all contig names even if they are identified as non-viral.
+```{r}
+v_missing <- viruses[is.na(viruses$checkv_uniq_contig),]
+```
+
+calculate percent viral/host/unknown
+```{r}
+viruses$percent_host <- viruses$checkv_host_genes/viruses$checkv_total_genes*100
+viruses$percent_viral <- viruses$checkv_viral_genes/viruses$checkv_total_genes*100
+viruses$percent_unknown <- 100-(viruses$checkv_host_genes+viruses$checkv_viral_genes)/viruses$checkv_total_genes*100
+```
+
+get rid of NAs for downstream processing
+```{r}
+# checkV
+viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
+viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
+viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
+
+# VIBRANT
+viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
+
+# DeepVirFinder
+viruses$score[is.na(viruses$score)] <- 0
+viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
+viruses$pvalue[is.na(viruses$pvalue)] <- 0
+
+# VirSorter2
+viruses$max_score[is.na(viruses$max_score)] <- 0
+viruses$viral[is.na(viruses$viral)] <- 0
+viruses$hallmark[is.na(viruses$hallmark)] <- 0
+viruses$RNA[is.na(viruses$RNA)] <- 0
+viruses$lavidaviridae[is.na(viruses$lavidaviridae)] <- 0
+viruses$NCLDV[is.na(viruses$NCLDV)] <- 0
+viruses$ssDNA[is.na(viruses$ssDNA)] <- 0
+viruses$dsDNAphage[is.na(viruses$dsDNAphage)] <- 0
+viruses$max_score[is.na(viruses$max_score)] <- 0
+
+#Virsorter
+viruses$category[is.na(viruses$category)] <- 0
+
+# Kaiju
+viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
+viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
+
+#adding a combined provirus category
+viruses$provirus <- FALSE
+viruses$provirus[viruses$checkv_provirus=="Yes" | viruses$vibrant_prophage=="Yes" | viruses$category==4] <- TRUE
+```
+
+```{r}
+write_tsv(viruses, "../IntermediaryFiles/viral_tools_combined-fragments.tsv")
+```

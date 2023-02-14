@@ -292,6 +292,20 @@ ggplot(viruses, aes(y=percent_viral, x=confusion_matrix_high_MCC)) +
 table(viruses$confusion_matrix_high_MCC[viruses$checkv_length>=5000])
 ```
 
+# Just looking at the protists getting wrong
+
+```{r}
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
+```
+
+
+```{r}
+ggplot(viruses, aes(y=kaiju_match_ratio, x=seqtype)) +
+  geom_boxplot() +
+  geom_point() +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") 
+```
 
 
 

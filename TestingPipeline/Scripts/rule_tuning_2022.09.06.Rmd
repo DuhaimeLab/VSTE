@@ -25,10 +25,268 @@ library(pROC)
 library("stringr")
 ```
 
+# 2023.01.15 Testing
+
 Import the file that combines the results from each of the tools from running "combining_tool_output.Rmd":
 ```{r}
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
+
+```{r}
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
+```
+
+```{r getting_viral_set_1}
+getting_viral_set_1 <- function(input_seqs,
+                                include_vibrant=FALSE, 
+                                include_virsorter2=FALSE,
+                                include_deepvirfinder=FALSE,
+                                include_tuning_viral=FALSE,
+                                tv_1=T, tv_2=T, tv_3=T, tv_4=T,
+                                include_tuning_not_viral=FALSE,
+                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=F, ntv_6=T,
+                                include_virsorter=FALSE) {
+  
+  keep_score <- rep(0, nrow(input_seqs))
+
+  if (include_vibrant) {
+    keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
+  }
+  
+  if (include_virsorter2) {
+    keep_score[input_seqs$max_score>=0.50] <- keep_score[input_seqs$max_score>=0.50] + 0.5
+    keep_score[input_seqs$max_score>=0.95] <- keep_score[input_seqs$max_score>=0.95] + 0.5  
+  }
+  
+  if (include_virsorter) {
+    keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
+    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
+    keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
+    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5 
+    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5 
+  }
+  
+  if (include_deepvirfinder) {
+     # add if DVF calls viral
+    keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
+    keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
+  }
+  
+  if (include_tuning_viral) {
+    keep_score <- tuning_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=tv_1,
+                         include_tv_2=tv_2,
+                         include_tv_3=tv_3,
+                         include_tv_4=tv_4,
+                         include_tv_5=tv_5)
+  }
+  
+  if (include_tuning_not_viral) {
+    # tuning removal 
+    keep_score <- tuning_not_viral(current_score=keep_score,
+                               ins=input_seqs,
+                         include_tv_1=ntv_1,
+                         include_tv_2=ntv_2,
+                         include_tv_3=ntv_3,
+                         include_tv_4=ntv_4,
+                         include_tv_5=ntv_5,
+                         include_tv_6=ntv_6)
+   
+  }
+  
+  return(keep_score)
+  
+}
+
+tuning_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[ins$hallmark>2] <- current_score[ins$hallmark>2] + 1
+  }
+  if (include_tv_2) {
+    current_score[ins$Kaiju_Viral=="Viruses" & ins$kaiju_match_ratio>=0.3] <- current_score[ins$Kaiju_Viral=="Viruses" & ins$kaiju_match_ratio>=0.3] + 1
+  }
+    #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
+    #note: having kaiju removal rule didn't help
+  if (include_tv_3) {
+    current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] <- current_score[ins$percent_unknown>=75 & ins$checkv_length<50000] + 0.5
+  }
+  if (include_tv_4) {
+    current_score[ins$viral>=50 | ins$percent_viral>=50] <- current_score[ins$viral>=50 | ins$percent_viral>=50] + 0.5 
+  }
+  return(current_score)
+}
+
+tuning_not_viral <- function(current_score, ins, 
+                         include_tv_1=T,
+                         include_tv_2=T,
+                         include_tv_3=T,
+                         include_tv_4=T,
+                         include_tv_5=F,
+                         include_tv_6=F) {
+    # tuning addition
+  if (include_tv_1) {
+    current_score[(ins$checkv_host_genes>50) & !ins$provirus] <- 0
+  }
+  if (include_tv_2) {
+    current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] <- current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] - 1
+  }
+  if (include_tv_3) {
+    current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] - 1
+  }
+  if (include_tv_4) {
+    current_score[ins$checkv_length>500000 & ins$hallmark<=1] <- 0
+  }
+  #if (include_tv_5) {
+  #  current_score[(ins$checkv_completeness<=75) & ins$checkv_length<=5000] <- current_score[(ins$checkv_completeness<=75) & ins$checkv_length<=5000] - 0.5 
+  #}
+  
+  if (include_tv_6) {
+    # remove if DVF calls it not viral
+    current_score[ins$score<=0.7 & ins$pvalue<=0.05] <- current_score[ins$score<=0.7 & ins$pvalue<=0.05] - 1 
+  }
+  
+  return(current_score)
+}
+```
+
+getting a 3kb set, equal virus and not virus
+```{r}
+set.seed(32)
+
+viruses_3to5kb <- viruses[viruses$checkv_length <= 5000,]
+
+viruses_3to5kb <- rbind(viruses_3to5kb[sample(grep("archaea", viruses_3to5kb$seqtype), size=100),],
+                        viruses_3to5kb[sample(grep("bacteria", viruses_3to5kb$seqtype), size=100),],
+                        viruses_3to5kb[sample(grep("fungi", viruses_3to5kb$seqtype), size=100),],
+                        viruses_3to5kb[sample(grep("plasmid", viruses_3to5kb$seqtype), size=100),],
+                        viruses_3to5kb[sample(grep("protist", viruses_3to5kb$seqtype), size=100),],
+                        viruses_3to5kb[sample(grep("virus", viruses_3to5kb$seqtype), size=500),])
+```
+
+```{r}
+table(viruses_3to5kb$seqtype)
+```
+
+## visualizing a select set of tools
+```{r}
+viruses_3to5kb$keep_score_high_all <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+viruses_3to5kb$keep_score_high_recall <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = T,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+viruses_3to5kb$keep_score_high_precision <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+viruses_3to5kb$keep_score_high_MCC <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+viruses_3to5kb$keep_score_high_vs2 <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses_3to5kb$true_virus <- "not"
+viruses_3to5kb$true_virus[viruses_3to5kb$seqtype=="virus"] <- "virus"
+
+viruses_long_scores <- viruses_3to5kb %>% 
+  select(contains("keep_score_high"), true_virus) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, true_virus) %>%
+  summarise(n = n())
+```
+
+```{r}
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~true_virus, scales = "free")
+```
+```{r}
+table(viruses_3to5kb$seqtype, viruses_3to5kb$keep_score_high_vs2)
+table(viruses_3to5kb$seqtype, viruses_3to5kb$keep_score_high_recall)
+table(viruses_3to5kb$seqtype, viruses_3to5kb$keep_score_high_MCC)
+```
+
+```{r}
+viruses_3to5kb$keep_score_tnv <- getting_viral_set_1(viruses_3to5kb, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+```{r}
+table(viruses_3to5kb$seqtype, viruses_3to5kb$keep_score_tnv)
+```
+
+note: after these results, pulled up some of the protists in NCBI and they had 
+the following error: "This record was removed as a result of standard genome annotation processing. Please see www.ncbi.nlm.nih.gov/genome/annotation_euk/process/ for more information."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Prior to 2023.01.15
+
+Import the file that combines the results from each of the tools from running "combining_tool_output.Rmd":
+```{r}
+viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
+```
+
+```{r}
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
+```
+
+
 (this is still the old rules)
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
@@ -118,7 +376,7 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_tuning_viral) {
   # tuning addition
     keep_score[input_seqs$hallmark>2] <- keep_score[input_seqs$hallmark>2] + 1
-    keep_score[input_seqs$Kaiju_Viral=="Viruses"] <- keep_score[input_seqs$Kaiju_Viral=="Viruses"] + 1
+    keep_score[input_seqs$Kaiju_Viral=="Viruses" & input_seqs$kaiju_match_ratio>=0.5] <- keep_score[input_seqs$Kaiju_Viral=="Viruses" & input_seqs$kaiju_match_ratio>=0.5] + 1
     #note: had tried pulling out this rule, but better recall without sacrificing precision with it in
     #note: having kaiju removal rule didn't help
     keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] <- keep_score[input_seqs$percent_unknown>=75 & input_seqs$checkv_length<50000] + 0.5
@@ -288,6 +546,9 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
   facet_grid(~true_virus, scales = "free")
 ```
 
+```{r}
+viruses <- viruses_3to5kb
+```
 
 
 # Assessing performance against the "truth"
@@ -2673,3 +2934,30 @@ ggplot(confusion_by_keep_score, aes(x=confusion_matrix, y=n,
   facet_wrap(~pipeline_type, scales = "free")
 
 ```
+
+```{r}
+ggplot(viruses, aes(x=checkv_completeness, y=checkv_contamination, 
+                                  color=confusion_matrix_high_MCC, fill=confusion_matrix_high_MCC)) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Contamination") +
+  xlab("Completeness") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(6)), 1)) +
+  facet_wrap(~seqtype)
+```
+
+
+
