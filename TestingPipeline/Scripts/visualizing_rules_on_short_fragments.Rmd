@@ -285,7 +285,7 @@ accuracy_scores <- accuracy_scores[order(accuracy_scores$precision, decreasing=F
 accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
-                                  color=numrules, fill=numrules)) +
+                                  color=as.factor(numrules), fill=numrules)) +
   geom_point(alpha=0.5) +
   theme_light() +
   theme(
@@ -937,5 +937,4 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
   ylab("Number of Sequences") + 
   facet_grid(~seqtype, scales = "free")
 ```
-
 
