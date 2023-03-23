@@ -536,6 +536,7 @@ TukeyHSD(one.way)
 ```
 
 ```{r}
+accuracy_scores$numrules <- as.factor(accuracy_scores$numrules)
 one.way <- aov(MCC ~ numrules, data = accuracy_scores)
 
 summary(one.way)

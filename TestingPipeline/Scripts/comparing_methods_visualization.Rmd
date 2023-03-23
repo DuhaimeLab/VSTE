@@ -872,6 +872,51 @@ rownames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
 viral_scores_two_comb
 ```
 
+comparing VS and VS2 viruses
+```{r}
+vs2_vs <- data.frame(vs2=viral_scores_two[,1],
+                     vs=viral_scores_two[,2],
+                     comb_score=viral_scores_two[,1]+viral_scores_two[,2],
+                     seqtype=viruses$seqtype,
+                     max_score_group=viruses$max_score_group)
+
+vs2_vs$comb[vs2_vs$comb_score<1] <- "neither"
+vs2_vs$comb[vs2_vs$vs2==0.5 & vs2_vs$vs==0.5] <- "both_low"
+vs2_vs$comb[vs2_vs$vs2>=1 & vs2_vs$vs==0.5] <- "vs2_high_vs_low"
+vs2_vs$comb[vs2_vs$vs2>=0.5 & vs2_vs$vs>=1] <- "vs2_low_vs_high"
+vs2_vs$comb[vs2_vs$vs2>=1 & vs2_vs$vs==0] <- "vs2_only"
+vs2_vs$comb[vs2_vs$vs2==0 & vs2_vs$vs>=1] <- "vs_only"
+vs2_vs$comb[vs2_vs$vs2>=1 & vs2_vs$vs>=1] <- "both_high"
+
+#vs2_vb$true_virus <- "not"
+#vs2_vb$true_virus[vs2_vb$seqtype=="virus"] <- "virus"
+
+vs2_vs_seqtype <- vs2_vs %>% 
+  group_by(comb, comb_score, seqtype) %>%
+  summarise(n = n())
+```
+
+```{r}
+table(vs2_vs$comb)
+```
+
+```{r}
+ggplot(vs2_vs_seqtype, aes(y=n, x=comb,
+                   fill=as.factor(comb_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~seqtype, scales = "free")
+```
+
 comparing VS2 and VIBRANT viruses
 ```{r}
 vs2_vb <- data.frame(vs2=viral_scores_two[,1],
@@ -892,12 +937,29 @@ vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb>=1] <- "both_high"
 #vs2_vb$true_virus[vs2_vb$seqtype=="virus"] <- "virus"
 
 vs2_vb_seqtype <- vs2_vb %>% 
-  group_by(comb, comb_score, seqtype, max_score_group) %>%
+  group_by(comb, comb_score, seqtype) %>%
   summarise(n = n())
 ```
 
 ```{r}
 table(vs2_vb$comb)
+```
+
+```{r}
+ggplot(vs2_vb_seqtype, aes(y=n, x=comb,
+                   fill=as.factor(comb_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~seqtype, scales = "free")
 ```
 
 ```{r}
