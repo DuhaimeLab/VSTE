@@ -3,7 +3,7 @@ title: "Comparing to VS2 SOP"
 output: html_notebook
 ---
 
-# VS2 SOP testing
+# VS2 SOP testing of version 2 and 3
 
 ```{r setup-library}
 library(ggplot2)
@@ -23,14 +23,35 @@ Import the file that combines the results from each of the tools from running "c
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 ```
 
-```{r virsorter2_SOP}
-virsorter2_SOP <- function(input_seqs) {
+```{r virsorter2_SOP v2}
+virsorter2_SOP2 <- function(input_seqs) {
+  keep_score <- rep(0, nrow(input_seqs))
+  # Keep: viral_gene >0 OR score >=0.95 OR hallmark >2 OR (viral_gene =0 AND host_gene =0)
+  keep_score[(input_seqs$checkv_viral_genes > 0) |
+             (input_seqs$max_score >=0.95) |
+             (input_seqs$hallmark > 2) |
+             ((input_seqs$checkv_viral_genes == 0) & (input_seqs$checkv_host_genes == 0))] <- 1
+  # discard viral_gene =0 AND host_gene >1 OR (viral_gene =0 AND host_gene =1 AND length <10kb)
+  keep_score[(input_seqs$checkv_viral_genes == 0) & 
+             (input_seqs$checkv_host_genes > 1) |
+             ((input_seqs$checkv_viral_genes == 0) & (input_seqs$checkv_host_genes == 1) & (input_seqs$checkv_length < 10000))] <- 0
+  # Manual check: (NOT in Keep1 OR Keep2) AND viral_gene =0 AND host_gene =1 AND length >=10kb
+  keep_score[(input_seqs$checkv_viral_genes == 0) & (input_seqs$checkv_host_genes == 1) & (input_seqs$checkv_length >= 10000)] <- 0.5
+  # implied by starting with zero matrix, unchanged will stay zero
+
+  return(keep_score)
+}
+
+```
+
+```{r virsorter2_SOP v3}
+virsorter2_SOP3 <- function(input_seqs) {
   keep_score <- rep(0, nrow(input_seqs))
   # Keep1: viral_gene >0
   keep_score[input_seqs$checkv_viral_genes > 0] <- 1
   
   # Keep2: viral_gene =0 AND (host_gene =0 OR score >=0.95 OR hallmark >2)
-  keep_score[(input_seqs$checkv_viral_genes == 0) & ((input_seqs$checkv_host_genes == 0) | (input_seqs$max_score >=0.95) | (input_seqs$hallmark > 2))] <- 1
+  keep_score[(input_seqs$checkv_viral_genes == 0) & ((input_seqs$checkv_host_genes == 0) | (input_seqs$max_score >=0.95) | (input_seqs$hallmark > 2))] <- 0.75
   
   # Manual check: (NOT in Keep1 OR Keep2) AND viral_gene =0 AND host_gene =1 AND length >=10kb
   keep_score[!(input_seqs$checkv_viral_genes > 0) & !((input_seqs$checkv_viral_genes == 0) & ((input_seqs$checkv_host_genes == 0) | (input_seqs$max_score >=0.95) | (input_seqs$hallmark > 2))) & (input_seqs$checkv_viral_genes == 0) & (input_seqs$checkv_host_genes == 1) & (input_seqs$checkv_length > 10000)] <- 0.5
@@ -44,35 +65,83 @@ virsorter2_SOP <- function(input_seqs) {
 ```
 
 ```{r}
-viruses$keep_score_virsorter2_SOP <- virsorter2_SOP(viruses)
+viruses$keep_score_virsorter2_SOP3 <- virsorter2_SOP3(viruses)
+viruses$keep_score_virsorter2_SOP2 <- virsorter2_SOP2(viruses)
 ```
 
 ```{r}
-viruses$confusion_matrix_vs2_sop <- "true negative"
-viruses$confusion_matrix_vs2_sop[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP<1] <- "false negative"
-viruses$confusion_matrix_vs2_sop[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP>=1] <- "true positive"
-viruses$confusion_matrix_vs2_sop[viruses$seqtype!="virus" & viruses$keep_score_virsorter2_SOP>=1] <- "false positive"
+viruses$confusion_matrix_vs2_sop2 <- "true negative"
+viruses$confusion_matrix_vs2_sop2[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP2<1] <- "false negative"
+viruses$confusion_matrix_vs2_sop2[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP2>=1] <- "true positive"
+viruses$confusion_matrix_vs2_sop2[viruses$seqtype!="virus" & viruses$keep_score_virsorter2_SOP2>=1] <- "false positive"
 
-viruses$accurate_vs2_SOP <- "false"
-viruses$accurate_vs2_SOP[grep("true", viruses$confusion_matrix_vs2_sop)] <- "true"
+viruses$accurate_vs2_SOP2 <- "false"
+viruses$accurate_vs2_SOP2[grep("true", viruses$confusion_matrix_vs2_sop2)] <- "true"
 ```
+
+```{r}
+viruses$confusion_matrix_vs2_sop3 <- "true negative"
+viruses$confusion_matrix_vs2_sop3[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP3<1] <- "false negative"
+viruses$confusion_matrix_vs2_sop3[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP3>=1] <- "true positive"
+viruses$confusion_matrix_vs2_sop3[viruses$seqtype!="virus" & viruses$keep_score_virsorter2_SOP3>=1] <- "false positive"
+
+viruses$accurate_vs2_SOP3 <- "false"
+viruses$accurate_vs2_SOP3[grep("true", viruses$confusion_matrix_vs2_sop3)] <- "true"
+```
+
+```{r}
+# investigate keep2
+keep2 = viruses[viruses$keep_score_virsorter2_SOP3 == 0.75,]
+nrow(keep2)
+```
+```{r}
+length(grep("virus", keep2$seqtype))
+```
+
+assume keep2 (0.75) and manual curation (0.5) has 100% accuracy to avoid having to check with DRAM v since it represents a small portion of the sequences
+
+```{r}
+viruses$confusion_matrix_vs2_keep2 <- "true negative"
+viruses$confusion_matrix_vs2_keep2[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP3<1] <- "false negative"
+viruses$confusion_matrix_vs2_keep2[viruses$seqtype=="virus" & viruses$keep_score_virsorter2_SOP3>=1] <- "true positive"
+viruses$confusion_matrix_vs2_keep2[viruses$seqtype!="virus" & viruses$keep_score_virsorter2_SOP3>=1] <- "false positive"
+viruses$confusion_matrix_vs2_keep2[viruses$keep_score_virsorter2_SOP3==0.75] <- "true positive"
+viruses$confusion_matrix_vs2_keep2[viruses$keep_score_virsorter2_SOP3==0.5] <- "true positive"
+
+viruses$accurate_vs2_keep2 <- "false"
+viruses$accurate_vs2_keep2[grep("true", viruses$confusion_matrix_vs2_keep2)] <- "true"
+```
+
 
 accuracy:
 ```{r}
-length(grep("true", viruses$accurate_vs2_SOP))/nrow(viruses)
+length(grep("true", viruses$accurate_vs2_SOP2))/nrow(viruses)
+```
+```{r}
+length(grep("true", viruses$accurate_vs2_SOP3))/nrow(viruses)
 ```
 
 precision
 ```{r}
-length(grep("true positive", viruses$confusion_matrix_vs2_sop))/length(grep("positive", viruses$confusion_matrix_vs2_sop))
+length(grep("true positive", viruses$confusion_matrix_vs2_sop2))/length(grep("positive", viruses$confusion_matrix_vs2_sop2))
+```
+```{r}
+length(grep("true positive", viruses$confusion_matrix_vs2_sop3))/length(grep("positive", viruses$confusion_matrix_vs2_sop3))
+```
+```{r}
+length(grep("true positive", viruses$confusion_matrix_vs2_keep2))/length(grep("positive", viruses$confusion_matrix_vs2_keep2))
 ```
 
 recall
 ```{r}
-length(grep("true positive", viruses$confusion_matrix_vs2_sop))/(length(grep("true positive", viruses$confusion_matrix_vs2_prsop))+length(grep("false negative", viruses$confusion_matrix_vs2_sop)))
+length(grep("true positive", viruses$confusion_matrix_vs2_sop2))/(length(grep("true positive", viruses$confusion_matrix_vs2_sop2))+length(grep("false negative", viruses$confusion_matrix_vs2_sop2)))
 ```
-
-
+```{r}
+length(grep("true positive", viruses$confusion_matrix_vs2_sop3))/(length(grep("true positive", viruses$confusion_matrix_vs2_sop3))+length(grep("false negative", viruses$confusion_matrix_vs2_sop3)))
+```
+```{r}
+length(grep("true positive", viruses$confusion_matrix_vs2_keep2))/(length(grep("true positive", viruses$confusion_matrix_vs2_keep2))+length(grep("false negative", viruses$confusion_matrix_vs2_keep2)))
+```
 
 
 
