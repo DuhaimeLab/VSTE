@@ -215,7 +215,7 @@ kj_c <- kj_c[!duplicated(kj_c$contig),]
 
 ## Merging
 ```{r}
-viruses <- left_join(x=vs2_c, y=checkV, by = c("contig"))
+viruses <- left_join(x=checkV, y=vs2_c, by = c("contig"))
 viruses <- left_join(x=viruses, y=dvf_c, by = c("contig", "assembly"))
 viruses <- left_join(x=viruses, y=vb_c, by = c("contig"))
 viruses <- left_join(x=viruses, y=vs_c, by = c("contig"))
@@ -280,6 +280,7 @@ viruses$category[is.na(viruses$category)] <- 0
 # Kaiju
 viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
 viruses$Kingdom[is.na(viruses$Kingdom)] <- "unknown"
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
 
 #adding a combined provirus category
 viruses$provirus <- FALSE

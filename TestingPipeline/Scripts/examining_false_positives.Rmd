@@ -43,7 +43,7 @@ includes ecological metrics like alpha diversity.
 You can decide which combination is appropriate for them and only need use the
 tools appropriate for your data.
 
-```{r getting_viral_set_1}
+```{r}
 getting_viral_set_1 <- function(input_seqs,
                                 include_vibrant=FALSE, 
                                 include_virsorter2=FALSE,
@@ -136,23 +136,25 @@ tuning_not_viral <- function(current_score, ins,
                          include_tv_3=T,
                          include_tv_4=T,
                          include_tv_5=F) {
-    # tuning addition
-  if (include_tv_1) {
-    current_score[(ins$checkv_host_genes>50) & !ins$provirus] <- 0
-  }
+    # tuning removal
   if (include_tv_2) {
     current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] <- current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] - 1
   }
   if (include_tv_3) {
     current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] - 1
   }
-  if (include_tv_4) {
-    current_score[ins$checkv_length>500000 & ins$hallmark<=1] <- 0
-  }
   
   if (include_tv_5) {
     # remove if DVF calls it not viral
     current_score[ins$score<=0.7 & ins$pvalue<=0.05] <- current_score[ins$score<=0.7 & ins$pvalue<=0.05] - 1 
+  }
+  
+  if (include_tv_1) {
+    current_score[(ins$checkv_host_genes>50) & !ins$provirus] <- -3
+  }
+  
+  if (include_tv_4) {
+    current_score[ins$checkv_length>500000 & ins$hallmark<=1] <- -3
   }
   
   return(current_score)
@@ -162,11 +164,11 @@ tuning_not_viral <- function(current_score, ins,
 
 ```{r}
 viruses$keep_score_high_MCC <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = T,
+                                              include_vibrant = F,
                                               include_virsorter2 = T,
                                               include_tuning_viral = T,
                                               include_tuning_not_viral = T,
-                                              include_virsorter = T)
+                                              include_virsorter = F)
 ```
 
 ```{r}
