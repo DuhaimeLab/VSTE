@@ -490,8 +490,15 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
 ```
 MCC
 ```{r}
-accuracy_scores <- accuracy_scores[order(accuracy_scores$MCC, decreasing=F),]
-accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+mean_MCC <- accuracy_scores %>% 
+  select(MCC, toolcombo) %>%
+  group_by(toolcombo) %>%
+  summarise(mean = mean(MCC)) %>%
+  arrange(mean)
+```
+
+```{r}
+accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = mean_MCC$toolcombo)
 
 fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numrules, fill=numrules)) +
@@ -550,40 +557,41 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
 
 making heatmap for the x-axis label
 ```{r}
-viruses_1 <- accuracy_scores %>% filter(testing_set_index==1)
-
 ann_col = data.frame(
-    tnv = combos_list$tune_not_viral,
-    tv = combos_list$tune_viral,
+    tnv = combos_list$tune_viral,
+    tv = combos_list$tune_not_viral,
     dvf = combos_list$DVF,
     vb = combos_list$VIBRANT,
     vs = combos_list$VS,
     vs2 = combos_list$VS2
 )
+rownames(ann_col) <- combos_list$toolcombo
 
 ann_colors = list(
-  tnv = c("black", pal(6)[1]),
   tv = c("black", pal(6)[3]),
+  tnv = c("black", pal(6)[1]),
   dvf = c("black", pal(6)[2]),
   vb = c("black", pal(6)[4]),
   vs = c("black", pal(6)[5]),
   vs2 = c("black", pal(6)[6])
 )
 
-rownames(ann_col) <- combos_list$toolcombo
 
-viral_scores_1 <- accuracy_scores %>% filter(testing_set_index==1)
 
-rownames(viral_scores_1) <- viral_scores_1$toolcombo
 
-viral_scores_1 <- viral_scores_1 %>%
-  select(c("MCC"))
+viral_scores_1 <- accuracy_scores %>% filter(testing_set_index==5)
+#viral_scores_1 <- mean_MCC
+#rn <- viral_scores_1$toolcombo
+
+viral_scores_1 <- viral_scores_1 %>% select(c("MCC"))
+#viral_scores_1 <- viral_scores_1 %>% select(c("mean"))
+rownames(viral_scores_1) <- rn
 
 pheatmap::pheatmap(as.matrix(viral_scores_1),
                   annotation_row = ann_col,
                   annotation_colors = ann_colors,
                   border_color = NA,
-                  show_rownames = F,
+                  show_rownames = T,
                   show_colnames = F,
                   annotation_legend = F,
                   cluster_rows = F,
@@ -594,13 +602,6 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 ```
 
 
-
-```{r}
-mean_MCC <- accuracy_scores %>% 
-  select(MCC, toolcombo) %>%
-  group_by(toolcombo) %>%
-  summarise(mean = mean(MCC))
-```
 
 ```{r}
 ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!="MCC",], aes(x=numrules, y=performance_metric_score, 
