@@ -488,9 +488,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vs2==1,], aes(x=as.factor(n
   xlab("Number of Rules") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(rev(pal(6)), 0.3)) +
+                     values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(rev(pal(6)), 0.7))
+                     values = alpha(rev(viridis(6)), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$vs==1,], aes(x=as.factor(numrules), y=proportion, 
                                   color=as.factor(numrules), fill=as.factor(numrules))) +
@@ -510,9 +510,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vs==1,], aes(x=as.factor(nu
   xlab("Number of Rules") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(rev(pal(6)), 0.3)) +
+                     values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(rev(pal(6)), 0.7))
+                     values = alpha(rev(viridis(6)), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$vb==1,], aes(x=as.factor(numrules), y=proportion, 
                                   color=as.factor(numrules), fill=as.factor(numrules))) +
@@ -532,9 +532,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vb==1,], aes(x=as.factor(nu
   xlab("Number of Rules") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(rev(pal(6)), 0.3)) +
+                     values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(rev(pal(6)), 0.7))
+                     values = alpha(rev(viridis(6)), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(numrules), y=proportion, 
                                   color=as.factor(numrules), fill=as.factor(numrules))) +
@@ -554,9 +554,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(n
   xlab("Number of Rules") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(rev(pal(6)), 0.3)) +
+                     values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(rev(pal(6)), 0.7))
+                     values = alpha(rev(viridis(6)), 0.7))
 ```
 
 ```{r}
@@ -584,9 +584,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vs2==1,], aes(x=as.factor(n
   xlab("Number of Tools") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(pal(6), 0.3)) +
+                     values = alpha(viridis(6), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(pal(6), 0.7))
+                     values = alpha(viridis(6), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$vs==1,], aes(x=as.factor(numtools), y=proportion, 
                                   color=as.factor(numtools), fill=as.factor(numtools))) +
@@ -606,9 +606,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vs==1,], aes(x=as.factor(nu
   xlab("Number of Tools") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(pal(6), 0.3)) +
+                     values = alpha(viridis(6), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(pal(6), 0.7))
+                     values = alpha(viridis(6), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$vb==1,], aes(x=as.factor(numtools), y=proportion, 
                                   color=as.factor(numtools), fill=as.factor(numtools))) +
@@ -628,9 +628,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$vb==1,], aes(x=as.factor(nu
   xlab("Number of Tools") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(pal(6), 0.3)) +
+                     values = alpha(viridis(6), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(pal(6), 0.7))
+                     values = alpha(viridis(6), 0.7))
 
 ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(numtools), y=proportion, 
                                   color=as.factor(numtools), fill=as.factor(numtools))) +
@@ -650,9 +650,9 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(n
   xlab("Number of Tools") +
   ylab("Proportion of Contigs in Common") +
   scale_fill_manual(name="",
-                     values = alpha(pal(6), 0.3)) +
+                     values = alpha(viridis(6), 0.3)) +
   scale_color_manual(name="",
-                     values = alpha(pal(6), 0.7))
+                     values = alpha(viridis(6), 0.7))
 ```
 rather than tool against all others, ones against ones, twos against twos...
 

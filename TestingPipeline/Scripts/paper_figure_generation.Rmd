@@ -212,9 +212,9 @@ for (i in c(0,1)){
             combos_list$toolcombo2[p] <- paste(if(i){"tv"}else{"0"},if(j){"DVF"}else{"0"},
                                                if(k){"tnv"}else{"0"},if(l){"VB"}else{"0"},
                                                if(m){"VS"}else{"0"},if(n){"VS2"}else{"0"})
-            combos_list$tune_not_viral[p] <- i
+            combos_list$tune_not_viral[p] <- k
             combos_list$DVF[p] <- j
-            combos_list$tune_viral[p] <- k
+            combos_list$tune_viral[p] <- i
             combos_list$VIBRANT[p] <- l
             combos_list$VS[p] <- m
             combos_list$VS2[p] <- n
@@ -396,9 +396,9 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Precision") +
   scale_fill_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 ```
 
 ```{r}
@@ -430,9 +430,9 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("Recall") +
   scale_fill_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 ```
 
 ```{r}
@@ -462,9 +462,9 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
   xlab("Precision") +
   ylab("Recall") +
   scale_fill_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 
 ggplot(accuracy_scores, aes(x=precision, y=recall, 
                                   color=numtools, fill=numtools)) +
@@ -558,8 +558,8 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
 making heatmap for the x-axis label
 ```{r}
 ann_col = data.frame(
-    tnv = combos_list$tune_viral,
-    tv = combos_list$tune_not_viral,
+    tnv = combos_list$tune_not_viral,
+    tv = combos_list$tune_viral,
     dvf = combos_list$DVF,
     vb = combos_list$VIBRANT,
     vs = combos_list$VS,
@@ -1692,14 +1692,222 @@ pheatmap::pheatmap(prop_high_viruses,
 
 
 
+# numbers in common between two tool combos
+```{r}
+combos_list_two <- combos_list
+combos_list_two$numtools <- str_count(combos_list_two$toolcombo, "1")
+combos_list_two <- combos_list_two[combos_list_two$numtools==1,]
+
+two_tool_pairs <- num_high_viruses[rownames(num_high_viruses) %in% combos_list_two$toolcombo,
+                                   colnames(num_high_viruses) %in% combos_list_two$toolcombo]
+
+colnames(two_tool_pairs) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
+rownames(two_tool_pairs) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
+```
+
+```{r}
+viral_scores_two <- viral_scores[,colnames(num_high_viruses) %in% combos_list_two$toolcombo]
+
+n <- 6
+viral_scores_two_comb <- matrix(data=NA, nrow=n, ncol=n)
+
+for (i in 1:n) {
+  for (j in 1:n) {
+    if (i==j) {
+      viral_scores_two_comb[i,j] <- sum(viral_scores_two[,i]>=1)
+    }
+    else if (i<j) {
+      viral_scores_two_comb[i,j] <- sum((viral_scores_two[,i]+viral_scores_two[,j])>=1)
+    }
+    else if (i>j) {
+      viral_scores_two_comb[i,j] <- paste(round(sum((viral_scores_two[,i]+viral_scores_two[,j])>=1)/sum(viral_scores_two[,i]>=1 | viral_scores_two[,j]>=1)*100, digits=0), "%", sep="")
+    }
+  }
+}
+
+colnames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
+rownames(viral_scores_two_comb) <- c("VS2", "VS", "VB", "tv", "DVF", "tnv")
+```
 
 
+```{r}
+viral_scores_two_comb
+```
+
+comparing VS2 and VIBRANT viruses - Figure S15
+```{r}
+vs2_vb <- data.frame(vs2=viral_scores_two[,1],
+                     vb=viral_scores_two[,3],
+                     comb_score=viral_scores_two[,1]+viral_scores_two[,3],
+                     seqtype=viruses$seqtype,
+                     max_score_group=viruses$max_score_group)
+
+vs2_vb$comb[vs2_vb$comb_score<1] <- "neither"
+vs2_vb$comb[vs2_vb$vs2==0.5 & vs2_vb$vb==0.5] <- "both_low"
+vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb==0.5] <- "vs2_high_vb_low"
+vs2_vb$comb[vs2_vb$vs2>=0.5 & vs2_vb$vb==1] <- "vs2_low_vb_high"
+vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb==0] <- "vs2_only"
+vs2_vb$comb[vs2_vb$vs2==0 & vs2_vb$vb>=1] <- "vb_only"
+vs2_vb$comb[vs2_vb$vs2>=1 & vs2_vb$vb>=1] <- "both_high"
+
+#vs2_vb$true_virus <- "not"
+#vs2_vb$true_virus[vs2_vb$seqtype=="virus"] <- "virus"
+
+vs2_vb_seqtype <- vs2_vb %>% 
+  group_by(comb, comb_score, seqtype) %>%
+  summarise(n = n())
+```
+
+```{r}
+table(vs2_vb$comb)
+```
+
+```{r}
+ggplot(vs2_vb_seqtype, aes(y=n, x=comb,
+                   fill=as.factor(comb_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr", ) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~seqtype, scales = "free")
+```
+
+# overlap in proportion of contigs for tool sets - Figure S16
+
+get number of tools and number of rules for each combination
+```{r}
+ann_col$numrules <- rowSums(ann_col[,1:6])
+ann_col$numtools <- ann_col$numrules
+
+for (i in 1:nrow(ann_col)) {
+  if (ann_col$tv[i]==1) {
+    ann_col$numtools[i] <- ann_col$numtools[i] + 3
+  }
+  
+  if (ann_col$tnv[i]==1) {
+    ann_col$numtools[i] <- ann_col$numtools[i] + 5
+  }
+}
+
+ann_col$numtools[ann_col$numtools>6] <- 6
+
+ann_col$tool <- rownames(ann_col)
+```
+
+```{r}
+prop_high_viruses_long <- as.data.frame(prop_high_viruses)
+prop_high_viruses_long$tool <- combos_list$toolcombo
+
+prop_high_viruses_long <- as.data.frame(prop_high_viruses_long) %>% 
+  pivot_longer(!tool,
+               values_to="proportion",
+               names_to="tool2") %>%
+  inner_join(ann_col, by=c("tool"))
 
 
+```
+
+```{r}
+head(prop_high_viruses_long)
+```
 
 
+```{r}
+ggplot(prop_high_viruses_long[prop_high_viruses_long$vs2==1,], aes(x=as.factor(numrules), y=proportion, 
+                                  color=as.factor(numrules), fill=as.factor(numrules))) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Rules") +
+  ylab("Proportion of Contigs in Common") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.3)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.7))
 
+ggplot(prop_high_viruses_long[prop_high_viruses_long$vs==1,], aes(x=as.factor(numrules), y=proportion, 
+                                  color=as.factor(numrules), fill=as.factor(numrules))) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Rules") +
+  ylab("Proportion of Contigs in Common") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.3)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.7))
 
+ggplot(prop_high_viruses_long[prop_high_viruses_long$vb==1,], aes(x=as.factor(numrules), y=proportion, 
+                                  color=as.factor(numrules), fill=as.factor(numrules))) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Rules") +
+  ylab("Proportion of Contigs in Common") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.3)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.7))
+
+ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(numrules), y=proportion, 
+                                  color=as.factor(numrules), fill=as.factor(numrules))) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Number of Rules") +
+  ylab("Proportion of Contigs in Common") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.3)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.7))
+```
 
 
 
