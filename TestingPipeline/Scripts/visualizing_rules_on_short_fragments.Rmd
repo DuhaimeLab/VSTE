@@ -29,6 +29,19 @@ Import the file that combines the results from each of the tools from running "c
 ```{r}
 viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined-fragments.tsv")
 ```
+```{r}
+viruses$kaiju_match_ratio_color <- "less than 0.3"
+viruses$kaiju_match_ratio[viruses$kaiju_match_ratio>=0.3] <- "greater than or equal to 0.3"
+
+ggplot(viruses, aes(x=kaiju_match_ratio, color=kaiju_match_ratio_color, fill=kaiju_match_ratio_color)) +
+  geom_histogram() +
+  theme_bw() +
+  facet_wrap(~seqtype, scales = "free") +
+  #scale_color_viridis_d(begin=0.2, end=0.8) +
+  #scale_fill_viridis_d(begin=0.2, end=0.8, alpha=0.2) +
+  xlab("Kaiju Match Ratio")
+```
+
 
 ```{r getting_viral_set_1}
 getting_viral_set_1 <- function(input_seqs,

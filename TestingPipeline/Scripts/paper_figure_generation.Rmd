@@ -1511,6 +1511,62 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                             "DeepVirFinder")))
 ```
 
+## visualizing a select set of tools
+```{r}
+viruses$keep_score_high_tv_tnv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+viruses$keep_score_high_tv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$true_virus <- "not"
+viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
+
+viruses$tv_vs_tv_ntv <- "not tv"
+viruses$tv_vs_tv_ntv[viruses$keep_score_high_tv>=1 & viruses$keep_score_high_tv_tnv>=1] <- "tnv_preserved"
+viruses$tv_vs_tv_ntv[viruses$keep_score_high_tv>=1 & viruses$keep_score_high_tv_tnv<1] <- "tnv lost"
+
+table(viruses$tv_vs_tv_ntv, viruses$true_virus)
+
+viruses_long_scores <- viruses %>% 
+  select(contains("keep_score_high"), true_virus) %>%
+  pivot_longer(cols=contains("keep_score_"), 
+               names_to="rule_combination",
+               values_to="viral_score") %>% 
+  mutate(viral_score=as.factor(round(viral_score))) %>%
+  group_by(rule_combination, viral_score, true_virus) %>%
+  summarise(n = n())
+
+pal_purple <- RColorBrewer::brewer.pal(6, "Purples")
+pal_orange <- RColorBrewer::brewer.pal(4, "Oranges")
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_manual(name="",
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(~true_virus, scales = "free")
+```
+
+
+
+
 # Comparing all of the tool methods - Fig 2A
 ```{r}
 combos_list <- data.frame(toolcombo=rep(0, 64),
@@ -1909,6 +1965,54 @@ ggplot(prop_high_viruses_long[prop_high_viruses_long$dvf==1,], aes(x=as.factor(n
                      values = alpha(rev(viridis(6)), 0.7))
 ```
 
+# Comparing RefSeq vs VS2 database
+VS2 sequences used: (/scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/NCLDV/env/NCLDV_env.fna /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/lavidaviridae/env/HQ_virophages.fna /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/dsDNAphage/env/* /scratch/kwigg_root/kwigg/hegartyb/VSTE/non-refseq-genomes/dsDNAphage/provirus/VirSorterCuratedDataset_HQ_contigs.fna)
+
+```{r}
+refseq_vir <- read_tsv("../IntermediaryFiles/refseq_viral_genome_ids.txt",col_names = F)
+refseq_vir$X1 <- sub(">", "", refseq_vir$X1)
+refseq_vir <- separate(refseq_vir, col=X1, sep=" ", remove=T, into="id")
+refseq_vir$id <- sub("\\.", "_", refseq_vir$id)
+```
+
+```{r}
+table(refseq_vir$id %in% viruses$contig)
+```
+
+```{r}
+viruses_refseq_vir <- viruses[viruses$contig %in% refseq_vir$id,]
+viruses_not_refseq_vir <- viruses[!(viruses$contig %in% refseq_vir$id) & viruses$seqtype=="virus",]
+```
+
+```{r}
+table(viruses_refseq_vir$max_score_group)
+table(viruses_not_refseq_vir$max_score_group)
+```
+
+```{r}
+viruses_refseq_vir$keep_score_high_MCC <- getting_viral_set_1(viruses_refseq_vir, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses_not_refseq_vir$keep_score_high_MCC <- getting_viral_set_1(viruses_not_refseq_vir, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+```
+
+
+```{r}
+sum(viruses_refseq_vir$keep_score_high_MCC>=1)/nrow(viruses_refseq_vir)
+```
+
+```{r}
+sum(viruses_not_refseq_vir$keep_score_high_MCC>=1)/nrow(viruses_not_refseq_vir)
+```
 
 
 
