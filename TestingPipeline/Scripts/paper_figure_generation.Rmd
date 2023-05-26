@@ -360,10 +360,30 @@ accuracy_scores$numrules <- as.factor(accuracy_scores$numrules)
 accuracy_scores$numtools <- as.factor(accuracy_scores$numtools)
 ```
 
+```{r}
+accuracy_scores$ruletype <- "other"
+accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("0 0 1 0 0 1",
+                                                          "0 0 1 1 0 0",
+                                                          "0 0 0 1 0 0")] <- "high precision"
+accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("1 1 0 0 1 1",
+                                                          "1 1 0 1 1 1",
+                                                          "1 1 0 0 0 1",
+                                                          "1 1 0 1 0 1")] <- "high recall"
+accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("0 0 1 0 0 1",
+                                                          "0 1 1 0 0 1",
+                                                          "0 0 0 0 0 1",
+                                                          "1 0 1 1 0 1",
+                                                          "1 0 1 0 1 1",
+                                                          "1 0 1 0 0 1")] <- "high MCC"
+#accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("0 0 1 0 0 1")] <- "high MCC and high precision"
+accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("1 1 1 1 1 1")] <- "all"
+
+
+```
 
 ```{r}
 accuracy_scores_melt <- accuracy_scores %>% 
-  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo) %>%
+  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo, ruletype) %>%
   pivot_longer(cols=c(precision, recall, MCC), 
                names_to="performance_metric",
                values_to="performance_metric_score")
@@ -398,6 +418,27 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
                      values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
                      values = alpha(rev(viridis(6)), 1))
+
+ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
+                                  color=ruletype, fill=ruletype)) +
+  geom_boxplot(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  ylab("Precision") +
+  scale_fill_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
+  scale_color_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6))
 ```
 
 ```{r}
@@ -450,6 +491,27 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
                      values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
                      values = alpha(rev(viridis(6)), 1))
+
+ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
+                                  color=ruletype, fill=ruletype)) +
+  geom_boxplot(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  ylab("Recall") +
+  scale_fill_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
+  scale_color_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6))
 ```
 
 ```{r}
@@ -540,30 +602,9 @@ mean_MCC <- accuracy_scores %>%
 ```{r}
 accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = mean_MCC$toolcombo)
 
-ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=20),
-  ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
-  ylab("MCC") +
-  scale_fill_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 0.5)) +
-  scale_color_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 1))
-
 fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
-                                  color=numrules, fill=numrules)) +
-  geom_point(alpha=0.5) +
+                                  color=ruletype, fill=ruletype)) +
+  geom_boxplot(alpha=0.5) +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -573,15 +614,16 @@ fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
     axis.text.y=element_text(size=14),
     axis.text.x=element_text(size=14, angle = 90),
     legend.text=element_text(size=12),
-    axis.title=element_text(size=20),
+    axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
   ylab("MCC") +
-  scale_fill_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 0.5)) +
-  scale_color_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 1))
+  scale_fill_manual(name="Number of Rules",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
+  scale_color_manual(name="Number of Rules",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6))
 
+fig
 
 ggsave(
   "../IntermediaryFiles/all_MCC_scatterplot.png",
@@ -633,6 +675,9 @@ t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"],
 
 t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
        accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 1 0 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"])
 
 t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
        accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 1 1"])
@@ -691,6 +736,44 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 ```
 
 
+
+```{r}
+fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Score") +
+  xlab("Number of Rule Sets") +
+  scale_fill_manual(name="Number of Rule Sets",
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name="Number of Rule Sets",
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/MCC_precision_recall_boxplots.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE
+)
+```
 
 ```{r}
 ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!="MCC",], aes(x=numrules, y=performance_metric_score, 
