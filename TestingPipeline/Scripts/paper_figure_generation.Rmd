@@ -1222,11 +1222,11 @@ viruses_long_scores <- viruses %>%
   mutate(viral_score=as.factor(round(viral_score))) %>%
   group_by(rule_combination, viral_score, seqtype) %>%
   summarise(n = n())
+```
 
-pal_purple <- RColorBrewer::brewer.pal(6, "Purples")
-pal_orange <- RColorBrewer::brewer.pal(4, "Oranges")
 
-ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+```{r}
+fig <- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                    fill=viral_score)) +
   geom_bar(stat="identity", color="black") +
   theme_light() +
@@ -1235,81 +1235,29 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
     legend.position = "bottom",
-    axis.text.x=element_text(size=8, angle = 45),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black")
   ) +
-  scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
-  xlab("") +
-  ylab("Number of Sequences") + 
-  facet_grid(~seqtype, scales = "free") +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 2))
-```
+  scale_fill_manual(name="Viral Score",
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,"Oranges")[4:7]),
+                            RColorBrewer::brewer.pal(9,"Purples")[4:9] 
+                            ), 0.8)) +
+  xlab("Ruleset") +
+  ylab("Proportion") + 
+  facet_grid(~seqtype, scales = "free") 
 
-```{r}
-ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
-                   fill=viral_score)) +
-  geom_bar(stat="identity", color="black") +
-  theme_light() +
-  coord_flip() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    legend.position = "bottom"
-  ) +
-  scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange), pal_purple), 0.5)) +
-  xlab("") +
-  ylab("Number of Sequences") + 
- # scale_x_discrete(labels=c("DVF", "DVF+VS", "DVF+VS+VB", "DVF+VS+VB+VS2",
- #                          "DVF+VS+VB+VS2+addition", "DVF+VS+VB+VS2+addition-removal")) + 
-  facet_grid(size_class~seqtype, scales = "free")
-```
+fig
 
-
-```{r}
-viruses$keep_score_all_tv_only_4 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = F,
-                                              include_virsorter2 = F,
-                                              include_tuning_viral = T,
-                                              tv_1=F, tv_2=F, tv_3=F, tv_4=T,
-                                              include_tuning_not_viral = F,
-                                              include_virsorter = F)
-
-viruses$keep_score_all_tv_only_1 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = F,
-                                              include_virsorter2 = F,
-                                              include_tuning_viral = T,
-                                              tv_1=T, tv_2=F, tv_3=F, tv_4=F,
-                                              include_tuning_not_viral = F,
-                                              include_virsorter = F)
-
-viruses$keep_score_all_tv_only_2 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = F,
-                                              include_virsorter2 = F,
-                                              include_tuning_viral = T,
-                                              tv_1=F, tv_2=T, tv_3=F, tv_4=F,
-                                              include_tuning_not_viral = F,
-                                              include_virsorter = F)
-
-viruses$keep_score_all_tv_only_3 <- getting_viral_set_1(viruses, include_deepvirfinder = F,
-                                              include_vibrant = F,
-                                              include_virsorter2 = F,
-                                              include_tuning_viral = T,
-                                              tv_1=F, tv_2=F, tv_3=T, tv_4=F,
-                                              include_tuning_not_viral = F,
-                                              include_virsorter = F)
-
-viruses$true_virus <- "not"
-viruses$true_virus[viruses$seqtype=="virus"] <- "virus"
-
-viruses_long_scores <- viruses %>% 
-  select(contains("keep_score_all_tv_only")) 
-
-viruses_long_scores <- apply(viruses_long_scores, c(1,2), function(x) {if (x>0){x<-1} else{x<-0}})
-
-viruses_long_scores <- as.data.frame(cbind(viruses$true_virus, rowSums(viruses_long_scores)))
-
-table(viruses_long_scores$V1, viruses_long_scores$V2>1)
+ggsave(
+  "../IntermediaryFiles/tuning_addition_rulesets.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
 ```
 
 same idea but VS2 base
@@ -1397,10 +1345,7 @@ viruses_long_scores <- viruses %>%
 ```
 
 ```{r}
-pal_purple <- RColorBrewer::brewer.pal(4, "Purples")
-pal_orange <- RColorBrewer::brewer.pal(1, "Oranges")
-
-ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+fig <- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                    fill=viral_score)) +
   geom_bar(stat="identity", color="black") +
   theme_light() +
@@ -1408,13 +1353,19 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
   theme(
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
-    legend.position = "bottom"
+    legend.position = "bottom",
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black")
   ) +
-  scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange[1]), pal_purple), 0.8)) +
-  xlab("") +
-  ylab("Number of Sequences") + 
-  facet_grid(~seqtype, scales = "free")
+  scale_fill_manual(name="Viral Score",
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,"Oranges")[4:7]),
+                            RColorBrewer::brewer.pal(9,"Purples")[4:9] 
+                            ), 0.8)) +
+  xlab("Ruleset") +
+  ylab("Proportion") + 
+  facet_grid(~seqtype, scales = "free") 
+
+fig
 ```
 
 
@@ -1489,7 +1440,7 @@ viruses_long_scores <- viruses %>%
 ```
 
 ```{r}
-ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+fig <- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                    fill=viral_score)) +
   geom_bar(stat="identity", color="black") +
   theme_light() +
@@ -1498,14 +1449,29 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
     legend.position = "bottom",
-    axis.text.x=element_text(size=8, angle = 45),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black")
   ) +
-  scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
-  xlab("") +
-  ylab("Number of Sequences") + 
-  facet_grid(~seqtype, scales = "free") +
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 2))
+  scale_fill_manual(name="Viral Score",
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,"Oranges")[4:7]),
+                            RColorBrewer::brewer.pal(9,"Purples")[4:9] 
+                            ), 0.8)) +
+  xlab("Ruleset") +
+  ylab("Proportion") + 
+  facet_grid(~seqtype, scales = "free") 
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/tuning_removal_rulesets.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
 ```
 
 ```{r}
@@ -2063,7 +2029,7 @@ pheatmap::pheatmap(prop_high_viruses,
                   show_rownames = F,
                   show_colnames = F,
                   filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common.png",
-                  annotation_legend = F)
+                  annotation_legend = T)
 ```
 
 
