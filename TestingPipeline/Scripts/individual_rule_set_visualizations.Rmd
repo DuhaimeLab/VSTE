@@ -348,7 +348,7 @@ viruses_long_scores$rule_type[viruses_long_scores$rule_combination=="keep_score_
 pal_purple <- RColorBrewer::brewer.pal(4, "Purples")
 pal_orange <- RColorBrewer::brewer.pal(4, "Oranges")
 
-ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+fig <- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                    fill=viral_score)) +
   geom_bar(stat="identity", color="black") +
   theme_light() +
@@ -360,11 +360,26 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
     strip.background = element_rect(fill="white", color="grey"),
     strip.text = element_text(color="black")
   ) +
-  scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  scale_fill_manual(name="Viral Score",
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,"Oranges")[4:7]),
+                            RColorBrewer::brewer.pal(9,"Purples")[4:9] 
+                            ), 0.8)) +
   xlab("Ruleset") +
-  ylab("Number of Sequences") + 
+  ylab("Proportion") + 
   facet_grid(rule_type~seqtype, scales = "free") 
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/individual_tool_rulesets.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
 ```
 
 
