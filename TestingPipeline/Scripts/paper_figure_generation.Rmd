@@ -1835,6 +1835,7 @@ num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_vir
 num_viruses$numtools <- as.factor(num_viruses$numtools)
 
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+pal2 <- ggthemes::tableau_color_pal(palette="Tableau 20", type="regular")
 
 viruses_1 <- viruses[viruses$Index=="1",]
 
@@ -1858,8 +1859,8 @@ ann_colors = list(
   vb = c("black", pal(6)[4]),
   vs = c("black", pal(6)[5]),
   vs2 = c("black", pal(6)[6]),
-  score = c("archaea"=pal(6)[1], "bacteria"=pal(6)[2], "fungi"=pal(6)[3],
-              "plasmid"=pal(6)[4], "protist"=pal(6)[5], "virus"=pal(6)[6])
+  score = c("archaea"=pal2(20)[13], "bacteria"=pal2(20)[9], "fungi"=pal2(20)[20],
+              "plasmid"=pal2(20)[19], "protist"=pal2(20)[5], "virus"=pal2(20)[17])
 )
 
 rownames(ann_col) <- combos_list$toolcombo
@@ -1870,13 +1871,45 @@ viral_scores_1 <- viral_scores[viruses$Index=="1",]
 colnames(viral_scores_1) <- combos_list$toolcombo
 rownames(viral_scores_1) <- viruses_1$contig
 
+viral_scores_1 <- floor(viral_scores_1)
+
+seq_scores <- rowSums(viral_scores_1)
+
+seq_type <- table(viruses_1$seqtype)[c(6,2,1,4,5,3)]
+seq_type <- cumsum(seq_type)
+
+sub_seq_scores <- seq_scores[1:seq_type[1]]
+order_seq_scores_virus <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+sub_seq_scores <- seq_scores[seq_type[1]:seq_type[2]]
+order_seq_scores_bacteria <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+sub_seq_scores <- seq_scores[seq_type[2]:seq_type[3]]
+order_seq_scores_archaea <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+sub_seq_scores <- seq_scores[seq_type[3]:seq_type[4]]
+order_seq_scores_plasmid <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+sub_seq_scores <- seq_scores[seq_type[4]:seq_type[5]]
+order_seq_scores_protist <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+sub_seq_scores <- seq_scores[seq_type[5]:seq_type[6]]
+order_seq_scores_fungi <- names(sub_seq_scores)[order(sub_seq_scores)]
+
+viral_scores_1 <- viral_scores_1[c(order_seq_scores_virus, 
+                                   order_seq_scores_bacteria,
+                                   order_seq_scores_archaea,
+                                   order_seq_scores_plasmid,
+                                   order_seq_scores_protist,
+                                   order_seq_scores_fungi),]
+
 pheatmap::pheatmap(t(viral_scores_1),
                   annotation_col = ann_row,
                   annotation_row = ann_col,
                   annotation_colors = ann_colors,
                   #border_color = "black",
-                  color = c(rev(RColorBrewer::brewer.pal(3,"Oranges")),
-                            RColorBrewer::brewer.pal(5,"Purples") 
+                  color = c(rev(RColorBrewer::brewer.pal(9,"Oranges")[4:7]),
+                            RColorBrewer::brewer.pal(9,"Purples")[4:9] 
                             ),
                   show_rownames = F,
                   show_colnames = F,
@@ -1884,6 +1917,9 @@ pheatmap::pheatmap(t(viral_scores_1),
                   cluster_rows = F,
                   cluster_cols = F,
                   cellheight=3,
+                  gaps_col = c(seq_type[1], seq_type[2], seq_type[3], seq_type[4], seq_type[5]),
+                  legend_breaks=c(-3:5),
+                  legend_labels=c(-3:5),
                   filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png"
                   )
 ```
