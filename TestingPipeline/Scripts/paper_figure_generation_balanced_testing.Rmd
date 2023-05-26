@@ -35,6 +35,45 @@ viruses <- read_tsv("../IntermediaryFiles/viral_tools_combined.tsv")
 viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
 ```
 
+only 5 testing sets   
+```{r}
+viruses <- viruses %>% filter(Index<=5)
+```
+
+balancing testing set
+1000 viruses per testing set
+600 bacteria
+100 arachaea
+100 fungi
+100 plasmid
+100 protist
+```{r}
+viruses <- rbind(viruses %>% filter(seqtype=="archaea") %>%
+  group_by(Index) %>%
+  slice_sample(n=100),
+  viruses %>% filter(seqtype=="bacteria") %>%
+  group_by(Index) %>%
+  slice_sample(n=600),
+  viruses %>% filter(seqtype=="fungi") %>%
+  group_by(Index) %>%
+  slice_sample(n=100),
+  viruses %>% filter(seqtype=="plasmid") %>%
+  group_by(Index) %>%
+  slice_sample(n=100),
+  viruses %>% filter(seqtype=="protist") %>%
+  group_by(Index) %>%
+  slice_sample(n=100),
+  viruses %>% filter(seqtype=="virus") %>%
+  group_by(Index) %>%
+  slice_sample(n=1000)
+)
+
+
+```
+
+
+
+
 
 Function that allows for the comparing pieces of the pipeline
 ```{r getting_viral_set_1}
@@ -264,16 +303,16 @@ build_score_list <- function(input_seqs, combos) {
 ## Calculate the performance of each pipeline
 quantifying variability between rule sets
 ```{r}
-accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*8),
-                      precision=rep(0, nrow(combos_list)*8),
-                       recall=rep(0, nrow(combos_list)*8),
-                       F1=rep(0, nrow(combos_list)*8),
-                       MCC=rep(0, nrow(combos_list)*8), 
-                      AUC=rep(0, nrow(combos_list)*8))
+accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*5),
+                      precision=rep(0, nrow(combos_list)*5),
+                       recall=rep(0, nrow(combos_list)*5),
+                       F1=rep(0, nrow(combos_list)*5),
+                       MCC=rep(0, nrow(combos_list)*5), 
+                      AUC=rep(0, nrow(combos_list)*5))
 
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==1,], combos_list))
-for (i in 2:8) {
+for (i in 2:5) {
   accuracy_scores <- rbind(accuracy_scores,
                            cbind(testing_set_index=rep(i, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==i,], combos_list)))
@@ -559,7 +598,11 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_fill_manual(name="Number of Rule Sets",
                      values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 1))
+                     values = alpha(rev(viridis(6)), 1)) + 
+  ylim(c(0,1))
+```
+
+```{r}
 
 fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numrules, fill=numrules)) +
@@ -694,6 +737,29 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 
 ```{r}
 ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!="MCC",], aes(x=numrules, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Score") +
+  xlab("Number of Rule Sets") +
+  scale_fill_manual(name="Number of Rule Sets",
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name="Number of Rule Sets",
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+ggplot(accuracy_scores_melt[,], aes(x=numrules, y=performance_metric_score, 
                                   color=numrules, fill=numrules)) +
   geom_boxplot() +
   geom_point(alpha=0.5) +
@@ -1315,7 +1381,7 @@ viruses_long_scores <- viruses %>%
 
 ```{r}
 pal_purple <- RColorBrewer::brewer.pal(4, "Purples")
-pal_orange <- RColorBrewer::brewer.pal(1, "Oranges")
+pal_orange <- RColorBrewer::brewer.pal(4, "Oranges")
 
 ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
                    fill=viral_score)) +
@@ -1328,7 +1394,7 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
     legend.position = "bottom"
   ) +
   scale_fill_manual(name="",
-                     values = alpha(c(rev(pal_orange[1]), pal_purple), 0.8)) +
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
   xlab("") +
   ylab("Number of Sequences") + 
   facet_grid(~seqtype, scales = "free")
@@ -1835,6 +1901,7 @@ num_viruses$toolcombo2 <- factor(num_viruses$toolcombo2, levels = unique(num_vir
 num_viruses$numtools <- as.factor(num_viruses$numtools)
 
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+pal2 <- ggthemes::tableau_color_pal(palette="Tableau 20", type="regular")
 
 viruses_1 <- viruses[viruses$Index=="1",]
 
@@ -1858,8 +1925,8 @@ ann_colors = list(
   vb = c("black", pal(6)[4]),
   vs = c("black", pal(6)[5]),
   vs2 = c("black", pal(6)[6]),
-  score = c("archaea"=pal(6)[1], "bacteria"=pal(6)[2], "fungi"=pal(6)[3],
-              "plasmid"=pal(6)[4], "protist"=pal(6)[5], "virus"=pal(6)[6])
+  score = c("archaea"=pal2(20)[13], "bacteria"=pal2(20)[9], "fungi"=pal2(20)[4],
+              "plasmid"=pal2(20)[19], "protist"=pal2(20)[5], "virus"=pal2(20)[17])
 )
 
 rownames(ann_col) <- combos_list$toolcombo
@@ -1884,7 +1951,7 @@ pheatmap::pheatmap(t(viral_scores_1),
                   cluster_rows = F,
                   cluster_cols = F,
                   cellheight=3,
-                  filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png"
+                  filename = "../IntermediaryFiles/pheatmap_virus_set_1_viral_scores_balanced.png"
                   )
 ```
 

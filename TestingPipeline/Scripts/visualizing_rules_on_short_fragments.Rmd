@@ -51,7 +51,7 @@ getting_viral_set_1 <- function(input_seqs,
                                 include_tuning_viral=FALSE,
                                 tv_1=T, tv_2=T, tv_3=T, tv_4=T,
                                 include_tuning_not_viral=FALSE,
-                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=F,
+                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=T,
                                 include_virsorter=FALSE) {
   
   keep_score <- rep(0, nrow(input_seqs))

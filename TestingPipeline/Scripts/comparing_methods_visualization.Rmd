@@ -1182,7 +1182,7 @@ table(viruses_not_refseq_vir$max_score_group)
 ```
 recall
 ```{r}
-length(grep("true positive", viruses_refseq_vir$confusion_matrix_high_MCC))/nrow(viruses_refseq_vir)
+length(grep("true positive", viruses_refseq_vir$))/nrow(viruses_refseq_vir)
 ```
 
 ```{r}
@@ -1191,6 +1191,22 @@ length(grep("true positive", viruses_not_refseq_vir$confusion_matrix_high_MCC))/
 
 
 
+```{r}
+ggplot(vs2_tnv_seqtype, aes(y=n, x=seqtype,
+                   fill=as.factor(comb_score))) +
+  geom_bar(stat="identity", color="black") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "bottom"
+  ) +
+  scale_fill_brewer(palette = "PuOr") +
+  xlab("") +
+  ylab("Number of Sequences") + 
+  facet_grid(comb~max_score_group, scales = "free")
+```
 
 
 
