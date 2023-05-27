@@ -338,13 +338,23 @@ viruses_long_scores <- viruses %>%
   group_by(rule_combination, viral_score, seqtype) %>%
   summarise(n = n())
 
-viruses_long_scores$rule_type <- "viral sorting tool"
+viruses_long_scores$rule_type <- "viral identification tool-based"
 viruses_long_scores$rule_type[viruses_long_scores$rule_combination=="keep_score_ind_tv"] <- "tuning"
 viruses_long_scores$rule_type[viruses_long_scores$rule_combination=="keep_score_ind_ntv"] <- "tuning"
 
 ```
 
 ```{r}
+
+viruses_long_scores$seqtype <- factor(viruses_long_scores$seqtype, levels = c("virus", "bacteria", "archaea", "plasmid", "protist", "fungi"))
+
+#viruses_long_scores$rule_combination <- factor(viruses_long_scores$rule_combination, 
+#                                               levels = c(rev("keep_score_ind_vs2", "keep_score_ind_vs",
+#                                                              "keep_score_ind_vb", "keep_score_ind_dvf"),
+#                                                         rev("keep_score_ind_tv", "keep_score_ind_ntv")))
+
+viruses_long_scores$rule_type <- factor(viruses_long_scores$rule_type, levels = c("viral identification tool-based", "tuning"))
+
 pal_purple <- RColorBrewer::brewer.pal(4, "Purples")
 pal_orange <- RColorBrewer::brewer.pal(4, "Oranges")
 

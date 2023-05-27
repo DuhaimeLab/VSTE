@@ -182,10 +182,10 @@ assess_performance <- function(seqtype, keep_score) {
   
   MCC <- (TP*TN-FP*FN)/sqrt(as.numeric(TP+FP)*as.numeric(TP+FN)*as.numeric(TN+FP)*as.numeric(TN+FN))
   
-  auc <- round(auc(truepositive, keep_score),4)
+  prop_viral <- (TP+FP)/(TP+FP+TN+FN)
   
-  performance <- c(precision, recall, F1, MCC, auc)
-  names(performance) <- c("precision", "recall", "F1", "MCC", "AUC")
+  performance <- c(precision, recall, F1, MCC, prop_viral)
+  names(performance) <- c("precision", "recall", "F1", "MCC", "prop_viral")
   
   return(performance)
 }
@@ -239,7 +239,7 @@ build_score_list <- function(input_seqs, combos) {
                        recall=rep(0, nrow(combos)),
                        F1=rep(0, nrow(combos)),
                        MCC=rep(0, nrow(combos)),
-                       AUC=rep(0, nrow(combos)))
+                       prop_viral=rep(0, nrow(combos)))
   for (i in 1:nrow(combos)) {
     keep_score <- getting_viral_set_1(input_seqs, include_vibrant = combos$VIBRANT[i],
                                             include_virsorter = combos$VS[i],
@@ -269,7 +269,7 @@ accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*8),
                        recall=rep(0, nrow(combos_list)*8),
                        F1=rep(0, nrow(combos_list)*8),
                        MCC=rep(0, nrow(combos_list)*8), 
-                      AUC=rep(0, nrow(combos_list)*8))
+                      prop_viral=rep(0, nrow(combos_list)*8))
 
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==1,], combos_list))
@@ -383,11 +383,56 @@ accuracy_scores$ruletype[accuracy_scores$toolcombo %in% c("1 1 1 1 1 1")] <- "al
 
 ```{r}
 accuracy_scores_melt <- accuracy_scores %>% 
-  select(testing_set_index, precision, recall, MCC, numrules, numtools, toolcombo, ruletype) %>%
-  pivot_longer(cols=c(precision, recall, MCC), 
+  select(testing_set_index, precision, recall, MCC, prop_viral, numrules, numtools, toolcombo, ruletype) %>%
+  pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
                names_to="performance_metric",
                values_to="performance_metric_score")
 ```
+
+
+```{r}
+fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric=="prop_viral",], 
+              aes(x=ruletype, y=performance_metric_score, 
+                                  color=ruletype, fill=ruletype)) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=10),
+    axis.text.x=element_text(size=12, angle = 90, vjust = -0.1),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=12),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=12)
+  ) +
+  xlab("Environment") +
+  ylab("Proportion Called Viral") +
+  scale_fill_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
+  scale_color_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6)) +
+  geom_hline(yintercept = 0.1, linetype="dashed", color="dark grey")
+
+fig
+```
+
+```{r}
+ggsave(
+  "../IntermediaryFiles/simplified_performance_metricrule_types.png",
+  plot = fig,
+  scale = 1,
+  width = 6.5,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
+```
+
 
 ### Visualize performance across all the rules 
 

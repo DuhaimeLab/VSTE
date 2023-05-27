@@ -33,12 +33,12 @@ viruses_dw <- viruses_dw[viruses_dw$assembly %in% c("Birmingham_Maria",
 ```
 
 ```{r}
-viruses_dw$environment <- "drinking_water"
+viruses_dw$environment <- "drinking water"
 
 viruses_rest$environment[viruses_rest$environment=="waste_water"] <- "wastewater"
-viruses_rest$environment[viruses_rest$environment=="lake_eerie"] <- "Lake_Erie"
-viruses_rest$environment[viruses_rest$environment=="lake_michigan"] <- "Lake_Michigan"
-viruses_rest$environment[viruses_rest$environment=="tara"] <- "global_oceans"
+viruses_rest$environment[viruses_rest$environment=="lake_eerie"] <- "Lake Erie"
+viruses_rest$environment[viruses_rest$environment=="lake_michigan"] <- "Lake Michigan"
+viruses_rest$environment[viruses_rest$environment=="tara"] <- "global oceans"
 
 viruses_all <- rbind(viruses_dw, viruses_rest)
 ```
@@ -46,10 +46,10 @@ viruses_all <- rbind(viruses_dw, viruses_rest)
 recoding AJ's samples to be able to separate virome from metagenome (and remove others)
 ```{r}
 viruses_all$environment2 <- viruses_all$environment
-viruses_all$environment2[viruses_all$assembly %in% c("49639", "49640", "49641", "49642")] <- "Lake_Erie_virome"
+viruses_all$environment2[viruses_all$assembly %in% c("49639", "49640", "49641", "49642")] <- "Lake Erie virome"
 viruses_all$environment2[viruses_all$assembly %in% c("49613", "49614", "49618", "49621",
-                                                     "49624", "49628", "49632", "49638")] <- "Lake_Erie_metagenome"
-viruses_all <- viruses_all[viruses_all$environment2!="Lake_Erie",]
+                                                     "49624", "49628", "49632", "49638")] <- "Lake Erie metagenome"
+viruses_all <- viruses_all[viruses_all$environment2!="Lake Erie",]
 ```
 
 
@@ -57,26 +57,41 @@ viruses_all <- viruses_all[viruses_all$environment2!="Lake_Erie",]
 
 ```{r}
 viruses_all$environment2 <- factor(viruses_all$environment2,
-                                    levels = c("drinking_water", "Lake_Erie_metagenome", 
-                                               "global_oceans",
-                                               "wastewater", "Lake_Erie_virome", 
-                                               "Lake_Michigan"))
+                                    levels = c("drinking water", "Lake Erie metagenome", 
+                                               "global oceans",
+                                               "wastewater", "Lake Erie virome", 
+                                               "Lake Michigan"))
 ```
 
 
 ```{r}
-viruses_all$best_coloring <- "others"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 1 1 1 1 1"] <- "all"
-viruses_all$best_coloring[viruses_all$toolcombo=="0 1 1 1 1 1"] <- "high recall"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 1 1 1"] <- "high MCC"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 0 0 1"] <- "VS2 combo"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 1 0 0"] <- "high precision"
+viruses_all$ruletype <- "other"
+viruses_all$ruletype[viruses_all$toolcombo %in% c("0 0 1 0 0 1",
+                                                          "0 0 1 1 0 0",
+                                                          "0 0 0 1 0 0")] <- "high precision"
+viruses_all$ruletype[viruses_all$toolcombo %in% c("1 1 0 0 1 1",
+                                                          "1 1 0 1 1 1",
+                                                          "1 1 0 0 0 1",
+                                                          "1 1 0 1 0 1")] <- "high recall"
+viruses_all$ruletype[viruses_all$toolcombo %in% c("0 0 1 0 0 1",
+                                                          "0 1 1 0 0 1",
+                                                          "0 0 0 0 0 1",
+                                                          "1 0 1 1 0 1",
+                                                          "1 0 1 0 1 1",
+                                                          "1 0 1 0 0 1")] <- "high MCC"
+viruses_all$ruletype[viruses_all$toolcombo %in% c("1 1 1 1 1 1")] <- "all"
+```
+
+```{r}
+viruses_all$type <- "metagenome"
+viruses_all$type[viruses_all$environment2 %in% c("wastewater", "Lake Erie virome",
+                                                 "Lake Michigan")] <- "virome"
 ```
 
 
 ```{r}
 ggplot(viruses_all, aes(x=toolcombo, y=prop_vir, 
-                                  color=best_coloring, fill=best_coloring)) +
+                                  color=ruletype, fill=ruletype)) +
   geom_boxplot() +
   #geom_point() +
   theme_light() +
@@ -89,27 +104,51 @@ ggplot(viruses_all, aes(x=toolcombo, y=prop_vir,
     axis.text.x=element_text(size=14, angle = 90),
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black")
   ) +
   xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("Proportion of Contigs >3kb Viral") +
   scale_fill_manual(name="",
-                     values = alpha(rev(viridis(6)), 0.3)) +
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
   scale_color_manual(name="",
-                     values = alpha(rev(viridis(6)), 0.7)) +
-  facet_wrap(~environment2)
-```
-
-```{r}
-viruses_all$type <- "metagenome"
-viruses_all$type[viruses_all$environment2 %in% c("wastewater", "Lake_Erie_virome",
-                                                 "Lake_Michigan")] <- "virome"
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6)) +
+  facet_grid(~environment2, scales = "free")
 ```
 
 
 
 ```{r}
-ggplot(viruses_all[viruses_all$best_coloring %in% c("high MCC", "high recall"),], aes(x=environment2, y=prop_vir, 
-                                  color=type, fill=type)) +
+viruses_all %>% 
+  select(prop_vir, toolcombo, environment2) %>%
+  filter(toolcombo=="1 0 0 1 0 0") %>%
+  filter(environment2=="wastewater") 
+  group_by(environment2) %>%
+  summarise(mean = mean(prop_vir))
+  
+viruses_all %>% 
+  select(prop_vir, toolcombo, environment2) %>%
+  filter(toolcombo=="0 1 1 0 1 1") %>%
+  group_by(environment2) %>%
+  summarise(mean = mean(prop_vir))
+  
+viruses_all %>% 
+  select(prop_vir, toolcombo, environment2) %>%
+  filter(toolcombo=="1 0 0 0 0 1") %>%
+  group_by(environment2) %>%
+  summarise(mean = mean(prop_vir))
+  
+viruses_all %>% 
+  select(prop_vir, toolcombo, environment2) %>%
+  filter(toolcombo=="1 1 1 1 1 1") %>%
+  group_by(environment2) %>%
+  summarise(mean = mean(prop_vir))
+```
+
+
+```{r}
+fig <- ggplot(viruses_all, aes(x=ruletype, y=prop_vir, 
+                                  color=ruletype, fill=ruletype)) +
   geom_boxplot() +
   #geom_point() +
   theme_light() +
@@ -118,23 +157,38 @@ ggplot(viruses_all[viruses_all$best_coloring %in% c("high MCC", "high recall"),]
     panel.border = element_blank(),
     axis.ticks.y = element_blank(),
     legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
+    axis.text.y=element_text(size=10),
+    axis.text.x=element_text(size=12, angle = 90, vjust = -0.1),
     legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
+    axis.title=element_text(size=12),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=12)
   ) +
   xlab("Environment") +
   ylab("Proportion of Contigs >3kb Viral") +
   scale_fill_manual(name="",
-                     values = alpha(magma(4)[2:3], 0.3)) +
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
   scale_color_manual(name="",
-                     values = alpha(magma(4)[2:3], 0.7)) +
-  facet_wrap(~best_coloring)
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6)) +
+  facet_wrap(~environment2)
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/simplified_environmental.png",
+  plot = fig,
+  scale = 1,
+  width = 6.5,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
 ```
 
 
 ```{r}
-imp_toolcombs <- viruses_all %>% group_by(best_coloring, environment) %>%
+imp_toolcombs <- viruses_all %>% group_by(ruletype, environment2) %>%
   summarize(median=median(prop_vir),
             mean=mean(prop_vir),
             sd=sd(prop_vir)
@@ -142,8 +196,8 @@ imp_toolcombs <- viruses_all %>% group_by(best_coloring, environment) %>%
 ```
 
 ```{r}
-ggplot(imp_toolcombs, aes(x=best_coloring, y=mean, 
-                                  color=best_coloring, fill=best_coloring)) +
+ggplot(imp_toolcombs, aes(x=ruletype, y=mean, 
+                                  color=ruletype, fill=ruletype)) +
   geom_point(size=3) +
   theme_light() +
   theme(
@@ -162,17 +216,7 @@ ggplot(imp_toolcombs, aes(x=best_coloring, y=mean,
                      values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
                      values = alpha(rev(viridis(6)), 0.7)) +
-  facet_wrap(~environment)
-```
-
-```{r}
-imp_toolcombs_wide <- viruses_all %>% group_by(best_coloring, environment) %>%
-  summarize(median=median(prop_vir),
-            mean=mean(prop_vir),
-            sd=sd(prop_vir)
-            ) %>%
-  select(mean, environment, best_coloring) %>%
-  pivot_wider(names_from=environment, values_from=mean)
+  facet_wrap(~environment2)
 ```
 
 
