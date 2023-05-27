@@ -14,12 +14,20 @@ library(readr)
 library(data.table)
 ```
 
+```{r}
+env_path <- '/Users/riddellj/Documents/Research/VSTE/VSTE_Old_Pull/EnvironmentalData/'
+viruses_tara <- read_csv(paste(env_path, "tara_num_viruses.csv", sep=""))
+viruses_tara$environment <- "global_oceans"
+viruses_le <- read_csv(paste(env_path, "le_num_viruses.csv", sep=""))
+viruses_le$environment <- "Lake_Erie"
+viruses_lm <- read_csv(paste(env_path, "lake_michigan_num_viruses.csv", sep=""))
+viruses_lm$environment <- "Lake_Michigan"
+viruses_ww <- read_csv(paste(env_path, "wastewater_num_viruses.csv", sep=""))
+viruses_ww$environment <- "wastewater"
+viruses_dw <- read_csv(paste(env_path, "drinking_water_uknl_num_viruses.csv", sep=""))
 
-```{r}
-viruses_dw <- read_csv("../DrinkingWaterMetagenomes/drinking_water_num_viruses.csv")
-```
-```{r}
-viruses_rest <- read_csv("/Users/hegartyb/Downloads/num_viruses_env.csv")
+viruses_rest <- rbind(viruses_tara, viruses_le, viruses_lm, viruses_ww)
+write.csv(viruses_rest, 'env_rest_num_viruses.csv')
 ```
 
 only keeping chlorinated drinking water samples
@@ -35,10 +43,10 @@ viruses_dw <- viruses_dw[viruses_dw$assembly %in% c("Birmingham_Maria",
 ```{r}
 viruses_dw$environment <- "drinking_water"
 
-viruses_rest$environment[viruses_rest$environment=="waste_water"] <- "wastewater"
-viruses_rest$environment[viruses_rest$environment=="lake_eerie"] <- "Lake_Erie"
-viruses_rest$environment[viruses_rest$environment=="lake_michigan"] <- "Lake_Michigan"
-viruses_rest$environment[viruses_rest$environment=="tara"] <- "global_oceans"
+# viruses_rest$environment[viruses_rest$environment=="waste_water"] <- "wastewater"
+# viruses_rest$environment[viruses_rest$environment=="lake_eerie"] <- "Lake_Erie"
+# viruses_rest$environment[viruses_rest$environment=="lake_michigan"] <- "Lake_Michigan"
+# viruses_rest$environment[viruses_rest$environment=="tara"] <- "global_oceans"
 
 viruses_all <- rbind(viruses_dw, viruses_rest)
 ```
@@ -66,15 +74,57 @@ viruses_all$environment2 <- factor(viruses_all$environment2,
 
 ```{r}
 viruses_all$best_coloring <- "others"
+# 
 viruses_all$best_coloring[viruses_all$toolcombo=="1 1 1 1 1 1"] <- "all"
-viruses_all$best_coloring[viruses_all$toolcombo=="0 1 1 1 1 1"] <- "high recall"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 1 1 1"] <- "high MCC"
+# high recall
+viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 1 1 1"] <- "high recall"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 0 1 1"] <- "high recall"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 0 0 1"] <- "high recall"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 0 0 0 1 1"] <- "high recall"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 1 0 1"] <- "high recall"
+# VS2 Combo
 viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 0 0 1"] <- "VS2 combo"
-viruses_all$best_coloring[viruses_all$toolcombo=="1 1 0 1 0 0"] <- "high precision"
+# High Precision
+viruses_all$best_coloring[viruses_all$toolcombo=="0 0 0 0 0 1"] <- "high precision"
+viruses_all$best_coloring[viruses_all$toolcombo=="0 0 0 1 0 0"] <- "high precision"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 0 0 1 0 0"] <- "high precision"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 0 0 0 0 1"] <- "high precision"
+# High MCC
+viruses_all$best_coloring[viruses_all$toolcombo=="0 0 1 0 0 1"] <- "high MCC"
+viruses_all$best_coloring[viruses_all$toolcombo=="0 1 1 0 0 1"] <- "high MCC"
+viruses_all$best_coloring[viruses_all$toolcombo=="0 0 0 0 0 1"] <- "high MCC"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 1 0 1"] <- "high MCC"
+viruses_all$best_coloring[viruses_all$toolcombo=="1 0 1 0 1 1"] <- "high MCC"
 ```
 
+run commented-out lines after paper_figure_generation.Rmd if order changes
 
 ```{r}
+# dput output from paper_figure_generation of toolcombo_vector created with the following commands
+# toolcombo_MCC <- aggregate(accuracy_scores$MCC, list(accuracy_scores$toolcombo), mean)
+# toolcombo_MCC <- toolcombo_MCC[order(toolcombo_MCC$x),]
+# toolcombo_vector <- as.vector(toolcombo_MCC$Group.1)
+
+# hard-coded
+toolcombo_vector <- c("0 0 1 0 0 0", "0 1 0 0 0 0", "0 1 1 0 0 0", "0 1 0 0 1 0", 
+"0 0 0 0 1 0", "0 0 1 0 1 0", "0 1 1 0 1 0", "0 1 0 1 1 0", "0 1 0 1 0 0", 
+"0 0 0 1 1 0", "0 0 1 1 1 0", "0 1 1 1 1 0", "1 1 0 0 0 0", "0 1 1 1 0 0", 
+"0 0 0 1 0 0", "0 0 1 1 0 0", "1 1 0 1 1 0", "1 1 0 1 0 0", "1 1 0 0 1 0", 
+"1 1 0 1 1 1", "0 1 0 1 1 1", "1 1 0 0 1 1", "0 1 0 0 1 1", "1 1 0 1 0 1", 
+"0 1 0 1 0 1", "1 1 0 0 0 1", "0 0 0 1 1 1", "1 1 1 0 0 0", "1 0 0 1 1 0", 
+"1 0 0 1 1 1", "1 0 0 0 0 0", "0 0 0 0 1 1", "1 0 1 0 0 0", "1 0 0 0 1 0", 
+"1 1 1 1 0 0", "1 0 0 0 1 1", "0 1 1 1 1 1", "1 1 1 1 1 0", "0 0 1 1 1 1", 
+"0 1 0 0 0 1", "1 0 0 1 0 0", "0 0 0 1 0 1", "1 1 1 0 1 0", "1 0 1 1 1 0", 
+"0 1 1 0 1 1", "1 0 1 1 0 0", "0 0 1 0 1 1", "0 1 1 1 0 1", "1 1 1 1 1 1", 
+"1 0 0 1 0 1", "0 0 1 1 0 1", "1 0 1 0 1 0", "1 1 1 0 1 1", "1 0 0 0 0 1", 
+"1 1 1 1 0 1", "1 0 1 1 1 1", "1 1 1 0 0 1", "1 0 1 0 1 1", "1 0 1 1 0 1", 
+"0 0 0 0 0 1", "1 0 1 0 0 1", "0 1 1 0 0 1", "0 0 1 0 0 1")
+```
+
+```{r fig.align="center", fig.width = 5, fig.height = 2}
+viruses_all$toolcombo <- factor(viruses_all$toolcombo, levels=toolcombo_vector)
+
+tiff(filename='env_comparisons.tiff', units="in", width=15, height=6, res=300, compression = 'lzw')
 ggplot(viruses_all, aes(x=toolcombo, y=prop_vir, 
                                   color=best_coloring, fill=best_coloring)) +
   geom_boxplot() +
@@ -86,18 +136,50 @@ ggplot(viruses_all, aes(x=toolcombo, y=prop_vir,
     axis.ticks.y = element_blank(),
     legend.position = "bottom",
     axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 90),
+    axis.text.x=element_text(size=5, angle = 90),
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
-  ylab("Proportion of Contigs >3kb Viral") +
+  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  ylab("Prop of Contigs >3kb Viral") +
   scale_fill_manual(name="",
                      values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
                      values = alpha(rev(viridis(6)), 0.7)) +
   facet_wrap(~environment2)
+  
+
+dev.off()
 ```
+
+```{r}
+p.list = lapply(sort(unique(viruses_all$environment2)), function(i) {
+ggplot(viruses_all[viruses_all$environment2==i,], aes(x=toolcombo, y=prop_vir, 
+                                  color=best_coloring, fill=best_coloring)) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=5, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  ylab("Prop of Contigs >3kb Viral") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.3)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(viridis(6)), 0.7)) +
+  facet_wrap(~environment2)
+})
+p.list
+```
+
 
 ```{r}
 viruses_all$type <- "metagenome"
@@ -134,7 +216,7 @@ ggplot(viruses_all[viruses_all$best_coloring %in% c("high MCC", "high recall"),]
 
 
 ```{r}
-imp_toolcombs <- viruses_all %>% group_by(best_coloring, environment) %>%
+imp_toolcombs <- viruses_all %>% group_by(best_coloring, environment2) %>%
   summarize(median=median(prop_vir),
             mean=mean(prop_vir),
             sd=sd(prop_vir)
@@ -157,12 +239,12 @@ ggplot(imp_toolcombs, aes(x=best_coloring, y=mean,
     axis.title=element_text(size=16),
   ) +
   xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
-  ylab("Proportion of Contigs >3kb Viral") +
+  ylab("Prop of Contigs >3kb Viral") +
   scale_fill_manual(name="",
                      values = alpha(rev(viridis(6)), 0.3)) +
   scale_color_manual(name="",
                      values = alpha(rev(viridis(6)), 0.7)) +
-  facet_wrap(~environment)
+  facet_wrap(~environment2)
 ```
 
 ```{r}
@@ -175,7 +257,36 @@ imp_toolcombs_wide <- viruses_all %>% group_by(best_coloring, environment) %>%
   pivot_wider(names_from=environment, values_from=mean)
 ```
 
+# check how much tuning removal decreases viral ID by on average
+```{r}
+viruses_all <- viruses_all %>% 
+  mutate(
+    has_tnv = grepl('tnv', toolcombo2, fixed=TRUE),
+    has_tv = grepl('tv', toolcombo2, fixed=TRUE),
+  )
+has_both <- rep(0, nrow(viruses_all))
+has_both[viruses_all$has_tnv==TRUE] <- has_both[viruses_all$has_tnv==TRUE] + 0.5
+has_both[viruses_all$has_tv==TRUE] <- has_both[viruses_all$has_tv==TRUE] + 0.5
+viruses_all$has_both <- has_both
 
+metagenomes <- viruses_all %>% subset(type == 'metagenome')
+viromes <- viruses_all %>% subset(type == 'virome')
+
+# how much does the tuning removal decrease the proportion identified as viral?
+metaG_avg_decrease <- aggregate(metagenomes$prop_vir, list(metagenomes$has_tnv), mean)
+virome_avg_decrease <- aggregate(viromes$prop_vir, list(viromes$has_tnv), mean)
+metaG_avg_increase <- aggregate(metagenomes$prop_vir, list(metagenomes$has_tv), mean)
+virome_avg_increase <- aggregate(viromes$prop_vir, list(viromes$has_tv), mean)
+
+metaG_both <- aggregate(metagenomes$prop_vir, list(metagenomes$has_both), mean)
+virome_both <- aggregate(viromes$prop_vir, list(viromes$has_both), mean)
+```
+
+# get total number of viruses and assemblies
+```{r}
+viruses_vs2_combo <- viruses_all[viruses_all$toolcombo == "1 0 1 0 0 1",]
+viruses_vs2_combo$total_viruses <- viruses_vs2_combo$num_viruses / viruses_vs2_combo$prop_vir
+```
 
 
 
