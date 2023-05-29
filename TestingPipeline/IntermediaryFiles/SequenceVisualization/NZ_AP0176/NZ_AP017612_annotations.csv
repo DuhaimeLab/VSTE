@@ -1,0 +1,128 @@
+protein,scaffold,KO,AMG,KO name,KO evalue,KO score,KO v-score,Pfam,Pfam name,Pfam evalue,Pfam score,Pfam v-score,VOG,VOG name,VOG evalue,VOG score,VOG v-score,coloring_annotation
+plasmid--NZ_AP017612.1_1,plasmid--NZ_AP017612.1,,,,,,,PF01051.21,Initiator Replication protein,1.30E-24,90.1,0.08,VOG11335,sp|P0A253|REP12_SALTI RepFIB replication protein A,1.20E-108,365.4,0.13,phage non-structural
+plasmid--NZ_AP017612.1_2,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00914,REFSEQ hypothetical protein,2.00E-18,68.6,2.49,VOG hypothetical
+plasmid--NZ_AP017612.1_3,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_4,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_5,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG12706,REFSEQ hypothetical protein,1.20E-41,143.7,0.72,VOG hypothetical
+plasmid--NZ_AP017612.1_6,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_7,plasmid--NZ_AP017612.1,,,,,,,PF10765.9,Protein of unknown function (DUF2591),8.30E-15,57.9,0.62,VOG11723,sp|Q38665|NINX_BPP22 Putative protein ninX,2.90E-25,91,1.8,VOG hypothetical
+plasmid--NZ_AP017612.1_8,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG13567,REFSEQ hypothetical protein,2.30E-68,231.1,0.23,VOG hypothetical
+plasmid--NZ_AP017612.1_9,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG12450,REFSEQ hypothetical protein,2.30E-49,170.5,0.45,VOG hypothetical
+plasmid--NZ_AP017612.1_10,plasmid--NZ_AP017612.1,,,,,,,PF18406.1,Ferredoxin-like domain in Api92-like protein,3.30E-16,61.6,0.02,,,,,,unidentified
+plasmid--NZ_AP017612.1_11,plasmid--NZ_AP017612.1,K04087,,hflC; membrane protease subunit HflC [EC:3.4.-.-],6.60E-11,46.3,0.75,PF01145.25,SPFH domain / Band 7 family,4.80E-23,84.9,1.29,VOG01564,REFSEQ hypothetical protein,1.30E-67,230.8,7.59,VOG hypothetical
+plasmid--NZ_AP017612.1_12,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG11116,REFSEQ hypothetical protein,2.30E-14,55.5,0.36,VOG hypothetical
+plasmid--NZ_AP017612.1_13,plasmid--NZ_AP017612.1,K03553,,recA; recombination protein RecA,3.00E-57,199.2,2.34,PF00154.21,recA bacterial DNA recombination protein,3.20E-42,147.7,1.81,VOG01109,sp|P04529|UVSX_BPT4 Recombination and repair protein,2.60E-74,252.8,10,phage non-structural
+plasmid--NZ_AP017612.1_14,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_15,plasmid--NZ_AP017612.1,K01146,,xni; protein Xni,3.50E-17,67.2,0.7,PF02739.16,"5'-3' exonuclease, N-terminal resolvase-like domain",2.20E-23,85.7,0.94,VOG03061,sp|P13319|RNH_BPT4 Ribonuclease H,3.90E-26,94.6,10,phage non-structural
+plasmid--NZ_AP017612.1_16,plasmid--NZ_AP017612.1,,,,,,,PF08804.10,gp32 DNA binding protein like,2.00E-58,200.8,1.57,VOG02465,sp|P09035|VHED_BPT2 Single-stranded DNA-binding protein (Fragment),4.90E-33,117.8,10,phage non-structural
+plasmid--NZ_AP017612.1_17,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02575,REFSEQ hypothetical protein,9.50E-33,115.6,3.25,VOG hypothetical
+plasmid--NZ_AP017612.1_18,plasmid--NZ_AP017612.1,K02337,,dnaE; DNA polymerase III subunit alpha [EC:2.7.7.7],1.30E-249,836.7,1.36,PF07733.12,Bacterial DNA polymerase III alpha NTPase domain,3.00E-72,246.2,1.02,VOG00728,sp|O67125|DPO3A_AQUAE DNA polymerase III subunit alpha,1.70E-253,846.6,5.27,phage non-structural
+plasmid--NZ_AP017612.1_19,plasmid--NZ_AP017612.1,K09882,AMG,cobS; cobaltochelatase CobS [EC:6.6.1.2],2.00E-92,315.3,0.92,PF07728.14,AAA domain (dynein-related subfamily),5.50E-15,58.4,1.03,VOG01029,sp|Q58294|RFCL_METJA Replication factor C large subunit,1.60E-36,128.7,9.64,phage non-structural
+plasmid--NZ_AP017612.1_20,plasmid--NZ_AP017612.1,K09883,AMG,cobT; cobaltochelatase CobT [EC:6.6.1.2],5.20E-43,152.5,0.07,PF11775.8,Cobalamin biosynthesis protein CobT VWA domain,1.10E-79,270,0.06,VOG01493,REFSEQ peptidase,3.80E-112,378.7,4.87,phage non-structural
+plasmid--NZ_AP017612.1_21,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_22,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_23,plasmid--NZ_AP017612.1,K04763,,xerD; integrase/recombinase XerD,3.70E-09,41.1,2.87,,,,,,VOG00041,sp|O10330|VLF1_NPVOP Very late expression factor 1,2.70E-27,98.6,10,phage non-structural
+plasmid--NZ_AP017612.1_24,plasmid--NZ_AP017612.1,K03674,,grxA; glutaredoxin 1,7.90E-32,113.8,0.31,PF00462.24,Glutaredoxin,1.20E-11,47.4,1.01,VOG00051,sp|P68692|GLRX1_VACCW Glutaredoxin-1,5.80E-13,51.5,10,phage non-structural
+plasmid--NZ_AP017612.1_25,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_26,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_27,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_28,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_29,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_30,plasmid--NZ_AP017612.1,K01971,,ligD; bifunctional non-homologous end joining protein LigD [EC:6.5.1.1],9.20E-16,61.9,0.09,PF01068.21,ATP dependent DNA ligase domain,1.60E-11,47.1,1.8,VOG00079,sp|P00970|DNLI_BPT4 DNA ligase,1.80E-63,217.2,10,phage non-structural
+plasmid--NZ_AP017612.1_31,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_32,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_33,plasmid--NZ_AP017612.1,K02316,,dnaG; DNA primase [EC:2.7.7.101],2.80E-15,60.9,3.37,,,,,,VOG00056,sp|P04520|PRIM_BPT4 DNA primase,1.10E-36,129.4,10,phage non-structural
+plasmid--NZ_AP017612.1_34,plasmid--NZ_AP017612.1,K02314,,dnaB; replicative DNA helicase [EC:3.6.4.12],3.30E-20,76.9,5.15,PF03796.15,DnaB-like helicase C terminal domain,3.00E-11,46,5.28,VOG00709,sp|P03692|PRIM_BPT7 DNA primase/helicase,2.90E-90,306,1.53,phage non-structural
+plasmid--NZ_AP017612.1_35,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG14354,REFSEQ hypothetical protein,6.60E-106,355.8,0.06,VOG hypothetical
+plasmid--NZ_AP017612.1_36,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_37,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_38,plasmid--NZ_AP017612.1,K03496,,"parA, soj; chromosome partitioning protein",8.20E-29,105.8,0.85,PF09140.11,ATPase MipZ,1.60E-12,50.2,0.01,VOG10286,sp|P07620|PARA_ECOLX Plasmid partition protein A,5.50E-33,117.1,2.49,phage structural
+plasmid--NZ_AP017612.1_39,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_40,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG20250,REFSEQ hypothetical protein,1.40E-23,85.5,0.05,VOG hypothetical
+plasmid--NZ_AP017612.1_41,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00591,REFSEQ hypothetical protein,1.40E-09,40.4,0.91,VOG hypothetical
+plasmid--NZ_AP017612.1_42,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00741,sp|Q9XJR2|P5_BPPM2 Protein P5,2.00E-63,217.6,2.21,phage structural
+plasmid--NZ_AP017612.1_43,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_44,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01599,REFSEQ Cor protein,2.60E-20,74.8,0.68,phage non-structural
+plasmid--NZ_AP017612.1_45,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01743,REFSEQ hypothetical protein,7.90E-31,110.1,2.3,VOG hypothetical
+plasmid--NZ_AP017612.1_46,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG03232,REFSEQ hypothetical protein,1.10E-18,69.7,1.81,VOG hypothetical
+plasmid--NZ_AP017612.1_47,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02076,sp|P03744|FIB37_BPT4 Long-tail fiber protein gp37,6.30E-17,63.6,2.02,phage structural
+plasmid--NZ_AP017612.1_48,plasmid--NZ_AP017612.1,,,,,,,PF13550.6,Putative phage tail protein,5.40E-30,107.3,1.24,VOG00125,sp|Q6QGE9|BPPB3_BPT5 Probable baseplate hub protein,1.50E-267,893.3,8.23,phage structural
+plasmid--NZ_AP017612.1_49,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02435,sp|O64334|TIPI_BPN15 Tail tip assembly protein I,1.20E-51,177.5,4.29,phage structural
+plasmid--NZ_AP017612.1_50,plasmid--NZ_AP017612.1,,,,,,,PF00877.19,NlpC/P60 family,1.20E-22,82.7,1.39,VOG01039,sp|O64333|TIPK_BPN15 Tail tip assembly protein K,4.70E-56,193.2,4.6,phage structural
+plasmid--NZ_AP017612.1_51,plasmid--NZ_AP017612.1,,,,,,,PF05100.12,Phage minor tail protein L,1.00E-95,321.8,1.09,VOG00644,sp|O64332|TIPL_BPN15 Tail tip protein L,1.10E-73,249.8,4.48,phage structural
+plasmid--NZ_AP017612.1_52,plasmid--NZ_AP017612.1,,,,,,,PF05939.13,Phage minor tail protein,4.90E-33,116.6,1.18,VOG01889,sp|O64331|TIPM_BPN15 Tail tip protein M,1.90E-28,101.5,4.25,phage structural
+plasmid--NZ_AP017612.1_53,plasmid--NZ_AP017612.1,,,,,,,PF09718.10,Lambda phage tail tape-measure protein (Tape_meas_lam_C),1.50E-11,47.1,1,VOG00586,REFSEQ hypothetical protein,1.50E-16,62.8,2.95,VOG hypothetical
+plasmid--NZ_AP017612.1_54,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_55,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG03051,REFSEQ hypothetical protein,5.60E-44,151.3,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_56,plasmid--NZ_AP017612.1,,,,,,,PF02368.18,Bacterial Ig-like domain (group 2),5.40E-24,86.7,1.22,VOG01018,REFSEQ hypothetical protein,1.80E-91,309,0.92,VOG hypothetical
+plasmid--NZ_AP017612.1_57,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG14353,REFSEQ hypothetical protein,7.70E-54,183.4,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_58,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01428,REFSEQ hypothetical protein,1.80E-50,173.3,0.21,VOG hypothetical
+plasmid--NZ_AP017612.1_59,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG14352,REFSEQ hypothetical protein,2.00E-50,172.1,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_60,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG14351,REFSEQ hypothetical protein,4.60E-120,402.2,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_61,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG20249,REFSEQ hypothetical protein,3.30E-46,160.1,0.05,VOG hypothetical
+plasmid--NZ_AP017612.1_62,plasmid--NZ_AP017612.1,,,,,,,PF02368.18,Bacterial Ig-like domain (group 2),2.20E-65,219.3,1.22,VOG00186,sp|Q6QGE2|TUBE_BPT5 Tail tube protein,7.80E-51,175.9,3.82,phage structural
+plasmid--NZ_AP017612.1_63,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01437,REFSEQ major capsid protein,1.40E-88,299.4,1.52,phage structural
+plasmid--NZ_AP017612.1_64,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02666,REFSEQ hypothetical protein,6.80E-72,244.4,0.43,phage structural
+plasmid--NZ_AP017612.1_65,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00213,sp|Q05220|PORTL_BPML5 Portal protein,3.90E-52,180.1,10,phage structural
+plasmid--NZ_AP017612.1_66,plasmid--NZ_AP017612.1,K06909,,xtmB; phage terminase large subunit,3.80E-15,60.4,4.5,,,,,,VOG00694,sp|O31952|YONF_BACSU SPBc2 prophage-derived uncharacterized protein YonF,1.50E-54,188.3,4.48,phage structural
+plasmid--NZ_AP017612.1_67,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG20248,REFSEQ hypothetical protein,4.60E-88,297.2,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_68,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_69,plasmid--NZ_AP017612.1,K07128,,K07128; uncharacterized protein,2.70E-34,123.3,0.19,,,,,,VOG14356,REFSEQ hypothetical protein,2.30E-155,518.6,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_70,plasmid--NZ_AP017612.1,K07128,,K07128; uncharacterized protein,4.20E-54,188.8,0.19,PF00005.27,ABC transporter,2.80E-11,46.9,0.13,VOG00385,sp|P03271|PKG1_ADE05 Packaging protein 1,2.30E-27,98,0.77,phage non-structural
+plasmid--NZ_AP017612.1_71,plasmid--NZ_AP017612.1,K03497,,"parB, spo0J; ParB family transcriptional regulator, chromosome partitioning protein",5.10E-14,57.1,1.4,PF02195.18,ParB-like nuclease domain,3.10E-17,65.5,0.65,VOG00153,REFSEQ hypothetical protein,5.70E-30,107.1,4.51,VOG hypothetical
+plasmid--NZ_AP017612.1_72,plasmid--NZ_AP017612.1,K03497,,"parB, spo0J; ParB family transcriptional regulator, chromosome partitioning protein",7.40E-12,50,1.4,PF02195.18,ParB-like nuclease domain,7.20E-18,67.5,0.65,VOG00153,REFSEQ hypothetical protein,4.40E-30,107.5,4.51,VOG hypothetical
+plasmid--NZ_AP017612.1_73,plasmid--NZ_AP017612.1,K01153,,"hsdR; type I restriction enzyme, R subunit [EC:3.1.21.3]",1.60E-12,51.5,0.25,PF00270.29,DEAD/DEAH box helicase,8.00E-13,51.4,0.13,VOG00935,sp|P20703|UVSW_BPT4 ATP-dependent DNA helicase uvsW,7.80E-83,281,10,VOG hypothetical
+plasmid--NZ_AP017612.1_74,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_75,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_76,plasmid--NZ_AP017612.1,,,,,,,PF03614.13,Repressor of phase-1 flagellin,2.40E-69,235.3,0.02,,,,,,unidentified
+plasmid--NZ_AP017612.1_77,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_78,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_79,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG15876,REFSEQ hypothetical protein,1.90E-12,49.6,0.12,VOG hypothetical
+plasmid--NZ_AP017612.1_80,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_81,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_82,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG20252,REFSEQ Gp62,2.30E-38,134,0.08,unidentified
+plasmid--NZ_AP017612.1_83,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_84,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_85,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_86,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02442,REFSEQ hypothetical protein,2.70E-19,71.5,0.1,phage non-structural
+plasmid--NZ_AP017612.1_87,plasmid--NZ_AP017612.1,K01874,AMG,"MARS, metG; methionyl-tRNA synthetase [EC:6.1.1.10]",6.50E-181,608,0,PF09334.11,tRNA synthetases class I (M),6.10E-166,554.9,0,VOG05812,"sp|F4JLM5|SYIC_ARATH Isoleucine--tRNA ligase, cytoplasmic",2.40E-12,48,0.02,phage non-structural
+plasmid--NZ_AP017612.1_88,plasmid--NZ_AP017612.1,K03593,,"mrp, NUBPL; ATP-binding protein involved in chromosome partitioning",4.90E-142,479.2,0,PF10609.9,NUBPL iron-transfer P-loop NTPase,9.90E-101,339.2,0,VOG10286,sp|P07620|PARA_ECOLX Plasmid partition protein A,5.40E-13,51.6,2.49,phage structural
+plasmid--NZ_AP017612.1_89,plasmid--NZ_AP017612.1,K03503,,umuD; DNA polymerase V [EC:3.4.21.-],1.70E-35,127.2,0.15,,,,,,VOG04769,sp|P0AG11|UMUD_ECOLI Protein UmuD,3.20E-59,200.9,0.42,phage non-structural
+plasmid--NZ_AP017612.1_90,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG18225,REFSEQ hypothetical protein,3.90E-17,65,0.17,VOG hypothetical
+plasmid--NZ_AP017612.1_91,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01584,REFSEQ hypothetical protein,8.10E-15,57.2,0.48,VOG hypothetical
+plasmid--NZ_AP017612.1_92,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_93,plasmid--NZ_AP017612.1,,,,,,,PF04448.12,Protein of unknown function (DUF551),1.40E-19,73.6,0.56,VOG00112,sp|P03756|EA22_LAMBD Protein ea22,5.50E-38,133.3,3.5,phage non-structural
+plasmid--NZ_AP017612.1_94,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_95,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02988,REFSEQ hypothetical protein,1.60E-37,131,0.85,VOG hypothetical
+plasmid--NZ_AP017612.1_96,plasmid--NZ_AP017612.1,,,,,,,PF06689.13,ClpX C4-type zinc finger,1.10E-14,56.9,0.04,,,,,,phage non-structural
+plasmid--NZ_AP017612.1_97,plasmid--NZ_AP017612.1,,,,,,,PF13935.6,Ead/Ea22-like protein,3.10E-35,124.7,0.62,,,,,,phage non-structural
+plasmid--NZ_AP017612.1_98,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01102,sp|Q03547|VEAE_BPP22 Eae protein,2.90E-17,66,1.66,phage non-structural
+plasmid--NZ_AP017612.1_99,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG02811,REFSEQ hypothetical protein,2.70E-74,251.4,0.3,VOG hypothetical
+plasmid--NZ_AP017612.1_100,plasmid--NZ_AP017612.1,K01139,,"spoT; GTP diphosphokinase / guanosine-3',5'-bis(diphosphate) 3'-diphosphatase [EC:2.7.6.5 3.1.7.2]",2.60E-26,96.7,0.58,PF13328.6,HD domain,5.20E-19,71.4,0.18,VOG01076,sp|O87331|RELA_CORGL GTP pyrophosphokinase,2.40E-39,137,3.31,phage non-structural
+plasmid--NZ_AP017612.1_101,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_102,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_103,plasmid--NZ_AP017612.1,K07317,,K07317; adenine-specific DNA-methyltransferase [EC:2.1.1.72],8.10E-11,46,0.4,PF13708.6,Domain of unknown function (DUF4942),1.00E-18,70.9,0.1,VOG12614,REFSEQ putative DNA modification methylase,1.20E-243,811.9,0.25,phage non-structural
+plasmid--NZ_AP017612.1_104,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_105,plasmid--NZ_AP017612.1,,,,,,,PF13064.6,Protein of unknown function (DUF3927),9.50E-12,47.5,0.05,VOG03097,REFSEQ hypothetical protein,4.40E-14,54.4,0.18,VOG hypothetical
+plasmid--NZ_AP017612.1_106,plasmid--NZ_AP017612.1,K05793,,terB; tellurite resistance protein TerB,1.60E-13,55.1,0.18,,,,,,VOG11339,REFSEQ putative terB,3.60E-58,198.4,0.35,VOG hypothetical
+plasmid--NZ_AP017612.1_107,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG13646,REFSEQ hypothetical protein,2.10E-15,58.9,0.34,VOG hypothetical
+plasmid--NZ_AP017612.1_108,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_109,plasmid--NZ_AP017612.1,K03469,,"rnhA, RNASEH1; ribonuclease HI [EC:3.1.26.4]",2.20E-58,203,1.04,PF00075.24,RNase H,4.80E-43,149.6,1.13,VOG00152,sp|B8HPS9|RNH_CYAP4 Ribonuclease H,6.30E-61,207.5,5.22,phage non-structural
+plasmid--NZ_AP017612.1_110,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_111,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG01116,sp|P51715|YO13_BPHC1 Uncharacterized adenine-specific methylase,2.10E-10,42.9,6.05,phage non-structural
+plasmid--NZ_AP017612.1_112,plasmid--NZ_AP017612.1,,,,,,,PF05869.11,DNA N-6-adenine-methyltransferase (Dam),8.90E-13,51,1.65,VOG01116,sp|P51715|YO13_BPHC1 Uncharacterized adenine-specific methylase,4.40E-14,54.9,6.05,phage non-structural
+plasmid--NZ_AP017612.1_113,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG14355,REFSEQ hypothetical protein,4.10E-68,232.5,0.07,VOG hypothetical
+plasmid--NZ_AP017612.1_114,plasmid--NZ_AP017612.1,K02342,,dnaQ; DNA polymerase III subunit epsilon [EC:2.7.7.7],1.90E-26,97.6,1.46,PF00929.24,Exonuclease,9.80E-19,71.3,1.28,VOG00231,sp|P04536|EXOD_BPT4 Exodeoxyribonuclease,1.70E-20,76.3,10,phage non-structural
+plasmid--NZ_AP017612.1_115,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_116,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00154,sp|P24518|NADR_SALTY Trifunctional NAD biosynthesis/regulator protein NadR,1.30E-28,102.9,3.56,phage non-structural
+plasmid--NZ_AP017612.1_117,plasmid--NZ_AP017612.1,K00287,AMG,"DHFR, folA; dihydrofolate reductase [EC:1.5.1.3]",1.40E-40,144,2.17,PF00186.19,Dihydrofolate reductase,1.50E-34,121.9,2.15,VOG01033,sp|Q920D2|DYR_RAT Dihydrofolate reductase,2.30E-32,115.2,2.43,phage non-structural
+plasmid--NZ_AP017612.1_118,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00073,sp|P06855|KIPN_BPT4 Polynucleotide kinase,1.70E-12,50,10,phage non-structural
+plasmid--NZ_AP017612.1_119,plasmid--NZ_AP017612.1,K00560,,"thyA, TYMS; thymidylate synthase [EC:2.1.1.45]",1.90E-82,281.9,3.96,PF00303.19,Thymidylate synthase,1.10E-80,273.5,3.79,VOG00688,sp|P00471|TYSY_BPT4 Thymidylate synthase,2.20E-84,285.3,10,phage non-structural
+plasmid--NZ_AP017612.1_120,plasmid--NZ_AP017612.1,,,,,,,PF01503.17,Phosphoribosyl-ATP pyrophosphohydrolase,4.40E-11,45.9,0.45,VOG00286,sp|Q5UQE7|YL479_MIMIV Uncharacterized protein L479,4.90E-26,93.7,4.79,VOG hypothetical
+plasmid--NZ_AP017612.1_121,plasmid--NZ_AP017612.1,K00526,,"E1.17.4.1B, nrdB, nrdF; ribonucleoside-diphosphate reductase beta chain [EC:1.17.4.1]",5.60E-81,277.3,3.84,PF00268.21,"Ribonucleotide reductase, small chain",6.20E-44,153.4,3.77,VOG00398,sp|P69924|RIR2_ECOLI Ribonucleoside-diphosphate reductase 1 subunit beta,5.00E-92,310.6,10,phage non-structural
+plasmid--NZ_AP017612.1_122,plasmid--NZ_AP017612.1,K00525,,"E1.17.4.1A, nrdA, nrdE; ribonucleoside-diphosphate reductase alpha chain [EC:1.17.4.1]",2.50E-114,387.6,4.45,PF02867.15,"Ribonucleotide reductase, barrel domain",4.00E-116,391.5,5.4,VOG00120,sp|P00452|RIR1_ECOLI Ribonucleoside-diphosphate reductase 1 subunit alpha,2.20E-186,623.7,10,phage non-structural
+plasmid--NZ_AP017612.1_123,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG00069,sp|P13004|YLYS_BPPHV Uncharacterized protein near lysin gene (Fragment),3.60E-25,91.2,10,VOG hypothetical
+plasmid--NZ_AP017612.1_124,plasmid--NZ_AP017612.1,,,,,,,,,,,,,,,,,unidentified
+plasmid--NZ_AP017612.1_125,plasmid--NZ_AP017612.1,K03546,,"sbcC, rad50; DNA repair protein SbcC/Rad50",2.00E-51,180,3.31,PF13476.6,AAA domain,4.10E-15,59.7,1.11,VOG00654,sp|P04522|EXO2_BPT4 Exonuclease subunit 2,2.70E-87,296.7,10,phage non-structural
+plasmid--NZ_AP017612.1_126,plasmid--NZ_AP017612.1,K03547,,"sbcD, mre11; DNA repair protein SbcD/Mre11",8.40E-13,52.8,2.76,,,,,,VOG01045,sp|P04521|EXO1_BPT4 Exonuclease subunit 1,5.90E-38,133.3,10,phage non-structural
+plasmid--NZ_AP017612.1_127,plasmid--NZ_AP017612.1,,,,,,,,,,,,VOG20251,REFSEQ hypothetical protein,4.00E-115,385.2,0.05,VOG hypothetical

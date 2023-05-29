@@ -1,0 +1,54 @@
+protein,scaffold,KO,AMG,KO name,KO evalue,KO score,KO v-score,Pfam,Pfam name,Pfam evalue,Pfam score,Pfam v-score,VOG,VOG name,VOG evalue,VOG score,VOG v-score,coloring_annotation
+bacteria--NZ_LLFE01000196.1_1,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG19530,sp|P03009|TRA2_ECOLX Probable transposase for transposon Tn903,8.50E-10,40.7,0.17,phage non-structural
+bacteria--NZ_LLFE01000196.1_2,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_3,bacteria--NZ_LLFE01000196.1,,,,,,,PF13274.6,Protein of unknown function (DUF4065),2.20E-17,66.8,0.36,VOG14094,sp|A0A0H3CCP8|SOCA_CAUVN Antitoxin SocA,1.00E-27,99.4,1.24,phage non-structural
+bacteria--NZ_LLFE01000196.1_4,bacteria--NZ_LLFE01000196.1,K03503,,umuD; DNA polymerase V [EC:3.4.21.-],2.10E-57,198.8,0.15,PF00717.23,Peptidase S24-like,6.50E-13,51.2,1.35,VOG04769,sp|P0AG11|UMUD_ECOLI Protein UmuD,2.00E-28,101.3,0.42,phage non-structural
+bacteria--NZ_LLFE01000196.1_5,bacteria--NZ_LLFE01000196.1,K03502,,umuC; DNA polymerase V,3.40E-148,499,0.12,PF00817.20,impB/mucB/samB family,7.10E-36,126.3,0.11,VOG14097,sp|P04152|UMUC_ECOLI Protein UmuC,6.70E-96,324,0.23,phage non-structural
+bacteria--NZ_LLFE01000196.1_6,bacteria--NZ_LLFE01000196.1,K07492,,K07492; putative transposase,6.90E-51,177.9,0.01,PF01609.21,Transposase DDE domain,7.40E-21,77.6,0.09,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_7,bacteria--NZ_LLFE01000196.1,K00148,AMG,fdhA; glutathione-independent formaldehyde dehydrogenase [EC:1.2.1.46],4.70E-102,346.1,0,PF08240.12,Alcohol dehydrogenase GroES-like domain,1.90E-28,101.3,0.03,VOG22303,sp|O74540|FADH2_SCHPO Putative S-(hydroxymethyl)glutathione dehydrogenase 2,4.40E-15,57.6,0.06,phage non-structural
+bacteria--NZ_LLFE01000196.1_8,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_9,bacteria--NZ_LLFE01000196.1,K03791,,K03791; putative chitinase,2.10E-60,209.3,2.36,,,,,,VOG03428,REFSEQ lysin A,5.30E-43,149.8,4.62,phage non-structural
+bacteria--NZ_LLFE01000196.1_10,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG01722,REFSEQ hypothetical protein,9.90E-57,193.1,0.84,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_11,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00685,REFSEQ hypothetical protein,3.00E-257,859,4.03,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_12,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00189,REFSEQ hypothetical protein,1.40E-13,53.3,4.04,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_13,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG01017,REFSEQ hypothetical protein,2.30E-41,143.7,3.58,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_14,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00407,REFSEQ hypothetical protein,3.40E-14,55.6,1.89,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_15,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_16,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00541,REFSEQ tail tape measure protein,2.50E-180,604.4,1,phage structural
+bacteria--NZ_LLFE01000196.1_17,bacteria--NZ_LLFE01000196.1,,,,,,,PF04383.13,KilA-N domain,3.90E-18,68.2,0.39,VOG00873,REFSEQ hypothetical protein,5.90E-11,44.8,0.74,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_18,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_19,bacteria--NZ_LLFE01000196.1,,,,,,,PF03869.14,Arc-like DNA binding domain,3.40E-12,48.8,0.27,VOG00170,sp|P03049|RMNT_BPP22 Regulatory protein mnt,3.30E-11,45.8,2.47,phage non-structural
+bacteria--NZ_LLFE01000196.1_20,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_21,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_22,bacteria--NZ_LLFE01000196.1,,,,,,,PF15919.5,HicB_like antitoxin of bacterial toxin-antitoxin system,6.70E-46,158.2,0.24,VOG11403,sp|P51716|YO14_BPHC1 Uncharacterized 14.9 kDa protein in rep-hol intergenic region,3.10E-40,140,1.77,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_23,bacteria--NZ_LLFE01000196.1,,,,,,,PF07927.12,"HicA toxin of bacterial toxin-antitoxin,",1.90E-23,85.1,0.3,VOG00556,sp|P0CJ67|HICA_ECO57 Probable mRNA interferase HicA,7.60E-24,85.9,2.92,phage non-structural
+bacteria--NZ_LLFE01000196.1_24,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00085,REFSEQ hypothetical protein,3.70E-24,88.1,4.19,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_25,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00513,REFSEQ hypothetical protein,9.40E-53,182.2,6.28,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_26,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00367,sp|Q6XQB2|PORTL_BPT1 Portal protein,1.20E-50,176.1,1,phage structural
+bacteria--NZ_LLFE01000196.1_27,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00106,sp|Q7Y5D9|FIBL2_BPT5 L-shaped tail fiber protein p132,1.60E-11,46.8,3.23,phage structural
+bacteria--NZ_LLFE01000196.1_28,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00290,REFSEQ hypothetical protein,1.90E-31,110.9,6.26,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_29,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG01487,REFSEQ hypothetical protein,1.10E-25,92.6,6.6,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_30,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG20553,REFSEQ hypothetical protein,7.80E-87,290.8,0.13,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_31,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00089,REFSEQ hypothetical protein,3.60E-35,123.6,5.9,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_32,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_33,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG20552,REFSEQ hypothetical protein,5.90E-126,420.7,0.07,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_34,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG03107,sp|Q38582|CAPSD_BPSPP Major capsid protein,8.20E-57,195.2,4.22,phage structural
+bacteria--NZ_LLFE01000196.1_35,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG02666,REFSEQ hypothetical protein,1.20E-95,322.2,0.43,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_36,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG10775,REFSEQ hypothetical protein,2.60E-29,103.5,1.16,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_37,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG20551,REFSEQ hypothetical protein,6.20E-57,192,0.06,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_38,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG20550,REFSEQ hypothetical protein,6.60E-98,326.8,0.06,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_39,bacteria--NZ_LLFE01000196.1,,,,,,,PF04233.14,Phage Mu protein F like protein,7.60E-13,52,2.29,VOG00686,sp|Q38442|GP7_BPSPP Minor head protein GP7,3.20E-50,174.4,9.5,phage structural
+bacteria--NZ_LLFE01000196.1_40,bacteria--NZ_LLFE01000196.1,,,,,,,PF13264.6,Domain of unknown function (DUF4055),3.60E-33,117.4,1.17,VOG00213,sp|Q05220|PORTL_BPML5 Portal protein,4.20E-69,236,10,phage structural
+bacteria--NZ_LLFE01000196.1_41,bacteria--NZ_LLFE01000196.1,,,,,,,PF17289.2,Terminase RNaseH-like domain,1.90E-16,63.4,1.17,VOG00677,"sp|P10310|TERL_BPT3 Terminase, large subunit gp19",6.50E-94,317.8,10,phage non-structural
+bacteria--NZ_LLFE01000196.1_42,bacteria--NZ_LLFE01000196.1,,,,,,,PF10045.9,Uncharacterized conserved protein (DUF2280),3.50E-37,129.6,0.18,VOG12619,REFSEQ hypothetical protein,1.30E-66,225.8,0.47,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_43,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG12618,REFSEQ hypothetical protein,2.30E-97,326.7,0.48,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_44,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_45,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_46,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_47,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_48,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_49,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_50,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,VOG00466,sp|Q5UPC5|YR047_MIMIV Uncharacterized protein R47,1.20E-12,50.3,0.6,VOG hypothetical
+bacteria--NZ_LLFE01000196.1_51,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_52,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified
+bacteria--NZ_LLFE01000196.1_53,bacteria--NZ_LLFE01000196.1,,,,,,,,,,,,,,,,,unidentified

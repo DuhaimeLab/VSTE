@@ -1,0 +1,160 @@
+LOCUS       AP000400                3174 bp    DNA     linear   PHG 22-DEC-2010
+DEFINITION  Enterobacteria phage VT1-Sakai genomic DNA, prophage inserted
+            region in Escherichia coli O157:H7.
+ACCESSION   AP000400 REGION: 18321..21494
+VERSION     AP000400.1
+KEYWORDS    .
+SOURCE      Enterobacteria phage VT1-Sakai
+  ORGANISM  Enterobacteria phage VT1-Sakai
+            Viruses; Duplodnaviria; Heunggongvirae; Uroviricota;
+            Caudoviricetes; Lambdavirus.
+REFERENCE   1
+  AUTHORS   Yokoyama,K., Makino,K., Kubota,Y., Watanabe,M., Kimura,S.,
+            Yutsudo,C.H., Kurokawa,K., Ishii,K., Hattori,M., Tatsuno,I.,
+            Abe,H., Yoh,M., Iida,T., Ohnishi,M., Hayashi,T., Yasunaga,T.,
+            Honda,T., Sasakawa,C. and Shinagawa,H.
+  TITLE     Complete nucleotide sequence of the prophage VT1-Sakai carrying the
+            Shiga toxin 1 genes of the enterohemorrhagic Escherichia coli
+            O157:H7 strain derived from the Sakai outbreak
+  JOURNAL   Gene 258 (1-2), 127-139 (2000)
+   PUBMED   11111050
+REFERENCE   2  (bases 1 to 3174)
+  AUTHORS   Makino,K., Yokoyama,K., Kubota,Y., Watanabe,M., Kimura,S.,
+            Yutsudo,C.H., Kurokawa,K., Ishii,K., Hattori,M., Abe,H.,
+            Yamamoto,K., Hayashi,T., Yasunaga,T., Honda,T., Sasakawa,C. and
+            Shinagawa,H.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (26-AUG-1999) Contact:Kozo Makino Research Institute for
+            Microbial Diseases, Osaka University, Department of Molecular
+            Microbiology; Yamadaoka 3-1, Suita, Osaka 565-0871, Japan
+FEATURES             Location/Qualifiers
+     source          1..3174
+                     /organism="Enterobacteria phage VT1-Sakai"
+                     /proviral
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:462299"
+                     /focus
+                     /note="synonym: Sakai-VT1 prophage"
+     gene            complement(<1..1619)
+                     /gene="H"
+     CDS             complement(<1..1619)
+                     /gene="H"
+                     /note="H0012;
+                     similar to bacteriophage lambda H"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="minor tail protein precursor H"
+                     /protein_id="BAB19568.1"
+                     /translation="MAGNFADLTAVLTLDSARFSEEAARVKKELGETSALADLMSGKV
+                     SQSFRKQADAAEQSLSRQALAAQKAGISVGQYKAAMRTLPAQFTDIVTQLAGGQNPFL
+                     IMLQQGGQISDSFGGPLSLLTLLKEELLGIRDASESSEESLSDTANALAENARNAGEL
+                     GRFMSVARVAAGGGVAVLAALAAAAWQAEQADRALLRSLTLTGGAAATTTAELWKMAG
+                     VISDEAGGGIRQAAENLARLAESGKYTAGQLRIMGETSQRWLQTVGDDAGKVEKAFEG
+                     IAADPVKALASLNQQYNFLSVSQLRHIDELERTKGKQAAVTEAMSLFADVMNARLEQL
+                     DKAATPVEKIWDDVKTWTSDAWAWIGDHTLGALSLITDVVAGTVEQVKLLLVQGDLAL
+                     AEFIQSAWETTKNVPGVGALFGELAEENRVFIEKTKRDELALRKSIAERDARIRQGEM
+                     GYINRSRATGVSKGPGQQEAVSRLAEELTGKKHTSPKTRSAGEREEEQAREALLALEA
+                     ELRTLEKHSGANEKISRQRRDLWKAESQYAVLKEAATKRQLSEQEKSLLAHKDETLEY
+                     KRQLAELGDKVEYQKRLNELAQQAVRFEEQQSAKQAAISAKARGLTDRQAQRESEAQR
+                     LRDVYGDNPAALAKATSALKNTWSAEEQLRGSWMAGLKSGWGEWAESATDSFSQVKSA
+                     ATQTFDGIAQNMAAMLTGAEADWRGFTRSVLSMMTEILLKQAMVGIVGRIGSAIGGAF
+                     GGGASASTGTAIQAAAANFHFATGGFTGTGGKYEPAGIVHRGEFVFTKEATSRIGVGN
+                     LYRLMRGYAEGGYVGGAGSPAQMRRTEGINFNQNNHVVIQNDGTNGQAGPQLMKAVYD
+                     MARKGAQDELRLQLRDGGMLSGSRR"
+     gene            complement(1663..1971)
+                     /gene="T"
+     CDS             complement(1663..1971)
+                     /gene="T"
+                     /note="H0013;
+                     similar to bacteriophage lambda T"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="minor tail protein T"
+                     /protein_id="BAB19569.1"
+                     /translation="MGRADWRAMLAGMTSTEYADWRRFYCTHYFQDTQLDMHFSGLMY
+                     AVLSLFFCDPDMHPADFSLFAPEAEEGQAETPDENDVLMQKAAGLAGGVRFGEEGRRL
+                     "
+     gene            complement(1998..2420)
+                     /gene="G"
+     CDS             complement(1998..2420)
+                     /gene="G"
+                     /note="H0014;
+                     similar to bacteriophage lambda G"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="minor tail protein G"
+                     /protein_id="BAB19570.1"
+                     /translation="MFLKTEQFEYNGVSVTLSELSALQRFDYIKFVSDAEQQETTKHD
+                     VVHINQRYLETASLLVAMSLWHSHSLKGTLASPETEMQQIRREVMLGWPADALNQATN
+                     RVLYLSGMLDNRHDADPEPTGKTEATEPVTSKKHSKAS"
+     gene            complement(2434..>3174)
+                     /gene="V"
+     CDS             complement(2434..>3174)
+                     /gene="V"
+                     /note="H0015;
+                     similar to bacteriophage lambda V"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="major tail protein V"
+                     /protein_id="BAB19571.1"
+                     /translation="MATPNPLEPVKGAGTTLWVYNGKGDAYANPLSDDDWQRLAKVKD
+                     LTPGEMTAEPYDDNYLDDEDADWTATGQGQKSAGDTSFTLAWKPGEEGQKGLIGWFES
+                     GDVRAYKIRFPNGTVDVFRGWVSSIGKAVTAKEVITRTVKVTNVGKPSVAEERSEITP
+                     ATAIKVTPTSGTVAKGKTTTLTVSFEPESATDKTFRAVSADPSKATISVKDMTITVNG
+                     VATGKVQIPVVSGNGQFAAVAEVTVTEAGAAG"
+ORIGIN      
+        1 aggaccgcat actgactttc cgccttccat aaatcacggc gctgccggct gattttctca
+       61 ttcgcaccgc tgtgtttttc cagcgtcctg agctcagctt caagggcaag cagagcctct
+      121 cttgcctgct cctcttccct ctccccggca gagcgcgttt tcggtgatgt atgcttttta
+      181 cctgtcagct cttcagccag acggctgacg gcttcctgct gccccggacc tttgctgacg
+      241 cctgttgcac gcgaacggtt gatgtacccc atttccccct ggcgtatacg cgcatcccgt
+      301 tccgcaatgg attttctcag cgccagttca tcacgttttg ttttctcaat aaatacgcgg
+      361 ttctcttctg ccagttcacc aaacaacgca ccaacgccgg gcacattctt tgtcgtttcc
+      421 caggctgact gaataaattc agccagcgcc agatccccct gcacaagcag cagcttcacc
+      481 tgttcaacgg ttcctgccac cacgtcagtg atcagactga gtgcccccag tgtatgatca
+      541 cctatccatg cccatgcgtc agaagtccag gttttaacat cgtcccagat tttttccacc
+      601 ggcgtggccg ctttatcaag ttgctccaga cgtgcattca tgacatccgc aaacagggac
+      661 atcgcctccg tcaccgcagc ctgtttacct ttcgtgcgct caagctcatc aatatggcgt
+      721 aactgggaaa cgctcaggaa gttatactgc tgattcaggg aggccagcgc cttcaccgga
+      781 tctgctgcaa tcccttcaaa ggctttttcc accttcccgg catcgtcccc caccgtctgc
+      841 agccatctct gagaggtttc ccccatgatc cgtagctgcc cggcggtata tttcccgctt
+      901 tctgccagac gggccagatt ttctgccgcc tgtctgatac caccaccggc ttcatcgctg
+      961 atcaccccgg ccattttcca caattctgcc gttgtggtgg cagcagcccc tccggtcagg
+     1021 gtcagtgaac gcaataaggc ccggtcagcc tgctctgcct gccaggcggc ggcagcaagc
+     1081 gcggccagta cggcaacccc gccacctgcc gccacacggg ccaccgacat aaatcgtccc
+     1141 agctcaccgg cattccgggc attttcagcc agtgcatttg ccgtatctga cagcgactcc
+     1201 tctgatgatt cagaggcatc cctgatcccg agaagttcct ccttcagcag ggtaagcagg
+     1261 ctgagcggtc caccgaatga atcgctgatc tgccccccct gctgcagcat gataaggaag
+     1321 ggattctgac caccggcaag ctgagtgaca atatccgtga actgtgcggg cagtgtgcgc
+     1381 atggcagcct tatactgtcc gactgatatc ccggcttttt gtgcagccag cgcctgtcgg
+     1441 ctcagactct gctcagcagc atcagcctgt tttctgaaag actgactgac tttcccggac
+     1501 atcaaatcag caagcgcact ggtttcaccc agctcttttt ttacccgcgc tgcctcttca
+     1561 gaaaaacggg cagaatccag tgtcagcacg gctgtcagat cggcaaaatt acctgccatc
+     1621 gtggtcacct cctgaaatgt cctctgatac catcaataac tgtcacaacc tccttccctc
+     1681 ctccccgaaa cggactccac cggcgaggcc cgccgccttc tgcatcagta catcattttc
+     1741 gtccggcgtc tccgcctgtc cttcctctgc ctccggagcg aacaggctga aatccgccgg
+     1801 atgcatatcc ggatcgcaaa aaaacaggct gagtacggcg tacatcagcc cggaaaaatg
+     1861 catatccagc tgggtatcct gaaaataatg cgtgcagtaa aaacgtcgcc agtcggcata
+     1921 ttcggtggat gtcatcccgg caagcatggc gcgccagtcg gctctcccca tctcacgcgc
+     1981 cagtttcagg acaaagttca gctcgccttc gaatgctttt ttgatgttac cggctcagtc
+     2041 gcttctgttt tcccggttgg ttcaggatcg gcatcgtgcc ggttatccag catacctgaa
+     2101 agataaagca cccggttcgt tgcctgattc agtgcatcag caggccatcc cagcatcact
+     2161 tcacggcgga tctgctgcat ctctgtctcc ggagaggcca gagtgccttt gagggaatgg
+     2221 gaatgccata gcgacatcgc cacaagcagg gatgccgttt ccagatatcg ctggttaatg
+     2281 tgcacgacat catgcttcgt tgtctcctgt tgttctgcgt ctgaaacaaa ctttatataa
+     2341 tcaaaccgct gcagcgcaga caattcggaa agcgtgacgg acacaccgtt atattcaaat
+     2401 tgttctgttt tcagaaacat gtattacctc cgtttaccct gcagcgcccg cttcagtaac
+     2461 ggtgacttca gccactgcgg cgaactgacc atttccgctc accacaggga tctgcacctt
+     2521 acctgtcgcc acgccgttta ccgtaattgt catatctttc acactaatgg tggctttcga
+     2581 cggatcggcg gaaaccgctc tgaacgtctt gtcggttgca ctttccggct caaaagaaac
+     2641 cgtcagggtg gttgttttcc cttttgccac cgtaccggat gtcggtgtca ccttaattgc
+     2701 agtggccggc gtaatttcgc tgcgttcttc cgccacggaa ggtttgccca cgttagtgac
+     2761 tttcaccgtg cgggtgatca cttctttcgc cgtcacggcc ttaccgatac tgctgaccca
+     2821 gccacggaac acatccaccg tgccatttgg gaaacggatt ttataggccc gcacatcccc
+     2881 gctttcaaac cagcctataa gccctttctg accttcttct cccggtttcc aggccagcgt
+     2941 aaaactggta tctcctgcag acttctgccc ctgcccggtc gcggtccagt ccgcgtcttc
+     3001 atcatccagg tagttatcat cgtagggttc tgccgtcatc tcgcccggcg tcagatcctt
+     3061 caccttagcc agtcgctgcc agtcatcgtc tgacaacggg tttgcataag catcaccctt
+     3121 gccgttgtaa acccacagag tggtaccggc accttttacc ggctcaaggg gatt
+//
+
