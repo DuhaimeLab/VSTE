@@ -435,10 +435,6 @@ ggsave(
 
 visualizing change when add the tnv rule
 ```{r}
-tnv_add_comp <- data.frame(test_set_index=rep(NA, ))
-```
-
-```{r}
 accuracy_scores_one_ts <- accuracy_scores[accuracy_scores$testing_set_index==1,]
 
 tnv <- rep(NA, 63)
@@ -469,39 +465,109 @@ for (i in grep("0", tnv)) {
   
   prop_tnv <- accuracy_scores_one_ts$prop_viral[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
   no_tnv_prop$prop_viral[j] <-
-    abs(accuracy_scores_one_ts$prop_viral[i]-prop_tnv)/accuracy_scores_one_ts$prop_viral[i]*100
+    (prop_tnv-accuracy_scores_one_ts$prop_viral[i])/prop_tnv*100
   
   prop_tnv <- accuracy_scores_one_ts$MCC[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
   no_tnv_prop$MCC[j] <-
-    abs(accuracy_scores_one_ts$MCC[i]-prop_tnv)/accuracy_scores_one_ts$MCC[i]*100
+    (prop_tnv-accuracy_scores_one_ts$MCC[i])/prop_tnv*100
   
-  prop_tnv <- accuracy_scores_one_ts$precision[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]*100
+  prop_tnv <- accuracy_scores_one_ts$precision[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
   no_tnv_prop$precision[j] <-
-    abs(accuracy_scores_one_ts$precision[i]-prop_tnv)/accuracy_scores_one_ts$precision[i]
+    (prop_tnv-accuracy_scores_one_ts$precision[i])/prop_tnv*100
   
   prop_tnv <- accuracy_scores_one_ts$recall[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
   no_tnv_prop$recall[j] <-
-    abs(accuracy_scores_one_ts$recall[i]-prop_tnv)/accuracy_scores_one_ts$recall[i]*100
+    (prop_tnv-accuracy_scores_one_ts$recall[i])/prop_tnv*100
   
   
   
   j <- j+1
 }
 
+
+
 mean(no_tnv_prop$prop_viral)
 sd(no_tnv_prop$prop_viral)
-```
 
-```{r}
 no_tnv_prop_melt <- no_tnv_prop %>% 
   select(precision, recall, MCC, prop_viral, tool_combo) %>%
   pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
                names_to="performance_metric",
                values_to="performance_metric_percent_diff")
 
+```
 
-fig <- ggplot(no_tnv_prop_melt, 
-              aes(x=performance_metric, y=performance_metric_percent_diff)) +
+visualizing when add the tuning addition rule
+```{r}
+accuracy_scores_one_ts <- accuracy_scores[accuracy_scores$testing_set_index==1,]
+
+tv <- rep(NA, 63)
+
+for (i in 1:nrow(accuracy_scores_one_ts)) {
+  tv[i] <- as.numeric(substr(accuracy_scores_one_ts$toolcombo[i], 1, 1))
+}
+
+num_no_tv <- 63-(sum(tv))
+
+no_tv_prop <- data.frame(tool_combo=accuracy_scores_one_ts$toolcombo[grep("0", tv)],
+                          prop_viral=rep(0, num_no_tv),
+                          MCC=rep(0, num_no_tv),
+                          precision=rep(0, num_no_tv),
+                          recall=rep(0, num_no_tv))
+
+tc_tv <- "0"
+tc_no_tv <- "0"
+prop_tv <- 0
+j <- 1
+
+for (i in grep("0", tv)) {
+  tc_no_tv <- as.character(accuracy_scores_one_ts$toolcombo[i])
+  tc_tv <- tc_no_tv
+  substr(tc_tv, 1, 1) <- "1"
+  
+  prop_tv <- accuracy_scores_one_ts$prop_viral[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tv_prop$prop_viral[j] <-
+    (prop_tv-accuracy_scores_one_ts$prop_viral[i])/prop_tv*100
+  
+  prop_tv <- accuracy_scores_one_ts$MCC[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tv_prop$MCC[j] <-
+    (prop_tv-accuracy_scores_one_ts$MCC[i])/prop_tv*100
+  
+  prop_tv <- accuracy_scores_one_ts$precision[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tv_prop$precision[j] <-
+    (prop_tv-accuracy_scores_one_ts$precision[i])/prop_tv*100
+  
+  prop_tv <- accuracy_scores_one_ts$recall[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tv_prop$recall[j] <-
+    abs(prop_tv-accuracy_scores_one_ts$recall[i])/prop_tv*100
+  
+  
+  
+  j <- j+1
+}
+
+mean(no_tv_prop$prop_viral)
+sd(no_tv_prop$prop_viral)
+
+no_tv_prop_melt <- no_tv_prop %>% 
+  select(precision, recall, MCC, prop_viral, tool_combo) %>%
+  pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
+               names_to="performance_metric",
+               values_to="performance_metric_percent_diff")
+```
+
+```{r}
+no_tv_and_ntv_prop_melt <- rbind(no_tv_prop_melt, no_tnv_prop_melt)
+
+no_tv_and_ntv_prop_melt$set <- c(rep("tuning addition", nrow(no_tv_prop_melt)),
+                                 rep("tuning removal", nrow(no_tnv_prop_melt)))
+
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+
+
+fig <- ggplot(no_tv_and_ntv_prop_melt, 
+              aes(x=performance_metric, y=performance_metric_percent_diff,
+                  color=set, fill=set)) +
   geom_boxplot() +
   #geom_point() +
   theme_light() +
@@ -518,11 +584,15 @@ fig <- ggplot(no_tnv_prop_melt,
     strip.text = element_text(color="black", size=12)
   ) +
   xlab("Performance Metric") +
-  ylab("Percent Difference") 
+  ylab("Percent Difference") +
+  geom_hline(yintercept = 1, color="grey") +
+  scale_fill_manual(name="",
+                     values = alpha(c(pal(6)[c(6,1)]), 0.4)) +
+  scale_color_manual(name="",
+                     values = alpha(c(pal(6)[c(6,1)]), 0.6))
 
 fig
 ```
-
 
 
 
