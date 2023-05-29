@@ -433,6 +433,98 @@ ggsave(
 )
 ```
 
+visualizing change when add the tnv rule
+```{r}
+tnv_add_comp <- data.frame(test_set_index=rep(NA, ))
+```
+
+```{r}
+accuracy_scores_one_ts <- accuracy_scores[accuracy_scores$testing_set_index==1,]
+
+tnv <- rep(NA, 63)
+
+for (i in 1:nrow(accuracy_scores_one_ts)) {
+  tnv[i] <- as.numeric(substr(accuracy_scores_one_ts$toolcombo[i], 5, 5))
+}
+
+num_no_tnv <- 63-(sum(tnv))
+```
+
+```{r}
+no_tnv_prop <- data.frame(tool_combo=accuracy_scores_one_ts$toolcombo[grep("0", tnv)],
+                          prop_viral=rep(0, num_no_tnv),
+                          MCC=rep(0, num_no_tnv),
+                          precision=rep(0, num_no_tnv),
+                          recall=rep(0, num_no_tnv))
+
+tc_tnv <- "0"
+tc_no_tnv <- "0"
+prop_tnv <- 0
+j <- 1
+
+for (i in grep("0", tnv)) {
+  tc_no_tnv <- as.character(accuracy_scores_one_ts$toolcombo[i])
+  tc_tnv <- tc_no_tnv
+  substr(tc_tnv, 5, 5) <- "1"
+  
+  prop_tnv <- accuracy_scores_one_ts$prop_viral[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tnv_prop$prop_viral[j] <-
+    abs(accuracy_scores_one_ts$prop_viral[i]-prop_tnv)/accuracy_scores_one_ts$prop_viral[i]*100
+  
+  prop_tnv <- accuracy_scores_one_ts$MCC[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tnv_prop$MCC[j] <-
+    abs(accuracy_scores_one_ts$MCC[i]-prop_tnv)/accuracy_scores_one_ts$MCC[i]*100
+  
+  prop_tnv <- accuracy_scores_one_ts$precision[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]*100
+  no_tnv_prop$precision[j] <-
+    abs(accuracy_scores_one_ts$precision[i]-prop_tnv)/accuracy_scores_one_ts$precision[i]
+  
+  prop_tnv <- accuracy_scores_one_ts$recall[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
+  no_tnv_prop$recall[j] <-
+    abs(accuracy_scores_one_ts$recall[i]-prop_tnv)/accuracy_scores_one_ts$recall[i]*100
+  
+  
+  
+  j <- j+1
+}
+
+mean(no_tnv_prop$prop_viral)
+sd(no_tnv_prop$prop_viral)
+```
+
+```{r}
+no_tnv_prop_melt <- no_tnv_prop %>% 
+  select(precision, recall, MCC, prop_viral, tool_combo) %>%
+  pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
+               names_to="performance_metric",
+               values_to="performance_metric_percent_diff")
+
+
+fig <- ggplot(no_tnv_prop_melt, 
+              aes(x=performance_metric, y=performance_metric_percent_diff)) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=10),
+    axis.text.x=element_text(size=12),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=12),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=12)
+  ) +
+  xlab("Performance Metric") +
+  ylab("Percent Difference") 
+
+fig
+```
+
+
+
 
 ### Visualize performance across all the rules 
 
