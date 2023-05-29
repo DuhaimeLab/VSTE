@@ -249,11 +249,12 @@ v_missing <- viruses[is.na(viruses$checkv_uniq_contig),]
 
 
 
-calculate percent viral/host/unknown
+calculate percent viral/host/unknown/kaiju_match_ratio
 ```{r}
 viruses$percent_host <- viruses$checkv_host_genes/viruses$checkv_total_genes*100
 viruses$percent_viral <- viruses$checkv_viral_genes/viruses$checkv_total_genes*100
 viruses$percent_unknown <- 100-(viruses$checkv_host_genes+viruses$checkv_viral_genes)/viruses$checkv_total_genes*100
+viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
 ```
 
 get rid of NAs for downstream processing
