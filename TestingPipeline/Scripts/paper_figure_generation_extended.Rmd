@@ -37,8 +37,9 @@ viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
 
 
 Function that allows for the comparing pieces of the pipeline
+
 ```{r getting_viral_set_1}
-getting_viral_set_1 <- function(input_seqs,
+getting_viral_set_2 <- function(input_seqs,
                                 include_vibrant=FALSE, 
                                 include_virsorter2=FALSE,
                                 include_deepvirfinder=FALSE,
@@ -53,27 +54,27 @@ getting_viral_set_1 <- function(input_seqs,
   if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
+    #keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
   }
   
   if (include_virsorter2) {
-    keep_score[input_seqs$max_score>=0.50] <- keep_score[input_seqs$max_score>=0.50] + 0.5
-    keep_score[input_seqs$max_score>=0.95] <- keep_score[input_seqs$max_score>=0.95] + 0.5  
+   # keep_score[input_seqs$max_score>=0.50] <- keep_score[input_seqs$max_score>=0.50] + 0.5
+    keep_score[input_seqs$max_score>=0.95] <- keep_score[input_seqs$max_score>=0.95] + 1  
   }
   
   if (include_virsorter) {
     keep_score[input_seqs$category==1] <- keep_score[input_seqs$category==1] + 1
-    keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
-    keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
+    #keep_score[input_seqs$category==2] <- keep_score[input_seqs$category==2] + 0.5
+    #keep_score[input_seqs$category==3] <- keep_score[input_seqs$category==3] + 0.5
     keep_score[input_seqs$category==4] <- keep_score[input_seqs$category==4] + 1
-    keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5 
-    keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5 
+    #keep_score[input_seqs$category==5] <- keep_score[input_seqs$category==5] + 0.5 
+    #keep_score[input_seqs$category==6] <- keep_score[input_seqs$category==6] + 0.5 
   }
   
   if (include_deepvirfinder) {
      # add if DVF calls viral
-    keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
-    keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
+    keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.9 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 1
+   # keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] <- keep_score[(input_seqs$score>=0.7 & input_seqs$pvalue<=0.05) & input_seqs$checkv_length<20000] + 0.5
   }
   
   if (include_tuning_viral) {
@@ -241,13 +242,14 @@ build_score_list <- function(input_seqs, combos) {
                        MCC=rep(0, nrow(combos)),
                        prop_viral=rep(0, nrow(combos)))
   for (i in 1:nrow(combos)) {
-    keep_score <- getting_viral_set_1(input_seqs, include_vibrant = combos$VIBRANT[i],
+    keep_score <- getting_viral_set_2(input_seqs, include_vibrant = combos$VIBRANT[i],
                                             include_virsorter = combos$VS[i],
                                             include_virsorter2 = combos$VS2[i],
                                             include_tuning_viral = combos$tune_viral[i],
                                             include_tuning_not_viral = combos$tune_not_viral[i],
                                             include_deepvirfinder = combos$DVF[i])
-  
+    
+    
     output[i,1:5] <- assess_performance(input_seqs$seqtype, keep_score)
     
     output$toolcombo[i] <- paste(combos$tune_viral[i],combos$DVF[i],
@@ -264,16 +266,16 @@ build_score_list <- function(input_seqs, combos) {
 ## Calculate the performance of each pipeline
 quantifying variability between rule sets
 ```{r}
-accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*8),
-                      precision=rep(0, nrow(combos_list)*8),
-                       recall=rep(0, nrow(combos_list)*8),
-                       F1=rep(0, nrow(combos_list)*8),
-                       MCC=rep(0, nrow(combos_list)*8), 
-                      prop_viral=rep(0, nrow(combos_list)*8))
+accuracy_scores <- data.frame(testing_set_index=rep(0, nrow(combos_list)*5),
+                      precision=rep(0, nrow(combos_list)*5),
+                       recall=rep(0, nrow(combos_list)*5),
+                       F1=rep(0, nrow(combos_list)*5),
+                       MCC=rep(0, nrow(combos_list)*5), 
+                      prop_viral=rep(0, nrow(combos_list)*5))
 
 accuracy_scores <- cbind(testing_set_index=rep(1, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==1,], combos_list))
-for (i in 2:8) {
+for (i in 2:5) {
   accuracy_scores <- rbind(accuracy_scores,
                            cbind(testing_set_index=rep(i, nrow(combos_list)),
                               build_score_list(viruses[viruses$Index==i,], combos_list)))
@@ -284,51 +286,8 @@ for (i in 2:8) {
 pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
 ```
 
-```{r}
-MCC_sd_quant <- cbind(accuracy_scores$toolcombo[accuracy_scores$testing_set_index==1], as.data.frame(matrix(data=0, nrow=63, ncol=7)))
-
-for (i in (2:8)) {
-  temp <- accuracy_scores %>%
-    filter(testing_set_index<=i) %>%
-    select(MCC, toolcombo) %>%
-    group_by(toolcombo) %>%
-    summarise(sd = sd(MCC))
-  
-  MCC_sd_quant[,i] <- temp$sd
-}
-
-colnames(MCC_sd_quant) <- c("testing_set_index", "1-2", "1-3", "1-4",
-                            "1-5", "1-6", "1-7", "1-8")
-
-MCC_sd_quant <- MCC_sd_quant %>% pivot_longer(cols=contains("-"))
-
-ggplot(MCC_sd_quant, aes(x=testing_set_index, y=value, 
-                                  color=name, fill=name)) +
-  geom_point(alpha=0.5)
-
-ggplot(MCC_sd_quant, aes(x=name, y=value)) +
-  geom_boxplot(alpha=0.5, color=pal(4)[1]) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=14),
-    axis.text.x=element_text(size=14, angle = 0),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=16),
-  ) +
-  xlab("Testing Sets") +
-  ylab("Standard Deviation") 
-```
-
 
 ## Calculate the performance of each pipeline
-```{r}
-accuracy_scores <- accuracy_scores %>% filter(testing_set_index<=5)
-```
-
 
 ```{r}
 accuracy_scores$numrules <- str_count(accuracy_scores$toolcombo, "1")
@@ -420,179 +379,9 @@ fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric=="pro
 fig
 ```
 
-```{r}
-ggsave(
-  "../IntermediaryFiles/simplified_performance_metricrule_types.png",
-  plot = fig,
-  scale = 1,
-  width = 6.5,
-  height = 4,
-  units = c("in"),
-  dpi = 300,
-  limitsize = TRUE
-)
-```
-
-visualizing change when add the tnv rule
-```{r}
-accuracy_scores_one_ts <- accuracy_scores[accuracy_scores$testing_set_index==1,]
-
-tnv <- rep(NA, 63)
-
-for (i in 1:nrow(accuracy_scores_one_ts)) {
-  tnv[i] <- as.numeric(substr(accuracy_scores_one_ts$toolcombo[i], 5, 5))
-}
-
-num_no_tnv <- 63-(sum(tnv))
-```
-
-```{r}
-no_tnv_prop <- data.frame(tool_combo=accuracy_scores_one_ts$toolcombo[grep("0", tnv)],
-                          prop_viral=rep(0, num_no_tnv),
-                          MCC=rep(0, num_no_tnv),
-                          precision=rep(0, num_no_tnv),
-                          recall=rep(0, num_no_tnv))
-
-tc_tnv <- "0"
-tc_no_tnv <- "0"
-prop_tnv <- 0
-j <- 1
-
-for (i in grep("0", tnv)) {
-  tc_no_tnv <- as.character(accuracy_scores_one_ts$toolcombo[i])
-  tc_tnv <- tc_no_tnv
-  substr(tc_tnv, 5, 5) <- "1"
-  
-  prop_tnv <- accuracy_scores_one_ts$prop_viral[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tnv_prop$prop_viral[j] <-
-    (prop_tnv-accuracy_scores_one_ts$prop_viral[i])/prop_tnv*100
-  
-  prop_tnv <- accuracy_scores_one_ts$MCC[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tnv_prop$MCC[j] <-
-    (prop_tnv-accuracy_scores_one_ts$MCC[i])/prop_tnv*100
-  
-  prop_tnv <- accuracy_scores_one_ts$precision[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tnv_prop$precision[j] <-
-    (prop_tnv-accuracy_scores_one_ts$precision[i])/prop_tnv*100
-  
-  prop_tnv <- accuracy_scores_one_ts$recall[grep(tc_tnv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tnv_prop$recall[j] <-
-    (prop_tnv-accuracy_scores_one_ts$recall[i])/prop_tnv*100
-  
-  
-  
-  j <- j+1
-}
 
 
 
-mean(no_tnv_prop$prop_viral)
-sd(no_tnv_prop$prop_viral)
-
-no_tnv_prop_melt <- no_tnv_prop %>% 
-  select(precision, recall, MCC, prop_viral, tool_combo) %>%
-  pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
-               names_to="performance_metric",
-               values_to="performance_metric_percent_diff")
-
-```
-
-visualizing when add the tuning addition rule
-```{r}
-accuracy_scores_one_ts <- accuracy_scores[accuracy_scores$testing_set_index==1,]
-
-tv <- rep(NA, 63)
-
-for (i in 1:nrow(accuracy_scores_one_ts)) {
-  tv[i] <- as.numeric(substr(accuracy_scores_one_ts$toolcombo[i], 1, 1))
-}
-
-num_no_tv <- 63-(sum(tv))
-
-no_tv_prop <- data.frame(tool_combo=accuracy_scores_one_ts$toolcombo[grep("0", tv)],
-                          prop_viral=rep(0, num_no_tv),
-                          MCC=rep(0, num_no_tv),
-                          precision=rep(0, num_no_tv),
-                          recall=rep(0, num_no_tv))
-
-tc_tv <- "0"
-tc_no_tv <- "0"
-prop_tv <- 0
-j <- 1
-
-for (i in grep("0", tv)) {
-  tc_no_tv <- as.character(accuracy_scores_one_ts$toolcombo[i])
-  tc_tv <- tc_no_tv
-  substr(tc_tv, 1, 1) <- "1"
-  
-  prop_tv <- accuracy_scores_one_ts$prop_viral[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tv_prop$prop_viral[j] <-
-    (prop_tv-accuracy_scores_one_ts$prop_viral[i])/prop_tv*100
-  
-  prop_tv <- accuracy_scores_one_ts$MCC[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tv_prop$MCC[j] <-
-    (prop_tv-accuracy_scores_one_ts$MCC[i])/prop_tv*100
-  
-  prop_tv <- accuracy_scores_one_ts$precision[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tv_prop$precision[j] <-
-    (prop_tv-accuracy_scores_one_ts$precision[i])/prop_tv*100
-  
-  prop_tv <- accuracy_scores_one_ts$recall[grep(tc_tv,accuracy_scores_one_ts$toolcombo)][1]
-  no_tv_prop$recall[j] <-
-    abs(prop_tv-accuracy_scores_one_ts$recall[i])/prop_tv*100
-  
-  
-  
-  j <- j+1
-}
-
-mean(no_tv_prop$prop_viral)
-sd(no_tv_prop$prop_viral)
-
-no_tv_prop_melt <- no_tv_prop %>% 
-  select(precision, recall, MCC, prop_viral, tool_combo) %>%
-  pivot_longer(cols=c(precision, recall, MCC, prop_viral), 
-               names_to="performance_metric",
-               values_to="performance_metric_percent_diff")
-```
-
-```{r}
-no_tv_and_ntv_prop_melt <- rbind(no_tv_prop_melt, no_tnv_prop_melt)
-
-no_tv_and_ntv_prop_melt$set <- c(rep("tuning addition", nrow(no_tv_prop_melt)),
-                                 rep("tuning removal", nrow(no_tnv_prop_melt)))
-
-pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
-
-
-fig <- ggplot(no_tv_and_ntv_prop_melt, 
-              aes(x=performance_metric, y=performance_metric_percent_diff,
-                  color=set, fill=set)) +
-  geom_boxplot() +
-  #geom_point() +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "bottom",
-    axis.text.y=element_text(size=10),
-    axis.text.x=element_text(size=12),
-    legend.text=element_text(size=12),
-    axis.title=element_text(size=12),
-    strip.background = element_rect(fill="white", color="grey"),
-    strip.text = element_text(color="black", size=12)
-  ) +
-  xlab("Performance Metric") +
-  ylab("Percent Difference") +
-  geom_hline(yintercept = 1, color="grey") +
-  scale_fill_manual(name="",
-                     values = alpha(c(pal(6)[c(6,1)]), 0.4)) +
-  scale_color_manual(name="",
-                     values = alpha(c(pal(6)[c(6,1)]), 0.6))
-
-fig
-```
 
 ### Visualize performance across all the rules 
 
@@ -830,17 +619,6 @@ fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
 
 fig
 
-ggsave(
-  "../IntermediaryFiles/all_MCC_scatterplot.png",
-  plot = fig,
-  scale = 1,
-  width = 8,
-  height = 4,
-  units = c("in", "cm", "mm", "px"),
-  dpi = 300,
-  limitsize = TRUE
-)
-
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numtools, fill=numtools)) +
   geom_point(alpha=0.5) +
@@ -862,6 +640,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_color_manual(name="Number of Tools",
                      values = alpha(rev(viridis(6)), 1))
 ```
+
 ```{r}
 max(accuracy_scores$MCC)
 ```
@@ -1083,6 +862,71 @@ summary(one.way)
 
 TukeyHSD(one.way)
 ```
+
+
+#comparing based on 0.5 rules or not
+
+```{r}
+#accuracy_scores_melt_no_0.5 <- accuracy_scores_melt
+```
+
+
+```{r}
+percent_diff <- data.frame(toolcombo=accuracy_scores_melt$toolcombo,
+                           percent_diff=(accuracy_scores_melt$performance_metric_score -
+                   accuracy_scores_melt_no_0.5$performance_metric_score)/
+  accuracy_scores_melt$performance_metric_score,
+                          performance_metric=accuracy_scores_melt$performance_metric)
+)
+
+
+fig <- ggplot(percent_diff, 
+              aes(x=performance_metric, y=percent_diff)) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=10),
+    axis.text.x=element_text(size=12),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=12),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=12)
+  ) +
+  xlab("Performance Metric") +
+  ylab("Percent Difference") +
+  geom_hline(yintercept = 0, color="grey") 
+
+fig
+```
+
+```{r}
+t.test(accuracy_scores_melt$performance_metric_score[accuracy_scores_melt$performance_metric=="MCC"],
+       accuracy_scores_melt_no_0.5$performance_metric_score[accuracy_scores_melt_no_0.5$performance_metric=="MCC"])
+```
+
+```{r}
+t.test(accuracy_scores_melt$performance_metric_score[accuracy_scores_melt$performance_metric=="precision"],
+       accuracy_scores_melt_no_0.5$performance_metric_score[accuracy_scores_melt_no_0.5$performance_metric=="precision"])
+```
+
+```{r}
+t.test(accuracy_scores_melt$performance_metric_score[accuracy_scores_melt$performance_metric=="recall"],
+       accuracy_scores_melt_no_0.5$performance_metric_score[accuracy_scores_melt_no_0.5$performance_metric=="recall"])
+```
+
+```{r}
+t.test(accuracy_scores_melt$performance_metric_score[accuracy_scores_melt$performance_metric=="prop_viral"],
+       accuracy_scores_melt_no_0.5$performance_metric_score[accuracy_scores_melt_no_0.5$performance_metric=="prop_viral"])
+```
+
+
+
+
 
 ## differences based on genome size
 ```{r}
