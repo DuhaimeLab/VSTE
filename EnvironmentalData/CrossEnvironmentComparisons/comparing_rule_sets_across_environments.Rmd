@@ -25,10 +25,15 @@ viruses_lm$environment <- "Lake_Michigan"
 viruses_ww <- read_csv(paste(env_path, "wastewater_num_viruses.csv", sep=""))
 viruses_ww$environment <- "wastewater"
 viruses_dw <- read_csv(paste(env_path, "drinking_water_uknl_num_viruses.csv", sep=""))
+#viruses_dw <- read_csv("../DrinkingWaterMetagenomes/drinking_water_num_viruses.csv")
 
 viruses_rest <- rbind(viruses_tara, viruses_le, viruses_lm, viruses_ww)
 write.csv(viruses_rest, 'env_rest_num_viruses.csv')
+#viruses_rest <- read.csv('env_rest_num_viruses.csv')
+
 ```
+
+
 
 only keeping chlorinated drinking water samples
 ```{r}
@@ -49,6 +54,8 @@ viruses_dw$environment <- "drinking_water"
 # viruses_rest$environment[viruses_rest$environment=="tara"] <- "global_oceans"
 
 viruses_all <- rbind(viruses_dw, viruses_rest)
+#viruses_all <- rbind(viruses_dw, viruses_rest[-1])
+
 ```
 
 recoding AJ's samples to be able to separate virome from metagenome (and remove others)
@@ -288,4 +295,46 @@ viruses_vs2_combo <- viruses_all[viruses_all$toolcombo == "1 0 1 0 0 1",]
 viruses_vs2_combo$total_viruses <- viruses_vs2_combo$num_viruses / viruses_vs2_combo$prop_vir
 ```
 
+# simplified version comparing rulesets based on their accuracy type
 
+```{r}
+viruses_all$ruletype <- viruses_all$best_coloring
+viruses_all$ruletype[viruses_all$best_coloring=="VS2 combo"] <- "high MCC"
+
+fig <- ggplot(viruses_all, aes(x=ruletype, y=prop_vir, 
+                                  color=ruletype, fill=ruletype)) +
+  geom_boxplot() +
+  #geom_point() +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=10),
+    axis.text.x=element_text(size=12, angle = 90, vjust = -0.1),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=12),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=12)
+  ) +
+  xlab("Environment") +
+  ylab("Proportion of Contigs >3kb Viral") +
+  scale_fill_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
+  scale_color_manual(name="",
+                     values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6)) +
+  facet_wrap(~environment2)
+fig
+
+ggsave(
+  "simplified_environmental.png",
+  plot = fig,
+  scale = 1,
+  width = 6.5,
+  height = 4,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE
+)
+```
