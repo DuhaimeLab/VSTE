@@ -2349,9 +2349,11 @@ ann_col = data.frame(
     dvf = combos_list$DVF,
     vb = combos_list$VIBRANT,
     vs = combos_list$VS,
-    vs2 = combos_list$VS2,
-    num_vir = colSums(viral_scores>=1)+1
+    vs2 = combos_list$VS2
 )
+
+ann_row = data.frame(
+    num_vir = colSums(viral_scores>=1)+1)
 
 ann_colors = list(
   num_vir=magma(100),
@@ -2364,9 +2366,11 @@ ann_colors = list(
 )
 
 rownames(ann_col) <- combos_list$toolcombo
+rownames(ann_row) <- combos_list$toolcombo
 
 pheatmap::pheatmap(prop_high_viruses,
-                  annotation_row = ann_col,
+                  annotation_row = ann_row,
+                  annotation_col=ann_col,
                   annotation_colors = ann_colors,
                   border_color = "black",
                   color = viridis(100),
