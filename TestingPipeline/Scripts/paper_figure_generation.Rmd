@@ -2164,7 +2164,7 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
 
 
 
-# Comparing all of the tool methods - Fig 2A
+# Comparing all of the tool methods - Fig 2A (also needed for 5)
 ```{r}
 combos_list <- data.frame(toolcombo=rep(0, 64),
                           tune_not_viral=rep(0, 64),
@@ -2375,7 +2375,7 @@ pheatmap::pheatmap(prop_high_viruses,
                   show_rownames = F,
                   show_colnames = F,
                   filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common.png",
-                  annotation_legend = T)
+                  annotation_legend = F)
 ```
 
 
