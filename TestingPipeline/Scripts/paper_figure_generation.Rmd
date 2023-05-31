@@ -2182,12 +2182,12 @@ for (i in c(0,1)){
         for (m in c(0,1)){
           for (n in c(0,1)){
             combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
-            combos_list$toolcombo2[p] <- paste(if(i){"tnv"}else{"0"},if(j){"DVF"}else{"0"},
-                                               if(k){"tv"}else{"0"},if(l){"VB"}else{"0"},
+            combos_list$toolcombo2[p] <- paste(if(i){"tv"}else{"0"},if(j){"DVF"}else{"0"},
+                                               if(k){"tnv"}else{"0"},if(l){"VB"}else{"0"},
                                                if(m){"VS"}else{"0"},if(n){"VS2"}else{"0"})
-            combos_list$tune_not_viral[p] <- i
+            combos_list$tune_not_viral[p] <- k
             combos_list$DVF[p] <- j
-            combos_list$tune_viral[p] <- k
+            combos_list$tune_viral[p] <- i
             combos_list$VIBRANT[p] <- l
             combos_list$VS[p] <- m
             combos_list$VS2[p] <- n
@@ -2338,6 +2338,25 @@ colnames(num_high_viruses) <- combos_list$toolcombo
 
 rownames(prop_high_viruses) <- combos_list$toolcombo
 colnames(prop_high_viruses) <- combos_list$toolcombo
+
+combos_list$ruletype <- "other"
+combos_list$ruletype[combos_list$toolcombo %in% c("0 0 1 0 0 1",
+                                          "0 0 1 1 0 0",
+                                          "0 0 0 1 0 0")] <- "high precision"
+combos_list$ruletype[combos_list$toolcombo %in% c("1 1 0 0 1 1",
+                                          "1 1 0 1 1 1",
+                                          "1 1 0 0 0 1",
+                                          "1 1 0 1 0 1")] <- "high recall"
+combos_list$ruletype[combos_list$toolcombo %in% c("0 0 1 0 0 1",
+                                          "0 1 1 0 0 1",
+                                          "0 0 0 0 0 1",
+                                          "1 0 1 1 0 1",
+                                          "1 0 1 0 1 1",
+                                          "1 0 1 0 0 1")] <- "high MCC"
+#combos_lists$ruletype[accuracy_scores$toolcombo %in% c("0 0 1 0 0 1")] <- "high MCC and high precision"
+combos_list$ruletype[combos_list$toolcombo %in% c("1 1 1 1 1 1")] <- "all"
+
+combos_list$ruletype <- as.factor(combos_list$ruletype)
 ```
 
 ```{r}
@@ -2349,7 +2368,8 @@ ann_col = data.frame(
     dvf = combos_list$DVF,
     vb = combos_list$VIBRANT,
     vs = combos_list$VS,
-    vs2 = combos_list$VS2
+    vs2 = combos_list$VS2,
+    ruleset_type = combos_list$ruletype
 )
 
 ann_row = data.frame(
@@ -2362,7 +2382,12 @@ ann_colors = list(
   dvf = c("black", pal(6)[2]),
   vb = c("black", pal(6)[4]),
   vs = c("black", pal(6)[5]),
-  vs2 = c("black", pal(6)[6])
+  vs2 = c("black", pal(6)[6]),
+  ruleset_type = c("all" = magma(7)[3],
+                   "high MCC" = magma(7)[4],
+                   "high precision" = magma(7)[5],
+                   "high recall" = magma(7)[6], 
+                   "other" = "grey")
 )
 
 rownames(ann_col) <- combos_list$toolcombo
@@ -2379,7 +2404,7 @@ pheatmap::pheatmap(prop_high_viruses,
                   show_rownames = F,
                   show_colnames = F,
                   filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common.png",
-                  annotation_legend = F)
+                  annotation_legend = T)
 ```
 
 
