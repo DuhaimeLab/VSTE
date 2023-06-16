@@ -943,7 +943,7 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 
 
 ```{r}
-fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score, 
+fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0" & accuracy_scores_melt$performance_metric!="prop_viral",], aes(x=numrules, y=performance_metric_score, 
                                   color=numrules, fill=numrules)) +
   geom_boxplot() +
   geom_point(alpha=0.5) +
@@ -951,7 +951,7 @@ fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score,
   theme(
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
+    #axis.ticks.y = element_blank(),
     legend.position = "bottom",
     axis.text.y=element_text(size=14),
     axis.text.x=element_text(size=14, angle = 90),
@@ -964,7 +964,9 @@ fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score,
                      values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rule Sets",
                      values = alpha(rev(viridis(6)), 1)) +
-  facet_wrap(~performance_metric)
+  facet_wrap(~performance_metric) +
+  geom_hline(yintercept = 0, color="grey")
+  
 
 fig
 
