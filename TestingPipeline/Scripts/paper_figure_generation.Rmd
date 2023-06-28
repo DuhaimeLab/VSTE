@@ -2407,6 +2407,19 @@ pheatmap::pheatmap(prop_high_viruses,
                   show_colnames = F,
                   filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common.png",
                   annotation_legend = T)
+
+pheatmap::pheatmap(prop_high_viruses,
+                  annotation_row = ann_row,
+                  annotation_col=ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = "black",
+                  color = c(rep(viridis(3)[1], 5), rep(viridis(3)[2], 4), viridis(3)[3]),
+                  cutree_rows = 3,
+                  cutree_cols = 3,
+                  show_rownames = F,
+                  show_colnames = F,
+                  filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common_3_breaks.png",
+                  annotation_legend = T)
 ```
 
 
