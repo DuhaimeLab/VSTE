@@ -43,7 +43,7 @@ includes ecological metrics like alpha diversity.
 You can decide which combination is appropriate for them and only need use the
 tools appropriate for your data.
 
-```{r}
+```{r getting_viral_set_1}
 getting_viral_set_1 <- function(input_seqs,
                                 include_vibrant=FALSE, 
                                 include_virsorter2=FALSE,
@@ -208,6 +208,7 @@ annotations_vb$contig <- sub("\\.", "_", annotations_vb$contig)
 ```{r}
 head(annotations_vb)
 ```
+
 ```{r}
 table(annotations_vb$contig %in% fp_bacteria_list)
 table(annotations_vb$contig %in% fp_plasmid_list)
@@ -263,16 +264,68 @@ ggplot(annotations_vb_fp_vog_count,
                      values = alpha(rev(pal(3)), 1)) +
   facet_wrap(~confusion_matrix, scales="free_x")
 ```
+
 ```{r}
 t.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="bacteria"],
        annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="virus"])
 ```
+
 ```{r}
 t.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="plasmid"],
        annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="virus"])
 ```
 
 ```{r}
+ggplot(annotations_vb_fp_vog_count, 
+       aes(x=num_vog, y=prop_vog, 
+           color=seqtype, fill=seqtype)) +
+  geom_smooth(formula = y ~ log(x), se=F) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Proportion Genes VOGs") +
+  xlab("Number of VOGs") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(3)), 0.2)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(3)), 1)) +
+  facet_wrap(~seqtype, scales="free_x") +
+  ylim(c(0,1))
+
+ggplot(annotations_vb_fp_vog_count, 
+       aes(x=num_vog, y=prop_vog, 
+           color=seqtype, fill=seqtype)) +
+  geom_smooth(method="lm", se=F) +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab("Proportion Genes VOGs") +
+  xlab("Number of VOGs") +
+  scale_fill_manual(name="",
+                     values = alpha(rev(pal(3)), 0.2)) +
+  scale_color_manual(name="",
+                     values = alpha(rev(pal(3)), 1)) +
+  facet_wrap(~seqtype, scales="free_x") +
+  ylim(c(0,1))
+
 ggplot(annotations_vb_fp_vog_count, 
        aes(x=num_vog, y=prop_vog, 
            color=seqtype, fill=seqtype)) +
@@ -291,10 +344,22 @@ ggplot(annotations_vb_fp_vog_count,
   ylab("Proportion Genes VOGs") +
   xlab("Number of VOGs") +
   scale_fill_manual(name="",
-                     values = alpha(rev(pal(3)), 0.5)) +
+                     values = alpha(rev(pal(3)), 0.2)) +
   scale_color_manual(name="",
-                     values = alpha(rev(pal(3)), 1))
+                     values = alpha(rev(pal(3)), 1)) +
+  facet_wrap(~seqtype, scales="free_x") +
+  ylim(c(0,1))
 ```
+
+```{r}
+
+cor.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="bacteria"], annotations_vb_fp_vog_count$num_vog[annotations_vb_fp_vog_count$seqtype=="bacteria"])
+
+cor.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="virus"], annotations_vb_fp_vog_count$num_vog[annotations_vb_fp_vog_count$seqtype=="virus"])
+
+cor.test(annotations_vb_fp_vog_count$prop_vog[annotations_vb_fp_vog_count$seqtype=="plasmid"], annotations_vb_fp_vog_count$num_vog[annotations_vb_fp_vog_count$seqtype=="plasmid"])
+```
+
 
 # Thinking about short protists
 ```{r}
@@ -317,6 +382,7 @@ ggplot(viruses, aes(y=percent_viral, x=confusion_matrix_high_MCC)) +
   theme_bw() +
   facet_wrap(~seqtype, scales = "free") 
 ```
+
 ```{r}
 table(viruses$confusion_matrix_high_MCC[viruses$checkv_length>=5000])
 ```
