@@ -51,7 +51,7 @@ getting_viral_set_1 <- function(input_seqs,
                                 include_tuning_viral=FALSE,
                                 tv_1=T, tv_2=T, tv_3=T, tv_4=T,
                                 include_tuning_not_viral=FALSE,
-                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=T,
+                                ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=T, ntv_5=F,
                                 include_virsorter=FALSE) {
   
   keep_score <- rep(0, nrow(input_seqs))
@@ -215,8 +215,8 @@ for (i in c(0,1)){
         for (m in c(0,1)){
           for (n in c(0,1)){
             combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
-            combos_list$toolcombo2[p] <- paste(if(i){"tv"}else{"0"},if(j){"DVF"}else{"0"},
-                                               if(k){"tnv"}else{"0"},if(l){"VB"}else{"0"},
+            combos_list$toolcombo2[p] <- paste(if(i){"tnv"}else{"0"},if(j){"DVF"}else{"0"},
+                                               if(k){"tv"}else{"0"},if(l){"VB"}else{"0"},
                                                if(m){"VS"}else{"0"},if(n){"VS2"}else{"0"})
             combos_list$tune_not_viral[p] <- i
             combos_list$DVF[p] <- j
@@ -296,8 +296,15 @@ accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(a
 ## Visualize how the precision, recall, and MCC changes across pipelines.
 precision
 ```{r}
+pal <- ggthemes::tableau_color_pal(palette="Tableau 10", type="regular")
+```
+
+
+```{r}
 accuracy_scores <- accuracy_scores[order(accuracy_scores$precision, decreasing=F),]
 accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+accuracy_scores$numrules <- factor(accuracy_scores$numrules, levels = unique(accuracy_scores$numrules))
+
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
                                   color=numrules, fill=numrules)) +
@@ -313,12 +320,12 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("Precision") +
   scale_fill_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 ```
 
 ```{r}
@@ -347,12 +354,12 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("Recall") +
   scale_fill_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rules",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 ```
 
 ```{r}
@@ -427,12 +434,12 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
     legend.text=element_text(size=12),
     axis.title=element_text(size=20),
   ) +
-  xlab("Tool Combination (tv, DVF, tnv, VB, VS, VS2)") +
+  xlab("Tool Combination (tnv, DVF, tv, VB, VS, VS2)") +
   ylab("MCC") +
   scale_fill_manual(name="Number of Rule Sets",
-                     values = alpha(rev(pal(6)), 0.5)) +
+                     values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rule Sets",
-                     values = alpha(rev(pal(6)), 1))
+                     values = alpha(rev(viridis(6)), 1))
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numtools, fill=numtools)) +

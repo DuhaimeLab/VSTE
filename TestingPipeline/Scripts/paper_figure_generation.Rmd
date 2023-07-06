@@ -943,7 +943,7 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 
 
 ```{r}
-fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score, 
+fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0" & accuracy_scores_melt$performance_metric!="prop_viral",], aes(x=numrules, y=performance_metric_score, 
                                   color=numrules, fill=numrules)) +
   geom_boxplot() +
   geom_point(alpha=0.5) +
@@ -951,7 +951,7 @@ fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score,
   theme(
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
+    #axis.ticks.y = element_blank(),
     legend.position = "bottom",
     axis.text.y=element_text(size=14),
     axis.text.x=element_text(size=14, angle = 90),
@@ -964,7 +964,9 @@ fig <- ggplot(accuracy_scores_melt, aes(x=numrules, y=performance_metric_score,
                      values = alpha(rev(viridis(6)), 0.5)) +
   scale_color_manual(name="Number of Rule Sets",
                      values = alpha(rev(viridis(6)), 1)) +
-  facet_wrap(~performance_metric)
+  facet_wrap(~performance_metric) +
+  geom_hline(yintercept = 0, color="grey")
+  
 
 fig
 
@@ -2182,12 +2184,12 @@ for (i in c(0,1)){
         for (m in c(0,1)){
           for (n in c(0,1)){
             combos_list$toolcombo[p] <- paste(i,j,k,l,m,n)
-            combos_list$toolcombo2[p] <- paste(if(i){"tnv"}else{"0"},if(j){"DVF"}else{"0"},
-                                               if(k){"tv"}else{"0"},if(l){"VB"}else{"0"},
+            combos_list$toolcombo2[p] <- paste(if(i){"tv"}else{"0"},if(j){"DVF"}else{"0"},
+                                               if(k){"tnv"}else{"0"},if(l){"VB"}else{"0"},
                                                if(m){"VS"}else{"0"},if(n){"VS2"}else{"0"})
-            combos_list$tune_not_viral[p] <- i
+            combos_list$tune_not_viral[p] <- k
             combos_list$DVF[p] <- j
-            combos_list$tune_viral[p] <- k
+            combos_list$tune_viral[p] <- i
             combos_list$VIBRANT[p] <- l
             combos_list$VS[p] <- m
             combos_list$VS2[p] <- n
@@ -2338,6 +2340,25 @@ colnames(num_high_viruses) <- combos_list$toolcombo
 
 rownames(prop_high_viruses) <- combos_list$toolcombo
 colnames(prop_high_viruses) <- combos_list$toolcombo
+
+combos_list$ruletype <- "other"
+combos_list$ruletype[combos_list$toolcombo %in% c("0 0 1 0 0 1",
+                                          "0 0 1 1 0 0",
+                                          "0 0 0 1 0 0")] <- "high precision"
+combos_list$ruletype[combos_list$toolcombo %in% c("1 1 0 0 1 1",
+                                          "1 1 0 1 1 1",
+                                          "1 1 0 0 0 1",
+                                          "1 1 0 1 0 1")] <- "high recall"
+combos_list$ruletype[combos_list$toolcombo %in% c("0 0 1 0 0 1",
+                                          "0 1 1 0 0 1",
+                                          "0 0 0 0 0 1",
+                                          "1 0 1 1 0 1",
+                                          "1 0 1 0 1 1",
+                                          "1 0 1 0 0 1")] <- "high MCC"
+#combos_lists$ruletype[accuracy_scores$toolcombo %in% c("0 0 1 0 0 1")] <- "high MCC and high precision"
+combos_list$ruletype[combos_list$toolcombo %in% c("1 1 1 1 1 1")] <- "all"
+
+combos_list$ruletype <- as.factor(combos_list$ruletype)
 ```
 
 ```{r}
@@ -2349,7 +2370,8 @@ ann_col = data.frame(
     dvf = combos_list$DVF,
     vb = combos_list$VIBRANT,
     vs = combos_list$VS,
-    vs2 = combos_list$VS2
+    vs2 = combos_list$VS2,
+    ruleset_type = combos_list$ruletype
 )
 
 ann_row = data.frame(
@@ -2362,7 +2384,12 @@ ann_colors = list(
   dvf = c("black", pal(6)[2]),
   vb = c("black", pal(6)[4]),
   vs = c("black", pal(6)[5]),
-  vs2 = c("black", pal(6)[6])
+  vs2 = c("black", pal(6)[6]),
+  ruleset_type = c("all" = magma(7)[3],
+                   "high MCC" = magma(7)[4],
+                   "high precision" = magma(7)[5],
+                   "high recall" = magma(7)[6], 
+                   "other" = "grey")
 )
 
 rownames(ann_col) <- combos_list$toolcombo
@@ -2379,7 +2406,46 @@ pheatmap::pheatmap(prop_high_viruses,
                   show_rownames = F,
                   show_colnames = F,
                   filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common.png",
-                  annotation_legend = F)
+                  annotation_legend = T)
+
+pheatmap::pheatmap(prop_high_viruses,
+                  annotation_row = ann_row,
+                  annotation_col=ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = "black",
+                  color = c(rep(viridis(3)[1], 5), rep(viridis(3)[2], 4), viridis(3)[3]),
+                  cutree_rows = 3,
+                  cutree_cols = 3,
+                  show_rownames = F,
+                  show_colnames = F,
+                  filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common_3_breaks.png",
+                  annotation_legend = T)
+
+pheatmap::pheatmap(prop_high_viruses,
+                  annotation_row = ann_row,
+                  annotation_col=ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = "black",
+                  color = c(viridis(4)[1], rep(viridis(4)[2], 4), rep(viridis(4)[3], 4), viridis(4)[4]),
+                  cutree_rows = 3,
+                  cutree_cols = 3,
+                  show_rownames = F,
+                  show_colnames = F,
+                  filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common_4_breaks.png",
+                  annotation_legend = T)
+
+pheatmap::pheatmap(prop_high_viruses,
+                  annotation_row = ann_row,
+                  annotation_col=ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = "black",
+                  color = viridis(5),
+                  cutree_rows = 3,
+                  cutree_cols = 3,
+                  show_rownames = F,
+                  show_colnames = F,
+                  filename = "../IntermediaryFiles/pheatmap_prop_viruses_in_common_5_breaks.png",
+                  annotation_legend = T)
 ```
 
 
@@ -2651,6 +2717,25 @@ sum(viruses_refseq_vir$keep_score_high_MCC>=1)/nrow(viruses_refseq_vir)
 sum(viruses_not_refseq_vir$keep_score_high_MCC>=1)/nrow(viruses_not_refseq_vir)
 ```
 
+```{r}
+viruses_from_tv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
 
+table(viruses_from_tv, viruses$seqtype)
+```
 
+```{r}
+viruses_from_ntv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+table(viruses_from_ntv, viruses$seqtype)
+```
 
