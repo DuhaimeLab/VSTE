@@ -3137,10 +3137,120 @@ rownames(viral_scores_1) &lt;- rn</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlnIDwtIGdncGxvdChhY2N1cmFjeV9zY29yZXNfbWVsdFthY2N1cmFjeV9zY29yZXNfbWVsdCR0b29sY29tYm8hPVwiMCAwIDEgMCAwIDBcIiAmIGFjY3VyYWN5X3Njb3Jlc19tZWx0JHBlcmZvcm1hbmNlX21ldHJpYyE9XCJwcm9wX3ZpcmFsXCIsXSwgYWVzKHg9bnVtcnVsZXMsIHk9cGVyZm9ybWFuY2VfbWV0cmljX3Njb3JlLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xvcj1udW1ydWxlcywgZmlsbD1udW1ydWxlcykpICtcbiAgZ2VvbV9ib3hwbG90KCkgK1xuICBnZW9tX3BvaW50KGFscGhhPTAuNSkgK1xuICB0aGVtZV9saWdodCgpICtcbiAgdGhlbWUoXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIHBhbmVsLmJvcmRlciA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICAjYXhpcy50aWNrcy55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCIsXG4gICAgYXhpcy50ZXh0Lnk9ZWxlbWVudF90ZXh0KHNpemU9MTQpLFxuICAgIGF4aXMudGV4dC54PWVsZW1lbnRfdGV4dChzaXplPTE0LCBhbmdsZSA9IDkwKSxcbiAgICBsZWdlbmQudGV4dD1lbGVtZW50X3RleHQoc2l6ZT0xMiksXG4gICAgYXhpcy50aXRsZT1lbGVtZW50X3RleHQoc2l6ZT0xNiksXG4gICkgK1xuICB5bGFiKFwiU2NvcmVcIikgK1xuICB4bGFiKFwiTnVtYmVyIG9mIFJ1bGUgU2V0c1wiKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJOdW1iZXIgb2YgUnVsZSBTZXRzXCIsXG4gICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSBhbHBoYShyZXYodmlyaWRpcyg2KSksIDAuNSkpICtcbiAgc2NhbGVfY29sb3JfbWFudWFsKG5hbWU9XCJOdW1iZXIgb2YgUnVsZSBTZXRzXCIsXG4gICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSBhbHBoYShyZXYodmlyaWRpcyg2KSksIDEpKSArXG4gIGZhY2V0X3dyYXAofnBlcmZvcm1hbmNlX21ldHJpYykgK1xuICBnZW9tX2hsaW5lKHlpbnRlcmNlcHQgPSAwLCBjb2xvcj1cImdyZXlcIilcbiAgXG5cbmZpZ1xuXG5nZ3NhdmUoXG4gIFwiLi4vSW50ZXJtZWRpYXJ5RmlsZXMvTUNDX3ByZWNpc2lvbl9yZWNhbGxfYm94cGxvdHMucG5nXCIsXG4gIHBsb3QgPSBmaWcsXG4gIHNjYWxlID0gMSxcbiAgd2lkdGggPSA4LFxuICBoZWlnaHQgPSA0LFxuICB1bml0cyA9IGMoXCJpblwiLCBcImNtXCIsIFwibW1cIiwgXCJweFwiKSxcbiAgZHBpID0gMzAwLFxuICBsaW1pdHNpemUgPSBUUlVFXG4pXG5gYGAifQ== -->
+<pre class="r"><code>fig &lt;- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!=&quot;0 0 1 0 0 0&quot; &amp; accuracy_scores_melt$performance_metric!=&quot;prop_viral&quot;,], aes(x=numrules, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    #axis.ticks.y = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab(&quot;Score&quot;) +
+  xlab(&quot;Number of Rule Sets&quot;) +
+  scale_fill_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric) +
+  geom_hline(yintercept = 0, color=&quot;grey&quot;)
+  
+
+fig
+
+ggsave(
+  &quot;../IntermediaryFiles/MCC_precision_recall_boxplots.png&quot;,
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c(&quot;in&quot;, &quot;cm&quot;, &quot;mm&quot;, &quot;px&quot;),
+  dpi = 300,
+  limitsize = TRUE
+)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGFjY3VyYWN5X3Njb3Jlc19tZWx0W2FjY3VyYWN5X3Njb3Jlc19tZWx0JHBlcmZvcm1hbmNlX21ldHJpYyE9XCJNQ0NcIixdLCBhZXMoeD1udW1ydWxlcywgeT1wZXJmb3JtYW5jZV9tZXRyaWNfc2NvcmUsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG9yPW51bXJ1bGVzLCBmaWxsPW51bXJ1bGVzKSkgK1xuICBnZW9tX2JveHBsb3QoKSArXG4gIGdlb21fcG9pbnQoYWxwaGE9MC41KSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGF4aXMudGlja3MueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBsZWdlbmQucG9zaXRpb24gPSBcImJvdHRvbVwiLFxuICAgIGF4aXMudGV4dC55PWVsZW1lbnRfdGV4dChzaXplPTE0KSxcbiAgICBheGlzLnRleHQueD1lbGVtZW50X3RleHQoc2l6ZT0xNCwgYW5nbGUgPSA5MCksXG4gICAgbGVnZW5kLnRleHQ9ZWxlbWVudF90ZXh0KHNpemU9MTIpLFxuICAgIGF4aXMudGl0bGU9ZWxlbWVudF90ZXh0KHNpemU9MTYpLFxuICApICtcbiAgeWxhYihcIlNjb3JlXCIpICtcbiAgeGxhYihcIk51bWJlciBvZiBSdWxlIFNldHNcIikgK1xuICBzY2FsZV9maWxsX21hbnVhbChuYW1lPVwiTnVtYmVyIG9mIFJ1bGUgU2V0c1wiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEocmV2KHZpcmlkaXMoNikpLCAwLjUpKSArXG4gIHNjYWxlX2NvbG9yX21hbnVhbChuYW1lPVwiTnVtYmVyIG9mIFJ1bGUgU2V0c1wiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEocmV2KHZpcmlkaXMoNikpLCAxKSkgK1xuICBmYWNldF93cmFwKH5wZXJmb3JtYW5jZV9tZXRyaWMpXG5cbmdncGxvdChhY2N1cmFjeV9zY29yZXNfbWVsdFthY2N1cmFjeV9zY29yZXNfbWVsdCRwZXJmb3JtYW5jZV9tZXRyaWMhPVwiTUNDXCIsXSwgYWVzKHg9bnVtcnVsZXMsIHk9cGVyZm9ybWFuY2VfbWV0cmljX3Njb3JlLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xvcj1udW10b29scywgZmlsbD1udW10b29scykpICtcbiAgZ2VvbV9ib3hwbG90KCkgK1xuICBnZW9tX3BvaW50KGFscGhhPTAuNSkgK1xuICB0aGVtZV9saWdodCgpICtcbiAgdGhlbWUoXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIHBhbmVsLmJvcmRlciA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBheGlzLnRpY2tzLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIixcbiAgICBheGlzLnRleHQueT1lbGVtZW50X3RleHQoc2l6ZT0xNCksXG4gICAgYXhpcy50ZXh0Lng9ZWxlbWVudF90ZXh0KHNpemU9MTQsIGFuZ2xlID0gOTApLFxuICAgIGxlZ2VuZC50ZXh0PWVsZW1lbnRfdGV4dChzaXplPTEyKSxcbiAgICBheGlzLnRpdGxlPWVsZW1lbnRfdGV4dChzaXplPTE2KSxcbiAgKSArXG4gIHlsYWIoXCJTY29yZVwiKSArXG4gIHhsYWIoXCJOdW1iZXIgb2YgUnVsZXNcIikgK1xuICBzY2FsZV9maWxsX21hbnVhbChuYW1lPVwiTnVtYmVyIG9mIFRvb2xzXCIsXG4gICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSBhbHBoYShyZXYodmlyaWRpcyg2KSksIDAuNSkpICtcbiAgc2NhbGVfY29sb3JfbWFudWFsKG5hbWU9XCJOdW1iZXIgb2YgVG9vbHNcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKHJldih2aXJpZGlzKDYpKSwgMSkpICtcbiAgZmFjZXRfd3JhcCh+cGVyZm9ybWFuY2VfbWV0cmljKVxuXG5nZ3Bsb3QoYWNjdXJhY3lfc2NvcmVzX21lbHRbYWNjdXJhY3lfc2NvcmVzX21lbHQkcGVyZm9ybWFuY2VfbWV0cmljIT1cIk1DQ1wiLF0sIGFlcyh4PW51bXRvb2xzLCB5PXBlcmZvcm1hbmNlX21ldHJpY19zY29yZSwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29sb3I9bnVtcnVsZXMsIGZpbGw9bnVtcnVsZXMpKSArXG4gIGdlb21fYm94cGxvdCgpICtcbiAgZ2VvbV9wb2ludChhbHBoYT0wLjUpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgYXhpcy50aWNrcy55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCIsXG4gICAgYXhpcy50ZXh0Lnk9ZWxlbWVudF90ZXh0KHNpemU9MTQpLFxuICAgIGF4aXMudGV4dC54PWVsZW1lbnRfdGV4dChzaXplPTE0LCBhbmdsZSA9IDkwKSxcbiAgICBsZWdlbmQudGV4dD1lbGVtZW50X3RleHQoc2l6ZT0xMiksXG4gICAgYXhpcy50aXRsZT1lbGVtZW50X3RleHQoc2l6ZT0xNiksXG4gICkgK1xuICB5bGFiKFwiU2NvcmVcIikgK1xuICB4bGFiKFwiTnVtYmVyIG9mIFRvb2xzXCIpICtcbiAgc2NhbGVfZmlsbF9tYW51YWwobmFtZT1cIk51bWJlciBvZiBSdWxlIFNldHNcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKHJldih2aXJpZGlzKDYpKSwgMC41KSkgK1xuICBzY2FsZV9jb2xvcl9tYW51YWwobmFtZT1cIk51bWJlciBvZiBSdWxlIFNldHNcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKHJldih2aXJpZGlzKDYpKSwgMSkpICtcbiAgZmFjZXRfd3JhcCh+cGVyZm9ybWFuY2VfbWV0cmljKVxuICBcbmBgYCJ9 -->
+<pre class="r"><code>ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!=&quot;MCC&quot;,], aes(x=numrules, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab(&quot;Score&quot;) +
+  xlab(&quot;Number of Rule Sets&quot;) +
+  scale_fill_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!=&quot;MCC&quot;,], aes(x=numrules, y=performance_metric_score, 
+                                  color=numtools, fill=numtools)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab(&quot;Score&quot;) +
+  xlab(&quot;Number of Rules&quot;) +
+  scale_fill_manual(name=&quot;Number of Tools&quot;,
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name=&quot;Number of Tools&quot;,
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric)
+
+ggplot(accuracy_scores_melt[accuracy_scores_melt$performance_metric!=&quot;MCC&quot;,], aes(x=numtools, y=performance_metric_score, 
+                                  color=numrules, fill=numrules)) +
+  geom_boxplot() +
+  geom_point(alpha=0.5) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14, angle = 90),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  ylab(&quot;Score&quot;) +
+  xlab(&quot;Number of Tools&quot;) +
+  scale_fill_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 0.5)) +
+  scale_color_manual(name=&quot;Number of Rule Sets&quot;,
+                     values = alpha(rev(viridis(6)), 1)) +
+  facet_wrap(~performance_metric)
+  </code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -3282,6 +3392,13 @@ $numrules
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxub25lLndheSA8LSBhb3YoTUNDIH4gbnVtdG9vbHMsIGRhdGEgPSBhY2N1cmFjeV9zY29yZXMpXG5cbnN1bW1hcnkob25lLndheSlcblxuVHVrZXlIU0Qob25lLndheSlcbmBgYCJ9 -->
+<pre class="r"><code>one.way &lt;- aov(MCC ~ numtools, data = accuracy_scores)
+
+summary(one.way)
+
+TukeyHSD(one.way)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3289,20 +3406,83 @@ $numrules
 <h2>differences based on genome size</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfTUNDIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcblxuYGBgIn0= -->
+<pre class="r"><code>viruses$keep_score_high_MCC &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSA1MCBvciBtb3JlIHdhcm5pbmdzICh1c2Ugd2FybmluZ3MoKSB0byBzZWUgdGhlIGZpcnN0IDUwKVxuIn0= -->
+<pre><code>There were 50 or more warnings (use warnings() to see the first 50)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5gYGAifQ== -->
+<pre class="r"><code>                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29uZnVzaW9uX3Zpcl9jYWxsZWRfc3Vic2V0IDwtIGNvbmZ1c2lvbl92aXJfY2FsbGVkW2NvbmZ1c2lvbl92aXJfY2FsbGVkJHNlcXR5cGU9PVwidmlydXNcIixdXG5cbm9uZS53YXkgPC0gYW92KHBlcl92aXJhbCB+IHNpemUsIGRhdGEgPSBjb25mdXNpb25fdmlyX2NhbGxlZF9zdWJzZXQpXG5cbnN1bW1hcnkob25lLndheSlcblxuVHVrZXlIU0Qob25lLndheSlcbmBgYCJ9 -->
+<pre class="r"><code>confusion_vir_called_subset &lt;- confusion_vir_called[confusion_vir_called$seqtype==&quot;virus&quot;,]
+
+one.way &lt;- aov(per_viral ~ size, data = confusion_vir_called_subset)
+
+summary(one.way)
+
+TukeyHSD(one.way)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29uZnVzaW9uX3Zpcl9jYWxsZWQgPC0gY29uZnVzaW9uX3Zpcl9jYWxsZWQgJT4lIGdyb3VwX2J5KHNlcXR5cGUsIHNpemUpICU+JVxuICBzdW1tYXJpc2UobWVhbj1tZWFuKHBlcl92aXJhbCksIFxuICAgICAgICAgICAgc2Q9c2QocGVyX3ZpcmFsKSlcblxuY29uZnVzaW9uX3Zpcl9jYWxsZWQkc2l6ZSA8LSBmYWN0b3IoY29uZnVzaW9uX3Zpcl9jYWxsZWQkc2l6ZSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGxldmVscyA9IGMoXCIzLTVrYlwiLCBcIjUtMTBrYlwiLCBcIj4xMGtiXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>confusion_vir_called &lt;- confusion_vir_called %&gt;% group_by(seqtype, size) %&gt;%
+  summarise(mean=mean(per_viral), 
+            sd=sd(per_viral))
+
+confusion_vir_called$size &lt;- factor(confusion_vir_called$size,
+                                    levels = c(&quot;3-5kb&quot;, &quot;5-10kb&quot;, &quot;&gt;10kb&quot;))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGNvbmZ1c2lvbl92aXJfY2FsbGVkLCBhZXMoeT1tZWFuLCB4PXNpemUsXG4gICAgICAgICAgICAgICAgICAgZmlsbD1zZXF0eXBlLFxuICAgICAgICAgICAgICAgICAgIGNvbG9yPXNlcXR5cGUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBwb3NpdGlvbj1wb3NpdGlvbl9kb2RnZSgpKSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGF4aXMudGlja3MueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBsZWdlbmQucG9zaXRpb24gPSBcImJvdHRvbVwiLFxuICAgIGF4aXMudGV4dC55PWVsZW1lbnRfdGV4dChzaXplPTE0KSxcbiAgICBheGlzLnRleHQueD1lbGVtZW50X3RleHQoc2l6ZT0xNCksXG4gICAgbGVnZW5kLnRleHQ9ZWxlbWVudF90ZXh0KHNpemU9MTIpLFxuICAgIGF4aXMudGl0bGU9ZWxlbWVudF90ZXh0KHNpemU9MTYpLFxuICApICtcbiAgZ2VvbV9lcnJvcmJhcihhZXMoeW1pbj1tZWFuLXNkLCB5bWF4PW1lYW4rc2QpLCB3aWR0aD0uMixcbiAgICAgICAgICAgICAgICAgcG9zaXRpb249cG9zaXRpb25fZG9kZ2UoLjkpKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKHJldihwYWwoNikpLCAwLjUpKSArXG4gIHNjYWxlX2NvbG9yX21hbnVhbChuYW1lPVwiXCIsXG4gICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSBhbHBoYShyZXYocGFsKDYpKSwgMSkpICtcbiAgeGxhYihcIkxlbmd0aFwiKSArXG4gIHlsYWIoXCJTZXF1ZW5jZXMgQ2FsbGVkIFZpcmFsICglKVwiKSBcbmBgYCJ9 -->
+<pre class="r"><code>ggplot(confusion_vir_called, aes(y=mean, x=size,
+                   fill=seqtype,
+                   color=seqtype)) +
+  geom_bar(stat=&quot;identity&quot;, position=position_dodge()) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.y=element_text(size=14),
+    axis.text.x=element_text(size=14),
+    legend.text=element_text(size=12),
+    axis.title=element_text(size=16),
+  ) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2,
+                 position=position_dodge(.9)) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(rev(pal(6)), 0.5)) +
+  scale_color_manual(name=&quot;&quot;,
+                     values = alpha(rev(pal(6)), 1)) +
+  xlab(&quot;Length&quot;) +
+  ylab(&quot;Sequences Called Viral (%)&quot;) </code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxub25lLndheSA8LSBhb3YobWVhbiB+IHNlcXR5cGUsIGRhdGEgPSBjb25mdXNpb25fdmlyX2NhbGxlZClcblxuc3VtbWFyeShvbmUud2F5KVxuXG5UdWtleUhTRChvbmUud2F5KVxuYGBgIn0= -->
+<pre class="r"><code>one.way &lt;- aov(mean ~ seqtype, data = confusion_vir_called)
+
+summary(one.way)
+
+TukeyHSD(one.way)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3310,20 +3490,214 @@ $numrules
 <h2>visualizing a select set of tools</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfYWxsIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfcmVjYWxsIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfcHJlY2lzaW9uIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfTUNDIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJHRydWVfdmlydXMgPC0gXCJub3RcIlxudmlydXNlcyR0cnVlX3ZpcnVzW3ZpcnVzZXMkc2VxdHlwZT09XCJ2aXJ1c1wiXSA8LSBcInZpcnVzXCJcblxudmlydXNlc19sb25nX3Njb3JlcyA8LSB2aXJ1c2VzICU+JSBcbiAgc2VsZWN0KGNvbnRhaW5zKFwia2VlcF9zY29yZV9oaWdoXCIpLCB0cnVlX3ZpcnVzKSAlPiVcbiAgcGl2b3RfbG9uZ2VyKGNvbHM9Y29udGFpbnMoXCJrZWVwX3Njb3JlX1wiKSwgXG4gICAgICAgICAgICAgICBuYW1lc190bz1cInJ1bGVfY29tYmluYXRpb25cIixcbiAgICAgICAgICAgICAgIHZhbHVlc190bz1cInZpcmFsX3Njb3JlXCIpICU+JSBcbiAgbXV0YXRlKHZpcmFsX3Njb3JlPWFzLmZhY3Rvcihyb3VuZCh2aXJhbF9zY29yZSkpKSAlPiVcbiAgZ3JvdXBfYnkocnVsZV9jb21iaW5hdGlvbiwgdmlyYWxfc2NvcmUsIHRydWVfdmlydXMpICU+JVxuICBzdW1tYXJpc2UobiA9IG4oKSlcblxucGFsX3B1cnBsZSA8LSBSQ29sb3JCcmV3ZXI6OmJyZXdlci5wYWwoNiwgXCJQdXJwbGVzXCIpXG5wYWxfb3JhbmdlIDwtIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg0LCBcIk9yYW5nZXNcIilcblxuZ2dwbG90KHZpcnVzZXNfbG9uZ19zY29yZXMsIGFlcyh5PW4sIHg9cnVsZV9jb21iaW5hdGlvbixcbiAgICAgICAgICAgICAgICAgICBmaWxsPXZpcmFsX3Njb3JlKSkgK1xuICBnZW9tX2JhcihzdGF0PVwiaWRlbnRpdHlcIiwgY29sb3I9XCJibGFja1wiKSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICBjb29yZF9mbGlwKCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCJcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KHBhbF9vcmFuZ2UpLCBwYWxfcHVycGxlKSwgMC44KSkgK1xuICB4bGFiKFwiXCIpICtcbiAgeWxhYihcIk51bWJlciBvZiBTZXF1ZW5jZXNcIikgKyBcbiAgZmFjZXRfZ3JpZCh+dHJ1ZV92aXJ1cywgc2NhbGVzID0gXCJmcmVlXCIpXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_high_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+viruses$keep_score_high_recall &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+viruses$keep_score_high_precision &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+viruses$keep_score_high_MCC &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_high&quot;), true_virus) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, true_virus) %&gt;%
+  summarise(n = n())
+
+pal_purple &lt;- RColorBrewer::brewer.pal(6, &quot;Purples&quot;)
+pal_orange &lt;- RColorBrewer::brewer.pal(4, &quot;Oranges&quot;)
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~true_virus, scales = &quot;free&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlc19sb25nX3Njb3JlcyA8LSB2aXJ1c2VzICU+JSBcbiAgc2VsZWN0KGNvbnRhaW5zKFwia2VlcF9zY29yZV9oaWdoXCIpLCBtYXhfc2NvcmVfZ3JvdXAsIHRydWVfdmlydXMpICU+JVxuICBmaWx0ZXIodHJ1ZV92aXJ1cz09XCJ2aXJ1c1wiKSAlPiVcbiAgcGl2b3RfbG9uZ2VyKGNvbHM9Y29udGFpbnMoXCJrZWVwX3Njb3JlX1wiKSwgXG4gICAgICAgICAgICAgICBuYW1lc190bz1cInJ1bGVfY29tYmluYXRpb25cIixcbiAgICAgICAgICAgICAgIHZhbHVlc190bz1cInZpcmFsX3Njb3JlXCIpICU+JSBcbiAgbXV0YXRlKHZpcmFsX3Njb3JlPWFzLmZhY3Rvcihyb3VuZCh2aXJhbF9zY29yZSkpKSAlPiVcbiAgZ3JvdXBfYnkocnVsZV9jb21iaW5hdGlvbiwgdmlyYWxfc2NvcmUsIG1heF9zY29yZV9ncm91cCkgJT4lXG4gIHN1bW1hcmlzZShuID0gbigpKVxuXG5wYWxfcHVycGxlIDwtIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg2LCBcIlB1cnBsZXNcIilcbnBhbF9vcmFuZ2UgPC0gUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDMsIFwiT3Jhbmdlc1wiKVxuXG5nZ3Bsb3QodmlydXNlc19sb25nX3Njb3JlcywgYWVzKHk9biwgeD1ydWxlX2NvbWJpbmF0aW9uLFxuICAgICAgICAgICAgICAgICAgIGZpbGw9dmlyYWxfc2NvcmUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBjb2xvcj1cImJsYWNrXCIpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIGNvb3JkX2ZsaXAoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIlxuICApICtcbiAgc2NhbGVfZmlsbF9tYW51YWwobmFtZT1cIlwiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEoYyhyZXYocGFsX29yYW5nZSksIHBhbF9wdXJwbGUpLCAwLjgpKSArXG4gIHhsYWIoXCJcIikgK1xuICB5bGFiKFwiTnVtYmVyIG9mIFNlcXVlbmNlc1wiKSArIFxuICBmYWNldF9ncmlkKH5tYXhfc2NvcmVfZ3JvdXAsIHNjYWxlcyA9IFwiZnJlZVwiKSArXG4gIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBzY2FsZXM6OnByZXR0eV9icmVha3MobiA9IDIpKVxuXG52aXJ1c2VzX2xvbmdfc2NvcmVzIDwtIHZpcnVzZXMgJT4lIFxuICBzZWxlY3QoY29udGFpbnMoXCJrZWVwX3Njb3JlX2hpZ2hcIiksIG1heF9zY29yZV9ncm91cCwgdHJ1ZV92aXJ1cykgJT4lXG4gIGZpbHRlcih0cnVlX3ZpcnVzPT1cIm5vdFwiKSAlPiVcbiAgcGl2b3RfbG9uZ2VyKGNvbHM9Y29udGFpbnMoXCJrZWVwX3Njb3JlX1wiKSwgXG4gICAgICAgICAgICAgICBuYW1lc190bz1cInJ1bGVfY29tYmluYXRpb25cIixcbiAgICAgICAgICAgICAgIHZhbHVlc190bz1cInZpcmFsX3Njb3JlXCIpICU+JSBcbiAgbXV0YXRlKHZpcmFsX3Njb3JlPWFzLmZhY3Rvcihyb3VuZCh2aXJhbF9zY29yZSkpKSAlPiVcbiAgZ3JvdXBfYnkocnVsZV9jb21iaW5hdGlvbiwgdmlyYWxfc2NvcmUsIG1heF9zY29yZV9ncm91cCkgJT4lXG4gIHN1bW1hcmlzZShuID0gbigpKVxuXG5wYWxfcHVycGxlIDwtIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg2LCBcIlB1cnBsZXNcIilcbnBhbF9vcmFuZ2UgPC0gUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDQsIFwiT3Jhbmdlc1wiKVxuXG5nZ3Bsb3QodmlydXNlc19sb25nX3Njb3JlcywgYWVzKHk9biwgeD1ydWxlX2NvbWJpbmF0aW9uLFxuICAgICAgICAgICAgICAgICAgIGZpbGw9dmlyYWxfc2NvcmUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBjb2xvcj1cImJsYWNrXCIpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIGNvb3JkX2ZsaXAoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIlxuICApICtcbiAgc2NhbGVfZmlsbF9tYW51YWwobmFtZT1cIlwiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEoYyhyZXYocGFsX29yYW5nZSksIHBhbF9wdXJwbGUpLCAwLjgpKSArXG4gIHhsYWIoXCJcIikgK1xuICB5bGFiKFwiTnVtYmVyIG9mIFNlcXVlbmNlc1wiKSArIFxuICBmYWNldF9ncmlkKH5tYXhfc2NvcmVfZ3JvdXAsIHNjYWxlcyA9IFwiZnJlZVwiKSArXG4gIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBzY2FsZXM6OnByZXR0eV9icmVha3MobiA9IDIpKVxuYGBgIn0= -->
+<pre class="r"><code>viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_high&quot;), max_score_group, true_virus) %&gt;%
+  filter(true_virus==&quot;virus&quot;) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, max_score_group) %&gt;%
+  summarise(n = n())
+
+pal_purple &lt;- RColorBrewer::brewer.pal(6, &quot;Purples&quot;)
+pal_orange &lt;- RColorBrewer::brewer.pal(3, &quot;Oranges&quot;)
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~max_score_group, scales = &quot;free&quot;) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 2))
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_high&quot;), max_score_group, true_virus) %&gt;%
+  filter(true_virus==&quot;not&quot;) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, max_score_group) %&gt;%
+  summarise(n = n())
+
+pal_purple &lt;- RColorBrewer::brewer.pal(6, &quot;Purples&quot;)
+pal_orange &lt;- RColorBrewer::brewer.pal(4, &quot;Oranges&quot;)
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~max_score_group, scales = &quot;free&quot;) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 2))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="effect-of-combining-tools" class="section level3">
 <h3>Effect of combining tools</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2R2ZiA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX2R2Zl92cyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2R2Zl92c192YiA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2R2Zl92c192Yl92czIgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9kdmZfdnNfdmJfdnMyX3R2IDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfZHZmX3ZzX3ZiX3ZzMl90dl90bnYgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMkdHJ1ZV92aXJ1cyA8LSBcIm5vdFwiXG52aXJ1c2VzJHRydWVfdmlydXNbdmlydXNlcyRzZXF0eXBlPT1cInZpcnVzXCJdIDwtIFwidmlydXNcIlxuXG52aXJ1c2VzX2xvbmdfc2NvcmVzIDwtIHZpcnVzZXMgJT4lIFxuICBzZWxlY3QoY29udGFpbnMoXCJrZWVwX3Njb3JlX2R2ZlwiKSwgc2l6ZV9jbGFzcywgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV9cIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzaXplX2NsYXNzLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpXG5cbnZpcnVzZXNfbG9uZ19zY29yZXMkc2l6ZV9jbGFzcyA8LSBmYWN0b3IodmlydXNlc19sb25nX3Njb3JlcyRzaXplX2NsYXNzLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbGV2ZWxzID0gYyhcIjMtNWtiXCIsIFwiNS0xMGtiXCIsIFwiPjEwa2JcIikpXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_dvf &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_dvf_vs &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_dvf_vs_vb &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_dvf_vs_vb_vs2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_dvf_vs_vb_vs2_tv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_dvf_vs_vb_vs2_tv_tnv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_dvf&quot;), size_class, seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, size_class, seqtype) %&gt;%
+  summarise(n = n())
+
+viruses_long_scores$size_class &lt;- factor(viruses_long_scores$size_class,
+                                    levels = c(&quot;3-5kb&quot;, &quot;5-10kb&quot;, &quot;&gt;10kb&quot;))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KHZpcnVzZXNfbG9uZ19zY29yZXMsIGFlcyh5PW4sIHg9cnVsZV9jb21iaW5hdGlvbixcbiAgICAgICAgICAgICAgICAgICBmaWxsPXZpcmFsX3Njb3JlKSkgK1xuICBnZW9tX2JhcihzdGF0PVwiaWRlbnRpdHlcIikgK1xuICB0aGVtZV9saWdodCgpICtcbiAgY29vcmRfZmxpcCgpICtcbiAgdGhlbWUoXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIHBhbmVsLmJvcmRlciA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBsZWdlbmQucG9zaXRpb24gPSBcImJvdHRvbVwiXG4gICkgK1xuICBzY2FsZV9maWxsX2JyZXdlcihwYWxldHRlID0gXCJQdU9yXCIsICkgK1xuICB4bGFiKFwiXCIpICtcbiAgeWxhYihcIk51bWJlciBvZiBTZXF1ZW5jZXNcIikgKyBcbiAgc2NhbGVfeF9kaXNjcmV0ZShsYWJlbHM9YyhcIkRWRlwiLCBcIkRWRitWU1wiLCBcIkRWRitWUytWQlwiLCBcIkRWRitWUytWQitWUzJcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIkRWRitWUytWQitWUzIrYWRkaXRpb25cIiwgXCJEVkYrVlMrVkIrVlMyK2FkZGl0aW9uLXJlbW92YWxcIikpICtcbiAgZmFjZXRfZ3JpZCh+c2VxdHlwZSwgc2NhbGVzID0gXCJmcmVlXCIpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_brewer(palette = &quot;PuOr&quot;, ) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  scale_x_discrete(labels=c(&quot;DVF&quot;, &quot;DVF+VS&quot;, &quot;DVF+VS+VB&quot;, &quot;DVF+VS+VB+VS2&quot;,
+                            &quot;DVF+VS+VB+VS2+addition&quot;, &quot;DVF+VS+VB+VS2+addition-removal&quot;)) +
+  facet_grid(~seqtype, scales = &quot;free&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3331,6 +3705,145 @@ $numrules
 <h3>Effect of tuning rules - subset</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfYWxsIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdHZfMT1ULCB0dl8yPVQsIHR2XzM9RiwgdHZfND1ULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1ULCBudHZfMj1ULCBudHZfMz1ULCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfbmVpdGhlciA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9VCwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1GLCBudHZfMj1GLCBudHZfMz1GLCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMSA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9VCwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9VCwgbnR2XzI9RiwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMiA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9VCwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9VCwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9VCwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9RiwgbnR2XzM9VCwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF90dl8wIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9VCwgbnR2XzI9VCwgbnR2XzM9VCwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfdHZfMSA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9RiwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9VCwgbnR2XzI9VCwgbnR2XzM9VCwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF90dl8yIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9RiwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1ULCBudHZfMj1ULCBudHZfMz1ULCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfYWxsX3R2XzQgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdHZfMT1GLCB0dl8yPUYsIHR2XzM9RiwgdHZfND1ULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPVQsIG50dl8yPVQsIG50dl8zPVQsIG50dl80PUYsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cblxudmlydXNlcyR0cnVlX3ZpcnVzIDwtIFwibm90XCJcbnZpcnVzZXMkdHJ1ZV92aXJ1c1t2aXJ1c2VzJHNlcXR5cGU9PVwidmlydXNcIl0gPC0gXCJ2aXJ1c1wiXG5cbnZpcnVzZXNfbG9uZ19zY29yZXMgPC0gdmlydXNlcyAlPiUgXG4gIHNlbGVjdChjb250YWlucyhcImtlZXBfc2NvcmVfYWxsX1wiKSwgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV9cIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpIFxuXG52aXJ1c2VzX2xvbmdfc2NvcmVzJHR1bmluZ190eXBlIDwtIFwidHVuaW5nIGFkZGl0aW9uXCJcbnZpcnVzZXNfbG9uZ19zY29yZXMkdHVuaW5nX3R5cGVbZ3JlcGwoXCJudHZcIiwgdmlydXNlc19sb25nX3Njb3JlcyRydWxlX2NvbWJpbmF0aW9uKV0gPC0gXCJ0dW5pbmcgcmVtb3ZhbFwiXG52aXJ1c2VzX2xvbmdfc2NvcmVzJHR1bmluZ190eXBlW3ZpcnVzZXNfbG9uZ19zY29yZXMkcnVsZV9jb21iaW5hdGlvbj09XCJrZWVwX3Njb3JlX2FsbF9udHZfYWxsXCJdIDwtIFwiYWxsXCJcbnZpcnVzZXNfbG9uZ19zY29yZXMkdHVuaW5nX3R5cGVbdmlydXNlc19sb25nX3Njb3JlcyRydWxlX2NvbWJpbmF0aW9uPT1cImtlZXBfc2NvcmVfYWxsX250dl9uZWl0aGVyXCJdIDwtIFwibmVpdGhlclwiXG5cbmZpZyA8LSBnZ3Bsb3QodmlydXNlc19sb25nX3Njb3JlcywgYWVzKHk9biwgeD1ydWxlX2NvbWJpbmF0aW9uLFxuICAgICAgICAgICAgICAgICAgIGZpbGw9dmlyYWxfc2NvcmUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBjb2xvcj1cImJsYWNrXCIpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIGNvb3JkX2ZsaXAoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIixcbiAgICBzdHJpcC5iYWNrZ3JvdW5kID0gZWxlbWVudF9yZWN0KGZpbGw9XCJ3aGl0ZVwiLCBjb2xvcj1cImdyZXlcIiksXG4gICAgc3RyaXAudGV4dCA9IGVsZW1lbnRfdGV4dChjb2xvcj1cImJsYWNrXCIpXG4gICkgK1xuICBzY2FsZV9maWxsX21hbnVhbChuYW1lPVwiVmlyYWwgU2NvcmVcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg5LFwiT3Jhbmdlc1wiKVs0OjddKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBSQ29sb3JCcmV3ZXI6OmJyZXdlci5wYWwoOSxcIlB1cnBsZXNcIilbNDo5XSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICApLCAwLjgpKSArXG4gIHhsYWIoXCJSdWxlc2V0XCIpICtcbiAgeWxhYihcIlByb3BvcnRpb25cIikgKyBcbiAgZmFjZXRfZ3JpZCh0dW5pbmdfdHlwZX5zZXF0eXBlLCBzY2FsZXMgPSBcImZyZWVcIikgXG5cbmZpZ1xuXG5nZ3NhdmUoXG4gIFwiLi4vSW50ZXJtZWRpYXJ5RmlsZXMvdHVuaW5nX3J1bGVzZXRzLnBuZ1wiLFxuICBwbG90ID0gZmlnLFxuICBzY2FsZSA9IDEsXG4gIHdpZHRoID0gOCxcbiAgaGVpZ2h0ID0gNixcbiAgdW5pdHMgPSBjKFwiaW5cIiksXG4gIGRwaSA9IDMwMCxcbiAgbGltaXRzaXplID0gVFJVRVxuKVxuXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_all_ntv_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_viral = T,
+                                              ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+viruses$keep_score_all_ntv_neither &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_viral = T,
+                                              ntv_1=T, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=T, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_3 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=F, tv_3=F, tv_4=F,
+                                              ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=T, tv_3=F, tv_4=F,
+                                              ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_4 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=T,
+                                              ntv_1=T, ntv_2=T, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_all_&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n()) 
+
+viruses_long_scores$tuning_type &lt;- &quot;tuning addition&quot;
+viruses_long_scores$tuning_type[grepl(&quot;ntv&quot;, viruses_long_scores$rule_combination)] &lt;- &quot;tuning removal&quot;
+viruses_long_scores$tuning_type[viruses_long_scores$rule_combination==&quot;keep_score_all_ntv_all&quot;] &lt;- &quot;all&quot;
+viruses_long_scores$tuning_type[viruses_long_scores$rule_combination==&quot;keep_score_all_ntv_neither&quot;] &lt;- &quot;neither&quot;
+
+fig &lt;- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    strip.background = element_rect(fill=&quot;white&quot;, color=&quot;grey&quot;),
+    strip.text = element_text(color=&quot;black&quot;)
+  ) +
+  scale_fill_manual(name=&quot;Viral Score&quot;,
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,&quot;Oranges&quot;)[4:7]),
+                            RColorBrewer::brewer.pal(9,&quot;Purples&quot;)[4:9] 
+                            ), 0.8)) +
+  xlab(&quot;Ruleset&quot;) +
+  ylab(&quot;Proportion&quot;) + 
+  facet_grid(tuning_type~seqtype, scales = &quot;free&quot;) 
+
+fig
+
+ggsave(
+  &quot;../IntermediaryFiles/tuning_rulesets.png&quot;,
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 6,
+  units = c(&quot;in&quot;),
+  dpi = 300,
+  limitsize = TRUE
+)
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3338,15 +3851,205 @@ $numrules
 <h3>Effect of tuning addition rules</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF90dl9hbGwgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfdHZfMSA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9RiwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfdHZfMiA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9VCwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfdHZfMyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9VCwgdHZfMz1ULCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfdHZfMCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPUYsIHR2XzI9RiwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMkdHJ1ZV92aXJ1cyA8LSBcIm5vdFwiXG52aXJ1c2VzJHRydWVfdmlydXNbdmlydXNlcyRzZXF0eXBlPT1cInZpcnVzXCJdIDwtIFwidmlydXNcIlxuXG52aXJ1c2VzX2xvbmdfc2NvcmVzIDwtIHZpcnVzZXMgJT4lIFxuICBzZWxlY3QoY29udGFpbnMoXCJrZWVwX3Njb3JlX2FsbF90dlwiKSwgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV9cIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpXG5cbmZpZyA8LSBnZ3Bsb3QodmlydXNlc19sb25nX3Njb3JlcywgYWVzKHk9biwgeD1ydWxlX2NvbWJpbmF0aW9uLFxuICAgICAgICAgICAgICAgICAgIGZpbGw9dmlyYWxfc2NvcmUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBjb2xvcj1cImJsYWNrXCIpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIGNvb3JkX2ZsaXAoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIixcbiAgICBzdHJpcC5iYWNrZ3JvdW5kID0gZWxlbWVudF9yZWN0KGZpbGw9XCJ3aGl0ZVwiLCBjb2xvcj1cImdyZXlcIiksXG4gICAgc3RyaXAudGV4dCA9IGVsZW1lbnRfdGV4dChjb2xvcj1cImJsYWNrXCIpXG4gICkgK1xuICBzY2FsZV9maWxsX21hbnVhbChuYW1lPVwiVmlyYWwgU2NvcmVcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg5LFwiT3Jhbmdlc1wiKVs0OjddKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBSQ29sb3JCcmV3ZXI6OmJyZXdlci5wYWwoOSxcIlB1cnBsZXNcIilbNDo5XSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICApLCAwLjgpKSArXG4gIHhsYWIoXCJSdWxlc2V0XCIpICtcbiAgeWxhYihcIlByb3BvcnRpb25cIikgKyBcbiAgZmFjZXRfZ3JpZCh+c2VxdHlwZSwgc2NhbGVzID0gXCJmcmVlXCIpIFxuXG5maWdcblxuZ2dzYXZlKFxuICBcIi4uL0ludGVybWVkaWFyeUZpbGVzL3R1bmluZ19hZGRpdGlvbl9ydWxlc2V0c19hbGwucG5nXCIsXG4gIHBsb3QgPSBmaWcsXG4gIHNjYWxlID0gMSxcbiAgd2lkdGggPSA4LFxuICBoZWlnaHQgPSA0LFxuICB1bml0cyA9IGMoXCJpblwiKSxcbiAgZHBpID0gMzAwLFxuICBsaW1pdHNpemUgPSBUUlVFXG4pXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_all_tv_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=F, tv_3=F, tv_4=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_3 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=T, tv_3=T, tv_4=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_tv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_all_tv&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n())
+
+fig &lt;- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    strip.background = element_rect(fill=&quot;white&quot;, color=&quot;grey&quot;),
+    strip.text = element_text(color=&quot;black&quot;)
+  ) +
+  scale_fill_manual(name=&quot;Viral Score&quot;,
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,&quot;Oranges&quot;)[4:7]),
+                            RColorBrewer::brewer.pal(9,&quot;Purples&quot;)[4:9] 
+                            ), 0.8)) +
+  xlab(&quot;Ruleset&quot;) +
+  ylab(&quot;Proportion&quot;) + 
+  facet_grid(~seqtype, scales = &quot;free&quot;) 
+
+fig
+
+ggsave(
+  &quot;../IntermediaryFiles/tuning_addition_rulesets_all.png&quot;,
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c(&quot;in&quot;),
+  dpi = 300,
+  limitsize = TRUE
+)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>same idea but VS2 base</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl90dl9hbGwgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfNF90dl8yIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9RiwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl90dl80X3R2XzJfdHZfMSA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9VCwgdHZfMz1GLCB0dl80PVQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfMSA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPVQsIHR2XzI9RiwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfMiA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPUYsIHR2XzI9VCwgdHZfMz1GLCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfMyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPUYsIHR2XzI9RiwgdHZfMz1ULCB0dl80PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfNCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0dl8xPUYsIHR2XzI9RiwgdHZfMz1GLCB0dl80PVQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfdHZfMCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiB2aXJ1c2VzJGtlZXBfc2NvcmVfdnMyX3R2X250diA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRikgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcblxudmlydXNlcyR0cnVlX3ZpcnVzIDwtIFwibm90XCJcbnZpcnVzZXMkdHJ1ZV92aXJ1c1t2aXJ1c2VzJHNlcXR5cGU9PVwidmlydXNcIl0gPC0gXCJ2aXJ1c1wiXG5cbnZpcnVzZXNfbG9uZ19zY29yZXMgPC0gdmlydXNlcyAlPiUgXG4gIHNlbGVjdChjb250YWlucyhcImtlZXBfc2NvcmVfdnMyX3R2X1wiKSwgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV9cIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_vs2_tv_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_4_tv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_4_tv_2_tv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=F, tv_3=F, tv_4=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=T, tv_3=F, tv_4=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_3 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=T, tv_4=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_4 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=F, tv_2=F, tv_3=F, tv_4=T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_tv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+                                              
+ viruses$keep_score_vs2_tv_ntv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)                                             
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_vs2_tv_&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n())</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlnIDwtIGdncGxvdCh2aXJ1c2VzX2xvbmdfc2NvcmVzLCBhZXMoeT1uLCB4PXJ1bGVfY29tYmluYXRpb24sXG4gICAgICAgICAgICAgICAgICAgZmlsbD12aXJhbF9zY29yZSkpICtcbiAgZ2VvbV9iYXIoc3RhdD1cImlkZW50aXR5XCIsIGNvbG9yPVwiYmxhY2tcIikgK1xuICB0aGVtZV9saWdodCgpICtcbiAgY29vcmRfZmxpcCgpICtcbiAgdGhlbWUoXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIHBhbmVsLmJvcmRlciA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBsZWdlbmQucG9zaXRpb24gPSBcImJvdHRvbVwiLFxuICAgIHN0cmlwLmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbD1cIndoaXRlXCIsIGNvbG9yPVwiZ3JleVwiKSxcbiAgICBzdHJpcC50ZXh0ID0gZWxlbWVudF90ZXh0KGNvbG9yPVwiYmxhY2tcIilcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJWaXJhbCBTY29yZVwiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEoYyhyZXYoUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDksXCJPcmFuZ2VzXCIpWzQ6N10pLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg5LFwiUHVycGxlc1wiKVs0OjldIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICksIDAuOCkpICtcbiAgeGxhYihcIlJ1bGVzZXRcIikgK1xuICB5bGFiKFwiUHJvcG9ydGlvblwiKSArIFxuICBmYWNldF9ncmlkKH5zZXF0eXBlLCBzY2FsZXMgPSBcImZyZWVcIikgXG5cbmZpZ1xuYGBgIn0= -->
+<pre class="r"><code>fig &lt;- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    strip.background = element_rect(fill=&quot;white&quot;, color=&quot;grey&quot;),
+    strip.text = element_text(color=&quot;black&quot;)
+  ) +
+  scale_fill_manual(name=&quot;Viral Score&quot;,
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,&quot;Oranges&quot;)[4:7]),
+                            RColorBrewer::brewer.pal(9,&quot;Purples&quot;)[4:9] 
+                            ), 0.8)) +
+  xlab(&quot;Ruleset&quot;) +
+  ylab(&quot;Proportion&quot;) + 
+  facet_grid(~seqtype, scales = &quot;free&quot;) 
+
+fig</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3354,69 +4057,425 @@ $numrules
 <h3>Effect of tuning removal rules</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfYWxsIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfYWxsX250dl8xIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPVQsIG50dl8yPUYsIG50dl8zPUYsIG50dl80PUYsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfbnR2XzIgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9VCwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1GLCBudHZfMj1GLCBudHZfMz1ULCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfYWxsX250dl80IDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPUYsIG50dl8yPUYsIG50dl8zPUYsIG50dl80PVQsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IFQpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9hbGxfbnR2XzUgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9RiwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1GLCBudHZfMj1GLCBudHZfMz1GLCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBUKVxuXG52aXJ1c2VzJHRydWVfdmlydXMgPC0gXCJub3RcIlxudmlydXNlcyR0cnVlX3ZpcnVzW3ZpcnVzZXMkc2VxdHlwZT09XCJ2aXJ1c1wiXSA8LSBcInZpcnVzXCJcblxudmlydXNlc19sb25nX3Njb3JlcyA8LSB2aXJ1c2VzICU+JSBcbiAgc2VsZWN0KGNvbnRhaW5zKFwia2VlcF9zY29yZV9hbGxfbnR2XCIpLCBzZXF0eXBlKSAlPiVcbiAgcGl2b3RfbG9uZ2VyKGNvbHM9Y29udGFpbnMoXCJrZWVwX3Njb3JlX1wiKSwgXG4gICAgICAgICAgICAgICBuYW1lc190bz1cInJ1bGVfY29tYmluYXRpb25cIixcbiAgICAgICAgICAgICAgIHZhbHVlc190bz1cInZpcmFsX3Njb3JlXCIpICU+JSBcbiAgbXV0YXRlKHZpcmFsX3Njb3JlPWFzLmZhY3Rvcihyb3VuZCh2aXJhbF9zY29yZSkpKSAlPiVcbiAgZ3JvdXBfYnkocnVsZV9jb21iaW5hdGlvbiwgdmlyYWxfc2NvcmUsIHNlcXR5cGUpICU+JVxuICBzdW1tYXJpc2UobiA9IG4oKSlcblxuZmlnIDwtIGdncGxvdCh2aXJ1c2VzX2xvbmdfc2NvcmVzLCBhZXMoeT1uLCB4PXJ1bGVfY29tYmluYXRpb24sXG4gICAgICAgICAgICAgICAgICAgZmlsbD12aXJhbF9zY29yZSkpICtcbiAgZ2VvbV9iYXIoc3RhdD1cImlkZW50aXR5XCIsIGNvbG9yPVwiYmxhY2tcIikgK1xuICB0aGVtZV9saWdodCgpICtcbiAgY29vcmRfZmxpcCgpICtcbiAgdGhlbWUoXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9ibGFuaygpLFxuICAgIHBhbmVsLmJvcmRlciA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBsZWdlbmQucG9zaXRpb24gPSBcImJvdHRvbVwiLFxuICAgIHN0cmlwLmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbD1cIndoaXRlXCIsIGNvbG9yPVwiZ3JleVwiKSxcbiAgICBzdHJpcC50ZXh0ID0gZWxlbWVudF90ZXh0KGNvbG9yPVwiYmxhY2tcIilcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJWaXJhbCBTY29yZVwiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEoYyhyZXYoUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDksXCJPcmFuZ2VzXCIpWzQ6N10pLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg5LFwiUHVycGxlc1wiKVs0OjldIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICksIDAuOCkpICtcbiAgeGxhYihcIlJ1bGVzZXRcIikgK1xuICB5bGFiKFwiUHJvcG9ydGlvblwiKSArIFxuICBmYWNldF9ncmlkKH5zZXF0eXBlLCBzY2FsZXMgPSBcImZyZWVcIikgXG5cbmZpZ1xuXG5nZ3NhdmUoXG4gIFwiLi4vSW50ZXJtZWRpYXJ5RmlsZXMvdHVuaW5nX3JlbW92YWxfcnVsZXNldHMtYWxsLnBuZ1wiLFxuICBwbG90ID0gZmlnLFxuICBzY2FsZSA9IDEsXG4gIHdpZHRoID0gOCxcbiAgaGVpZ2h0ID0gNCxcbiAgdW5pdHMgPSBjKFwiaW5cIiksXG4gIGRwaSA9IDMwMCxcbiAgbGltaXRzaXplID0gVFJVRVxuKVxuYGBgIn0= -->
+<pre class="r"><code>viruses$keep_score_all_ntv_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=T, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=T, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_3 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_4 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=T, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_5 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = T)
+
+viruses$keep_score_all_ntv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = T,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_all_ntv&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n())
+
+fig &lt;- ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    strip.background = element_rect(fill=&quot;white&quot;, color=&quot;grey&quot;),
+    strip.text = element_text(color=&quot;black&quot;)
+  ) +
+  scale_fill_manual(name=&quot;Viral Score&quot;,
+                     values = alpha(c(rev(RColorBrewer::brewer.pal(9,&quot;Oranges&quot;)[4:7]),
+                            RColorBrewer::brewer.pal(9,&quot;Purples&quot;)[4:9] 
+                            ), 0.8)) +
+  xlab(&quot;Ruleset&quot;) +
+  ylab(&quot;Proportion&quot;) + 
+  facet_grid(~seqtype, scales = &quot;free&quot;) 
+
+fig
+
+ggsave(
+  &quot;../IntermediaryFiles/tuning_removal_rulesets-all.png&quot;,
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c(&quot;in&quot;),
+  dpi = 300,
+  limitsize = TRUE
+)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMCwgdmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfMSlcbmBgYCJ9 -->
+<pre class="r"><code>table(viruses$keep_score_all_ntv_0, viruses$keep_score_all_ntv_1)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfNCwgdmlydXNlcyRrZWVwX3Njb3JlX2FsbF9udHZfNSlcbmBgYCJ9 -->
+<pre class="r"><code>table(viruses$keep_score_all_ntv_4, viruses$keep_score_all_ntv_5)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KHZpcnVzZXNfbG9uZ19zY29yZXMsIGFlcyh5PW4sIHg9cnVsZV9jb21iaW5hdGlvbixcbiAgICAgICAgICAgICAgICAgICBmaWxsPXZpcmFsX3Njb3JlKSkgK1xuICBnZW9tX2JhcihzdGF0PVwiaWRlbnRpdHlcIiwgY29sb3I9XCJibGFja1wiKSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICBjb29yZF9mbGlwKCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCJcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KHBhbF9vcmFuZ2UpLCBwYWxfcHVycGxlKSwgMSkpICtcbiAgeGxhYihcIlwiKSArXG4gIHlsYWIoXCJOdW1iZXIgb2YgU2VxdWVuY2VzXCIpICsgXG4gIyBzY2FsZV94X2Rpc2NyZXRlKGxhYmVscz1jKFwiRFZGXCIsIFwiRFZGK1ZTXCIsIFwiRFZGK1ZTK1ZCXCIsIFwiRFZGK1ZTK1ZCK1ZTMlwiLFxuICMgICAgICAgICAgICAgICAgICAgICAgICAgIFwiRFZGK1ZTK1ZCK1ZTMithZGRpdGlvblwiLCBcIkRWRitWUytWQitWUzIrYWRkaXRpb24tcmVtb3ZhbFwiKSkgKyBcbiAgZmFjZXRfZ3JpZChzaXplX2NsYXNzfnNlcXR5cGUsIHNjYWxlcyA9IFwiZnJlZVwiKVxuYGBgIn0= -->
+<pre class="r"><code>ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 1)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+ # scale_x_discrete(labels=c(&quot;DVF&quot;, &quot;DVF+VS&quot;, &quot;DVF+VS+VB&quot;, &quot;DVF+VS+VB+VS2&quot;,
+ #                          &quot;DVF+VS+VB+VS2+addition&quot;, &quot;DVF+VS+VB+VS2+addition-removal&quot;)) + 
+  facet_grid(size_class~seqtype, scales = &quot;free&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>same idea but with a VS2 base</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl9udHZfYWxsIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfdnMyX250dl8xIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPVQsIG50dl8yPUYsIG50dl8zPUYsIG50dl80PUYsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfbnR2XzIgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9VCwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9RixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl9udHZfMyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1GLCBudHZfMj1GLCBudHZfMz1ULCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfdnMyX250dl80IDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPUYsIG50dl8yPUYsIG50dl8zPUYsIG50dl80PVQsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfbnR2XzUgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbnR2XzE9RiwgbnR2XzI9RiwgbnR2XzM9RiwgbnR2XzQ9RiwgbnR2XzU9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl9udHZfMCA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudHZfMT1GLCBudHZfMj1GLCBudHZfMz1GLCBudHZfND1GLCBudHZfNT1GLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfdnMyX250dl8wX3R2IDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50dl8xPUYsIG50dl8yPUYsIG50dl8zPUYsIG50dl80PUYsIG50dl81PUYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV92czJfbnR2X2FsbF90diA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX3ZzMl9udHZfYWxsX3R2XzRfMl8xIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHR2XzE9VCwgdHZfMj1ULCB0dl8zPUYsIHR2XzQ9VCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyR0cnVlX3ZpcnVzIDwtIFwibm90XCJcbnZpcnVzZXMkdHJ1ZV92aXJ1c1t2aXJ1c2VzJHNlcXR5cGU9PVwidmlydXNcIl0gPC0gXCJ2aXJ1c1wiXG5cbnZpcnVzZXNfbG9uZ19zY29yZXMgPC0gdmlydXNlcyAlPiUgXG4gIHNlbGVjdChjb250YWlucyhcImtlZXBfc2NvcmVfdnMyX250dlwiKSwgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV92czJcIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_vs2_ntv_all &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=T, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=F, ntv_2=T, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_3 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=F, ntv_2=F, ntv_3=T, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_4 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=T, ntv_5=F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_5 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_0 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_0_tv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              ntv_1=F, ntv_2=F, ntv_3=F, ntv_4=F, ntv_5=F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_all_tv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_vs2_ntv_all_tv_4_2_1 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              tv_1=T, tv_2=T, tv_3=F, tv_4=T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_vs2_ntv&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_vs2&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n())</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KHZpcnVzZXNfbG9uZ19zY29yZXMsIGFlcyh5PW4sIHg9cnVsZV9jb21iaW5hdGlvbixcbiAgICAgICAgICAgICAgICAgICBmaWxsPXZpcmFsX3Njb3JlKSkgK1xuICBnZW9tX2JhcihzdGF0PVwiaWRlbnRpdHlcIiwgY29sb3I9XCJibGFja1wiKSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICBjb29yZF9mbGlwKCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCJcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KHBhbF9vcmFuZ2UpLCBwYWxfcHVycGxlKSwgMC43KSkgK1xuICB4bGFiKFwiXCIpICtcbiAgeWxhYihcIk51bWJlciBvZiBTZXF1ZW5jZXNcIikgKyBcbiAgZmFjZXRfZ3JpZCh+c2VxdHlwZSwgc2NhbGVzID0gXCJmcmVlXCIpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.7)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~seqtype, scales = &quot;free&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>comparing each tool’s score</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9pbmRfdHYgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMka2VlcF9zY29yZV9pbmRfZHZmIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gVCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX3ZiIDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxuXG52aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX250diA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gRilcblxudmlydXNlcyRrZWVwX3Njb3JlX2luZF92cyA8LSBnZXR0aW5nX3ZpcmFsX3NldF8xKHZpcnVzZXMsIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aWJyYW50ID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ19ub3RfdmlyYWwgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyID0gVClcblxudmlydXNlcyR0cnVlX3ZpcnVzIDwtIFwibm90XCJcbnZpcnVzZXMkdHJ1ZV92aXJ1c1t2aXJ1c2VzJHNlcXR5cGU9PVwidmlydXNcIl0gPC0gXCJ2aXJ1c1wiXG5cbnZpcnVzZXNfbG9uZ19zY29yZXMgPC0gdmlydXNlcyAlPiUgXG4gIHNlbGVjdChjb250YWlucyhcImtlZXBfc2NvcmVfaW5kX1wiKSwgc2VxdHlwZSkgJT4lXG4gIHBpdm90X2xvbmdlcihjb2xzPWNvbnRhaW5zKFwia2VlcF9zY29yZV9cIiksIFxuICAgICAgICAgICAgICAgbmFtZXNfdG89XCJydWxlX2NvbWJpbmF0aW9uXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG89XCJ2aXJhbF9zY29yZVwiKSAlPiUgXG4gIG11dGF0ZSh2aXJhbF9zY29yZT1hcy5mYWN0b3Iocm91bmQodmlyYWxfc2NvcmUpKSkgJT4lXG4gIGdyb3VwX2J5KHJ1bGVfY29tYmluYXRpb24sIHZpcmFsX3Njb3JlLCBzZXF0eXBlKSAlPiVcbiAgc3VtbWFyaXNlKG4gPSBuKCkpXG5gYGAifQ== -->
+<pre class="r"><code>viruses$keep_score_ind_vs2 &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_ind_tv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = T,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_ind_dvf &lt;- getting_viral_set_1(viruses, include_deepvirfinder = T,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_ind_vb &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = T,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$keep_score_ind_ntv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+
+viruses$keep_score_ind_vs &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = F,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = T)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_ind_&quot;), seqtype) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, seqtype) %&gt;%
+  summarise(n = n())</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Fig 4</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyR0cnVlX3ZpcnVzLCB2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX2R2ZilcbnRhYmxlKHZpcnVzZXMkdHJ1ZV92aXJ1cywgdmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIpXG50YWJsZSh2aXJ1c2VzJHRydWVfdmlydXMsIHZpcnVzZXMka2VlcF9zY29yZV9pbmRfdnMpXG50YWJsZSh2aXJ1c2VzJHRydWVfdmlydXMsIHZpcnVzZXMka2VlcF9zY29yZV9pbmRfdmIpXG5gYGAifQ== -->
+<pre class="r"><code>table(viruses$true_virus, viruses$keep_score_ind_dvf)
+table(viruses$true_virus, viruses$keep_score_ind_vs2)
+table(viruses$true_virus, viruses$keep_score_ind_vs)
+table(viruses$true_virus, viruses$keep_score_ind_vb)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>seems like false positive rate is way high for 0.5 across all</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyR0cnVlX3ZpcnVzLCB2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX2R2Zit2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX3ZzMilcbmBgYCJ9 -->
+<pre class="r"><code>table(viruses$true_virus, viruses$keep_score_ind_dvf+viruses$keep_score_ind_vs2)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyR0cnVlX3ZpcnVzLCB2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX2R2Zit2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX3ZzMit2aXJ1c2VzJGtlZXBfc2NvcmVfaW5kX250dilcbmBgYCJ9 -->
+<pre class="r"><code>table(viruses$true_virus, viruses$keep_score_ind_dvf+viruses$keep_score_ind_vs2+viruses$keep_score_ind_ntv)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIsIHZpcnVzZXMka2VlcF9zY29yZV9pbmRfZHZmK3ZpcnVzZXMka2VlcF9zY29yZV9pbmRfdnMyK3ZpcnVzZXMka2VlcF9zY29yZV9pbmRfbnR2KVxuYGBgIn0= -->
+<pre class="r"><code>table(viruses$keep_score_ind_vs2, viruses$keep_score_ind_dvf+viruses$keep_score_ind_vs2+viruses$keep_score_ind_ntv)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>with 0.5 rules: 1464 sequences predicted viral that weren’t viral by vs2 on its own without them: 1234 sequences added</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIsIHZpcnVzZXMka2VlcF9zY29yZV9pbmRfZHZmK3ZpcnVzZXMka2VlcF9zY29yZV9pbmRfdnMyK3ZpcnVzZXMka2VlcF9zY29yZV9pbmRfbnR2LFxuICAgICAgdmlydXNlcyR0cnVlX3ZpcnVzKVxuYGBgIn0= -->
+<pre class="r"><code>table(viruses$keep_score_ind_vs2, viruses$keep_score_ind_dvf+viruses$keep_score_ind_vs2+viruses$keep_score_ind_ntv,
+      viruses$true_virus)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>with 0.5 rules: however, of these, only 432 (30%) are truly viruses without 0.5 rules: only 375 (30%) are truly viruses</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUodmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIsIHZpcnVzZXMka2VlcF9zY29yZV9pbmRfdmIrdmlydXNlcyRrZWVwX3Njb3JlX2luZF92czIrdmlydXNlcyRrZWVwX3Njb3JlX2luZF9udHYsXG4gICAgICB2aXJ1c2VzJHRydWVfdmlydXMpXG5gYGAifQ== -->
+<pre class="r"><code>table(viruses$keep_score_ind_vs2, viruses$keep_score_ind_vb+viruses$keep_score_ind_vs2+viruses$keep_score_ind_ntv,
+      viruses$true_virus)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>with 0.5 rules: however, of these, only 74 (7%) are truly viruses without 0.5 rules: only 87 (4%) are truly viruses</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGFsX3B1cnBsZSA8LSBSQ29sb3JCcmV3ZXI6OmJyZXdlci5wYWwoNiwgXCJQdXJwbGVzXCIpXG5wYWxfb3JhbmdlIDwtIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg0LCBcIk9yYW5nZXNcIilcblxuZ2dwbG90KHZpcnVzZXNfbG9uZ19zY29yZXMsIGFlcyh5PW4sIHg9cnVsZV9jb21iaW5hdGlvbixcbiAgICAgICAgICAgICAgICAgICBmaWxsPXZpcmFsX3Njb3JlKSkgK1xuICBnZW9tX2JhcihzdGF0PVwiaWRlbnRpdHlcIiwgY29sb3I9XCJibGFja1wiKSArXG4gIHRoZW1lX2xpZ2h0KCkgK1xuICBjb29yZF9mbGlwKCkgK1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnkgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgcGFuZWwuYm9yZGVyID0gZWxlbWVudF9ibGFuaygpLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwiYm90dG9tXCIsXG4gICAgYXhpcy50ZXh0Lng9ZWxlbWVudF90ZXh0KHNpemU9OCwgYW5nbGUgPSA0NSlcbiAgKSArXG4gIHNjYWxlX2ZpbGxfbWFudWFsKG5hbWU9XCJcIixcbiAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGFscGhhKGMocmV2KHBhbF9vcmFuZ2UpLCBwYWxfcHVycGxlKSwgMC44KSkgK1xuICB4bGFiKFwiXCIpICtcbiAgeWxhYihcIk51bWJlciBvZiBTZXF1ZW5jZXNcIikgKyBcbiAgZmFjZXRfZ3JpZCh+c2VxdHlwZSwgc2NhbGVzID0gXCJmcmVlXCIpICtcbiAgc2NhbGVfeV9jb250aW51b3VzKGJyZWFrcyA9IHNjYWxlczo6cHJldHR5X2JyZWFrcyhuID0gMikpICtcbiAgc2NhbGVfeF9kaXNjcmV0ZShsYWJlbHM9cmV2KGMoXCJWaXJTb3J0ZXIyXCIsIFwiVmlyU29ydGVyXCIsIFwiVklCUkFOVFwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwidHVuaW5nIHZpcmFsXCIsIFwidHVuaW5nIG5vdCB2aXJhbFwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiRGVlcFZpckZpbmRlclwiKSkpXG5gYGAifQ== -->
+<pre class="r"><code>pal_purple &lt;- RColorBrewer::brewer.pal(6, &quot;Purples&quot;)
+pal_orange &lt;- RColorBrewer::brewer.pal(4, &quot;Oranges&quot;)
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;,
+    axis.text.x=element_text(size=8, angle = 45)
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~seqtype, scales = &quot;free&quot;) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 2)) +
+  scale_x_discrete(labels=rev(c(&quot;VirSorter2&quot;, &quot;VirSorter&quot;, &quot;VIBRANT&quot;,
+                            &quot;tuning viral&quot;, &quot;tuning not viral&quot;,
+                            &quot;DeepVirFinder&quot;)))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnVtX2hpZ2hfdmlydXNlcyA8LSBtYXRyaXgoZGF0YT1OQSwgbnJvdz02MywgbmNvbD02MylcbnByb3BfaGlnaF92aXJ1c2VzIDwtIG1hdHJpeChkYXRhPU5BLCBucm93PTYzLCBuY29sPTYzKVxuXG5mb3IgKGkgaW4gMTo2Mykge1xuICBmb3IgKGogaW4gMTo2Mykge1xuICAgIG51bV9oaWdoX3ZpcnVzZXNbaSxqXSA8LSBzdW0odmlyYWxfc2NvcmVzWyxpXT49MSAmIHZpcmFsX3Njb3Jlc1ssal0+PTEpXG4gICAgXG4gICAgcHJvcF9oaWdoX3ZpcnVzZXNbaSxqXSA8LSBzdW0odmlyYWxfc2NvcmVzWyxpXT49MSAmIHZpcmFsX3Njb3Jlc1ssal0+PTEpXG4gICAgcHJvcF9oaWdoX3ZpcnVzZXNbaSxqXSA8LSBwcm9wX2hpZ2hfdmlydXNlc1tpLGpdL3N1bSh2aXJhbF9zY29yZXNbLGldPj0xIHwgdmlyYWxfc2NvcmVzWyxqXT49MSlcbiAgfVxufVxuXG5yb3duYW1lcyhudW1faGlnaF92aXJ1c2VzKSA8LSBjb21ib3NfbGlzdCR0b29sY29tYm9cbmNvbG5hbWVzKG51bV9oaWdoX3ZpcnVzZXMpIDwtIGNvbWJvc19saXN0JHRvb2xjb21ib1xuXG5yb3duYW1lcyhwcm9wX2hpZ2hfdmlydXNlcykgPC0gY29tYm9zX2xpc3QkdG9vbGNvbWJvXG5jb2xuYW1lcyhwcm9wX2hpZ2hfdmlydXNlcykgPC0gY29tYm9zX2xpc3QkdG9vbGNvbWJvXG5gYGAifQ== -->
+<pre class="r"><code>num_high_viruses &lt;- matrix(data=NA, nrow=63, ncol=63)
+prop_high_viruses &lt;- matrix(data=NA, nrow=63, ncol=63)
+
+for (i in 1:63) {
+  for (j in 1:63) {
+    num_high_viruses[i,j] &lt;- sum(viral_scores[,i]&gt;=1 &amp; viral_scores[,j]&gt;=1)
+    
+    prop_high_viruses[i,j] &lt;- sum(viral_scores[,i]&gt;=1 &amp; viral_scores[,j]&gt;=1)
+    prop_high_viruses[i,j] &lt;- prop_high_viruses[i,j]/sum(viral_scores[,i]&gt;=1 | viral_scores[,j]&gt;=1)
+  }
+}
+
+rownames(num_high_viruses) &lt;- combos_list$toolcombo
+colnames(num_high_viruses) &lt;- combos_list$toolcombo
+
+rownames(prop_high_viruses) &lt;- combos_list$toolcombo
+colnames(prop_high_viruses) &lt;- combos_list$toolcombo</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -3425,6 +4484,57 @@ $numrules
 <h2>visualizing a select set of tools</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfdHZfdG52IDwtIGdldHRpbmdfdmlyYWxfc2V0XzEodmlydXNlcywgaW5jbHVkZV9kZWVwdmlyZmluZGVyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpYnJhbnQgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlyc29ydGVyMiA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfdmlyYWwgPSBULFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX25vdF92aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIgPSBGKVxudmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfdHYgPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX2RlZXB2aXJmaW5kZXIgPSBGLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdmlicmFudCA9IEYsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV92aXJzb3J0ZXIyID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3R1bmluZ192aXJhbCA9IFQsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gRixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IEYpXG5cbnZpcnVzZXMkdHJ1ZV92aXJ1cyA8LSBcIm5vdFwiXG52aXJ1c2VzJHRydWVfdmlydXNbdmlydXNlcyRzZXF0eXBlPT1cInZpcnVzXCJdIDwtIFwidmlydXNcIlxuXG52aXJ1c2VzJHR2X3ZzX3R2X250diA8LSBcIm5vdCB0dlwiXG52aXJ1c2VzJHR2X3ZzX3R2X250dlt2aXJ1c2VzJGtlZXBfc2NvcmVfaGlnaF90dj49MSAmIHZpcnVzZXMka2VlcF9zY29yZV9oaWdoX3R2X3Rudj49MV0gPC0gXCJ0bnZfcHJlc2VydmVkXCJcbnZpcnVzZXMkdHZfdnNfdHZfbnR2W3ZpcnVzZXMka2VlcF9zY29yZV9oaWdoX3R2Pj0xICYgdmlydXNlcyRrZWVwX3Njb3JlX2hpZ2hfdHZfdG52PDFdIDwtIFwidG52IGxvc3RcIlxuXG50YWJsZSh2aXJ1c2VzJHR2X3ZzX3R2X250diwgdmlydXNlcyR0cnVlX3ZpcnVzKVxuXG52aXJ1c2VzX2xvbmdfc2NvcmVzIDwtIHZpcnVzZXMgJT4lIFxuICBzZWxlY3QoY29udGFpbnMoXCJrZWVwX3Njb3JlX2hpZ2hcIiksIHRydWVfdmlydXMpICU+JVxuICBwaXZvdF9sb25nZXIoY29scz1jb250YWlucyhcImtlZXBfc2NvcmVfXCIpLCBcbiAgICAgICAgICAgICAgIG5hbWVzX3RvPVwicnVsZV9jb21iaW5hdGlvblwiLFxuICAgICAgICAgICAgICAgdmFsdWVzX3RvPVwidmlyYWxfc2NvcmVcIikgJT4lIFxuICBtdXRhdGUodmlyYWxfc2NvcmU9YXMuZmFjdG9yKHJvdW5kKHZpcmFsX3Njb3JlKSkpICU+JVxuICBncm91cF9ieShydWxlX2NvbWJpbmF0aW9uLCB2aXJhbF9zY29yZSwgdHJ1ZV92aXJ1cykgJT4lXG4gIHN1bW1hcmlzZShuID0gbigpKVxuXG5wYWxfcHVycGxlIDwtIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg2LCBcIlB1cnBsZXNcIilcbnBhbF9vcmFuZ2UgPC0gUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDQsIFwiT3Jhbmdlc1wiKVxuXG5nZ3Bsb3QodmlydXNlc19sb25nX3Njb3JlcywgYWVzKHk9biwgeD1ydWxlX2NvbWJpbmF0aW9uLFxuICAgICAgICAgICAgICAgICAgIGZpbGw9dmlyYWxfc2NvcmUpKSArXG4gIGdlb21fYmFyKHN0YXQ9XCJpZGVudGl0eVwiLCBjb2xvcj1cImJsYWNrXCIpICtcbiAgdGhlbWVfbGlnaHQoKSArXG4gIGNvb3JkX2ZsaXAoKSArXG4gIHRoZW1lKFxuICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfYmxhbmsoKSxcbiAgICBwYW5lbC5ib3JkZXIgPSBlbGVtZW50X2JsYW5rKCksXG4gICAgbGVnZW5kLnBvc2l0aW9uID0gXCJib3R0b21cIlxuICApICtcbiAgc2NhbGVfZmlsbF9tYW51YWwobmFtZT1cIlwiLFxuICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gYWxwaGEoYyhyZXYocGFsX29yYW5nZSksIHBhbF9wdXJwbGUpLCAwLjgpKSArXG4gIHhsYWIoXCJcIikgK1xuICB5bGFiKFwiTnVtYmVyIG9mIFNlcXVlbmNlc1wiKSArIFxuICBmYWNldF9ncmlkKH50cnVlX3ZpcnVzLCBzY2FsZXMgPSBcImZyZWVcIilcbmBgYCJ9 -->
+<pre class="r"><code>viruses$keep_score_high_tv_tnv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = T,
+                                              include_virsorter = F)
+viruses$keep_score_high_tv &lt;- getting_viral_set_1(viruses, include_deepvirfinder = F,
+                                              include_vibrant = F,
+                                              include_virsorter2 = F,
+                                              include_tuning_viral = T,
+                                              include_tuning_not_viral = F,
+                                              include_virsorter = F)
+
+viruses$true_virus &lt;- &quot;not&quot;
+viruses$true_virus[viruses$seqtype==&quot;virus&quot;] &lt;- &quot;virus&quot;
+
+viruses$tv_vs_tv_ntv &lt;- &quot;not tv&quot;
+viruses$tv_vs_tv_ntv[viruses$keep_score_high_tv&gt;=1 &amp; viruses$keep_score_high_tv_tnv&gt;=1] &lt;- &quot;tnv_preserved&quot;
+viruses$tv_vs_tv_ntv[viruses$keep_score_high_tv&gt;=1 &amp; viruses$keep_score_high_tv_tnv&lt;1] &lt;- &quot;tnv lost&quot;
+
+table(viruses$tv_vs_tv_ntv, viruses$true_virus)
+
+viruses_long_scores &lt;- viruses %&gt;% 
+  select(contains(&quot;keep_score_high&quot;), true_virus) %&gt;%
+  pivot_longer(cols=contains(&quot;keep_score_&quot;), 
+               names_to=&quot;rule_combination&quot;,
+               values_to=&quot;viral_score&quot;) %&gt;% 
+  mutate(viral_score=as.factor(round(viral_score))) %&gt;%
+  group_by(rule_combination, viral_score, true_virus) %&gt;%
+  summarise(n = n())
+
+pal_purple &lt;- RColorBrewer::brewer.pal(6, &quot;Purples&quot;)
+pal_orange &lt;- RColorBrewer::brewer.pal(4, &quot;Oranges&quot;)
+
+ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
+                   fill=viral_score)) +
+  geom_bar(stat=&quot;identity&quot;, color=&quot;black&quot;) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    legend.position = &quot;bottom&quot;
+  ) +
+  scale_fill_manual(name=&quot;&quot;,
+                     values = alpha(c(rev(pal_orange), pal_purple), 0.8)) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Number of Sequences&quot;) + 
+  facet_grid(~true_virus, scales = &quot;free&quot;)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
