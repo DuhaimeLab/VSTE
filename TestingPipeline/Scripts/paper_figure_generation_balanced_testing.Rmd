@@ -625,17 +625,7 @@ fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_color_manual(name="Number of Rule Sets",
                      values = alpha(rev(viridis(6)), 1))
 
-
-ggsave(
-  "../IntermediaryFiles/all_MCC_scatterplot.png",
-  plot = fig,
-  scale = 1,
-  width = 8,
-  height = 4,
-  units = c("in", "cm", "mm", "px"),
-  dpi = 300,
-  limitsize = TRUE
-)
+fig
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=MCC, 
                                   color=numtools, fill=numtools)) +
@@ -658,30 +648,37 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_color_manual(name="Number of Tools",
                      values = alpha(rev(viridis(6)), 1))
 ```
+
 ```{r}
 max(accuracy_scores$MCC)
 ```
-=78
+=91
 
 getting set of tools with roughly equivalent MCC
 ```{r}
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
-       accuracy_scores$MCC[accuracy_scores$toolcombo=="0 1 1 0 0 1"])
-
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
-       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"])
-
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
-       accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 0 0 0 1"])
-
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
-       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 1 0 1"])
-
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
        accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 1 1"])
 
-t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="0 0 1 0 0 1"], 
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
        accuracy_scores$MCC[accuracy_scores$toolcombo=="1 1 1 0 0 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 1 0 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 1 1 0 1 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 1 1 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 0 0 0 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 1 1 1 0 1"])
+
+t.test(accuracy_scores$MCC[accuracy_scores$toolcombo=="1 0 1 0 0 1"], 
+       accuracy_scores$MCC[accuracy_scores$toolcombo=="1 1 1 1 1 1"])
 ```
 accounting for multiple t-tests with Bonferroni, then the following have the same MCC:
 - vs2+tnv, vs2+tnv+dvf, vs2, vs2+tnv+tv+vb, vs2+tnv+tv+vs   
@@ -729,7 +726,7 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
                   cluster_rows = F,
                   cluster_cols = F,
                   cellheight=3,
-                  filename = "../IntermediaryFiles/heatmap_MCC_labels.png"
+                  filename = "../IntermediaryFiles/heatmap_MCC_labels_50-50.png"
                   )
 ```
 
