@@ -297,14 +297,10 @@ for (i in (2:8)) {
   MCC_sd_quant[,i] <- temp$sd
 }
 
-colnames(MCC_sd_quant) <- c("testing_set_index", "1-2", "1-3", "1-4",
-                            "1-5", "1-6", "1-7", "1-8")
+colnames(MCC_sd_quant) <- c("testing_set_index", "2", "3", "4",
+                            "5", "6", "7", "8")
 
-MCC_sd_quant <- MCC_sd_quant %>% pivot_longer(cols=contains("-"))
-
-ggplot(MCC_sd_quant, aes(x=testing_set_index, y=value, 
-                                  color=name, fill=name)) +
-  geom_point(alpha=0.5)
+MCC_sd_quant <- MCC_sd_quant %>% pivot_longer(cols=!contains("testing_set_index"))
 
 ggplot(MCC_sd_quant, aes(x=name, y=value)) +
   geom_boxplot(alpha=0.5, color=pal(4)[1]) +
@@ -319,9 +315,19 @@ ggplot(MCC_sd_quant, aes(x=name, y=value)) +
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
   ) +
-  xlab("Testing Sets") +
+  xlab("Number of Testing Sets Included") +
   ylab("Standard Deviation") 
 ```
+```{r}
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==2],MCC_sd_quant$value[MCC_sd_quant$name==3])
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==3],MCC_sd_quant$value[MCC_sd_quant$name==4])
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==4],MCC_sd_quant$value[MCC_sd_quant$name==5])
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==5],MCC_sd_quant$value[MCC_sd_quant$name==6])
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==6],MCC_sd_quant$value[MCC_sd_quant$name==7])
+t.test(MCC_sd_quant$value[MCC_sd_quant$name==7],MCC_sd_quant$value[MCC_sd_quant$name==8])
+```
+
+
 
 
 ## Calculate the performance of each pipeline
