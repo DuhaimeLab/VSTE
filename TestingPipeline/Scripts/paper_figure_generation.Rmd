@@ -949,10 +949,9 @@ pheatmap::pheatmap(as.matrix(viral_scores_1),
 
 
 ```{r}
-fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0" & accuracy_scores_melt$performance_metric!="prop_viral",], aes(x=numrules, y=performance_metric_score, 
-                                  color=numrules, fill=numrules)) +
-  geom_boxplot() +
-  geom_point(alpha=0.5) +
+fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0" & accuracy_scores_melt$performance_metric!="prop_viral",], aes(x=numrules, y=performance_metric_score)) +
+  geom_boxplot(alpha=0.1, fill="black") +
+  geom_point(alpha=0.2, fill="black", color="black") +
   theme_light() +
   theme(
     panel.grid.major.y = element_blank(),
@@ -963,13 +962,11 @@ fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0"
     axis.text.x=element_text(size=14, angle = 90),
     legend.text=element_text(size=12),
     axis.title=element_text(size=16),
+    strip.background = element_rect(fill="white", color="grey"),
+    strip.text = element_text(color="black", size=14)
   ) +
   ylab("Score") +
   xlab("Number of Rule Sets") +
-  scale_fill_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 0.5)) +
-  scale_color_manual(name="Number of Rule Sets",
-                     values = alpha(rev(viridis(6)), 1)) +
   facet_wrap(~performance_metric) +
   geom_hline(yintercept = 0, color="grey")
   
@@ -977,7 +974,7 @@ fig <- ggplot(accuracy_scores_melt[accuracy_scores_melt$toolcombo!="0 0 1 0 0 0"
 fig
 
 ggsave(
-  "../IntermediaryFiles/MCC_precision_recall_boxplots.png",
+  "../IntermediaryFiles/MCC_precision_recall_boxplots_grey.png",
   plot = fig,
   scale = 1,
   width = 8,
