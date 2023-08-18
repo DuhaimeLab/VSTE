@@ -4676,164 +4676,13 @@ ggplot(viruses_long_scores, aes(y=n, x=rule_combination,
 <h1>Comparing all of the tool methods - Fig 2A (also needed for 5)</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tYm9zX2xpc3QgPC0gZGF0YS5mcmFtZSh0b29sY29tYm89cmVwKDAsIDY0KSxcbmBgYCJ9 -->
-<pre class="r"><code>combos_list &lt;- data.frame(toolcombo=rep(0, 64),</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnVtX3ZpcnVzZXMkbnVtdG9vbHMgPC0gc3RyX2NvdW50KG51bV92aXJ1c2VzJHRvb2xjb21ibywgXCIxXCIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>num_viruses$numtools &lt;- str_count(num_viruses$toolcombo, &quot;1&quot;)
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSA1MCBvciBtb3JlIHdhcm5pbmdzICh1c2Ugd2FybmluZ3MoKSB0byBzZWUgdGhlIGZpcnN0IDUwKVxuIn0= -->
-<pre><code>There were 50 or more warnings (use warnings() to see the first 50)</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSAxNiB3YXJuaW5ncyAodXNlIHdhcm5pbmdzKCkgdG8gc2VlIHRoZW0pXG4ifQ== -->
+<pre><code>There were 16 warnings (use warnings() to see them)</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuICAgICAgICAgICAgICAgICAgICAgICAgICB0dW5lX25vdF92aXJhbD1yZXAoMCwgNjQpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICBEVkY9cmVwKDAsIDY0KSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgdHVuZV92aXJhbD1yZXAoMCwgNjQpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICBWSUJSQU5UPXJlcCgwLCA2NCksXG4gICAgICAgICAgICAgICAgICAgICAgICAgIFZTPXJlcCgwLCA2NCksXG4gICAgICAgICAgICAgICAgICAgICAgICAgIFZTMj1yZXAoMCwgNjQpKVxucCA8LSAxXG5cbmZvciAoaSBpbiBjKDAsMSkpe1xuICBmb3IgKGogaW4gYygwLDEpKXtcbiAgICBmb3IgKGsgaW4gYygwLDEpKXtcbiAgICAgIGZvciAobCBpbiBjKDAsMSkpe1xuICAgICAgICBmb3IgKG0gaW4gYygwLDEpKXtcbiAgICAgICAgICBmb3IgKG4gaW4gYygwLDEpKXtcbiAgICAgICAgICAgIGNvbWJvc19saXN0JHRvb2xjb21ib1twXSA8LSBwYXN0ZShpLGosayxsLG0sbilcbiAgICAgICAgICAgIGNvbWJvc19saXN0JHRvb2xjb21ibzJbcF0gPC0gcGFzdGUoaWYoaSl7XCJ0dlwifWVsc2V7XCIwXCJ9LGlmKGope1wiRFZGXCJ9ZWxzZXtcIjBcIn0sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlmKGspe1widG52XCJ9ZWxzZXtcIjBcIn0saWYobCl7XCJWQlwifWVsc2V7XCIwXCJ9LFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpZihtKXtcIlZTXCJ9ZWxzZXtcIjBcIn0saWYobil7XCJWUzJcIn1lbHNle1wiMFwifSlcbiAgICAgICAgICAgIGNvbWJvc19saXN0JHR1bmVfbm90X3ZpcmFsW3BdIDwtIGtcbiAgICAgICAgICAgIGNvbWJvc19saXN0JERWRltwXSA8LSBqXG4gICAgICAgICAgICBjb21ib3NfbGlzdCR0dW5lX3ZpcmFsW3BdIDwtIGlcbiAgICAgICAgICAgIGNvbWJvc19saXN0JFZJQlJBTlRbcF0gPC0gbFxuICAgICAgICAgICAgY29tYm9zX2xpc3QkVlNbcF0gPC0gbVxuICAgICAgICAgICAgY29tYm9zX2xpc3QkVlMyW3BdIDwtIG5cbiAgICAgICAgICAgIHAgPC0gcCsxXG4gICAgICAgICAgfVxuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuICB9XG59XG5cbmNvbWJvc19saXN0IDwtIGNvbWJvc19saXN0Wy0xLF1cblxudmlyYWxfc2NvcmVzIDwtIG1hdHJpeChkYXRhPTAsIG5yb3c9bnJvdyh2aXJ1c2VzKSwgbmNvbD1ucm93KGNvbWJvc19saXN0KSlcbm51bV92aXJ1c2VzIDwtIGRhdGEuZnJhbWUodG9vbGNvbWJvPXJlcCgwLCBucm93KGNvbWJvc19saXN0KSksXG4gICAgICAgICAgICAgICAgICAgICAgICAgIG51bV92aXJ1c2VzPXJlcCgwLCBucm93KGNvbWJvc19saXN0KSkpXG5cbmZvciAoaSBpbiAxOm5yb3coY29tYm9zX2xpc3QpKSB7XG4gIHZpcmFsX3Njb3Jlc1ssaV0gPC0gZ2V0dGluZ192aXJhbF9zZXRfMSh2aXJ1c2VzLCBpbmNsdWRlX3ZpYnJhbnQgPSBjb21ib3NfbGlzdCRWSUJSQU5UW2ldLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlciA9IGNvbWJvc19saXN0JFZTW2ldLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbmNsdWRlX3ZpcnNvcnRlcjIgPSBjb21ib3NfbGlzdCRWUzJbaV0sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfdHVuaW5nX3ZpcmFsID0gY29tYm9zX2xpc3QkdHVuZV92aXJhbFtpXSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV90dW5pbmdfbm90X3ZpcmFsID0gY29tYm9zX2xpc3QkdHVuZV9ub3RfdmlyYWxbaV0sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY2x1ZGVfZGVlcHZpcmZpbmRlciA9IGNvbWJvc19saXN0JERWRltpXSlcbiAgXG4gIGlmIChtYXgodmlyYWxfc2NvcmVzWyxpXSk8PTApIHtcbiAgICBudW1fdmlydXNlcyRudW1fdmlydXNlc1tpXSA8LSAwXG4gIH1cbiAgZWxzZSB7XG4gICAgbnVtX3ZpcnVzZXMkbnVtX3ZpcnVzZXNbaV0gPC0gdGFibGUodmlyYWxfc2NvcmVzWyxpXT49MSlbWzJdXVxuICB9XG4gIG51bV92aXJ1c2VzJHRvb2xjb21ib1tpXSA8LSBjb21ib3NfbGlzdCR0b29sY29tYm9baV1cbiAgXG4gIG51bV92aXJ1c2VzJHRvb2xjb21ibzJbaV0gPC0gY29tYm9zX2xpc3QkdG9vbGNvbWJvMltpXVxufVxubnVtX3ZpcnVzZXMkbnVtdG9vbHMgPC0gc3RyX2NvdW50KG51bV92aXJ1c2VzJHRvb2xjb21ibywgXCIxXCIpXG5udW1fdmlydXNlcyA8LSBudW1fdmlydXNlc1tvcmRlcihudW1fdmlydXNlcyRudW1fdmlydXNlcywgZGVjcmVhc2luZz1GKSxdXG5udW1fdmlydXNlcyR0b29sY29tYm8gPC0gZmFjdG9yKG51bV92aXJ1c2VzJHRvb2xjb21ibywgbGV2ZWxzID0gdW5pcXVlKG51bV92aXJ1c2VzJHRvb2xjb21ibykpXG5udW1fdmlydXNlcyR0b29sY29tYm8yIDwtIGZhY3RvcihudW1fdmlydXNlcyR0b29sY29tYm8yLCBsZXZlbHMgPSB1bmlxdWUobnVtX3ZpcnVzZXMkdG9vbGNvbWJvMikpXG5udW1fdmlydXNlcyRudW10b29scyA8LSBhcy5mYWN0b3IobnVtX3ZpcnVzZXMkbnVtdG9vbHMpXG5cbnBhbCA8LSBnZ3RoZW1lczo6dGFibGVhdV9jb2xvcl9wYWwocGFsZXR0ZT1cIlRhYmxlYXUgMTBcIiwgdHlwZT1cInJlZ3VsYXJcIilcbnBhbDIgPC0gZ2d0aGVtZXM6OnRhYmxlYXVfY29sb3JfcGFsKHBhbGV0dGU9XCJUYWJsZWF1IDIwXCIsIHR5cGU9XCJyZWd1bGFyXCIpXG5cbnZpcnVzZXNfMSA8LSB2aXJ1c2VzW3ZpcnVzZXMkSW5kZXg9PVwiMVwiLF1cblxuYW5uX2NvbCA9IGRhdGEuZnJhbWUoXG4gICAgdG52ID0gY29tYm9zX2xpc3QkdHVuZV9ub3RfdmlyYWwsXG4gICAgdHYgPSBjb21ib3NfbGlzdCR0dW5lX3ZpcmFsLFxuICAgIGR2ZiA9IGNvbWJvc19saXN0JERWRixcbiAgICB2YiA9IGNvbWJvc19saXN0JFZJQlJBTlQsXG4gICAgdnMgPSBjb21ib3NfbGlzdCRWUyxcbiAgICB2czIgPSBjb21ib3NfbGlzdCRWUzJcbilcblxuYW5uX3JvdyA9IGRhdGEuZnJhbWUoXG4gICAgc2NvcmUgPSB2aXJ1c2VzXzEkc2VxdHlwZVxuKVxuXG5hbm5fY29sb3JzID0gbGlzdChcbiAgdG52ID0gYyhcImJsYWNrXCIsIHBhbCg2KVsxXSksXG4gIHR2ID0gYyhcImJsYWNrXCIsIHBhbCg2KVszXSksXG4gIGR2ZiA9IGMoXCJibGFja1wiLCBwYWwoNilbMl0pLFxuICB2YiA9IGMoXCJibGFja1wiLCBwYWwoNilbNF0pLFxuICB2cyA9IGMoXCJibGFja1wiLCBwYWwoNilbNV0pLFxuICB2czIgPSBjKFwiYmxhY2tcIiwgcGFsKDYpWzZdKSxcbiAgc2NvcmUgPSBjKFwiYXJjaGFlYVwiPXBhbDIoMjApWzEzXSwgXCJiYWN0ZXJpYVwiPXBhbDIoMjApWzldLCBcImZ1bmdpXCI9cGFsMigyMClbMjBdLFxuICAgICAgICAgICAgICBcInBsYXNtaWRcIj1wYWwyKDIwKVsxOV0sIFwicHJvdGlzdFwiPXBhbDIoMjApWzVdLCBcInZpcnVzXCI9cGFsMigyMClbMTddKVxuKVxuXG5yb3duYW1lcyhhbm5fY29sKSA8LSBjb21ib3NfbGlzdCR0b29sY29tYm9cbnJvd25hbWVzKGFubl9yb3cpIDwtIHZpcnVzZXNfMSRjb250aWdcblxudmlyYWxfc2NvcmVzXzEgPC0gdmlyYWxfc2NvcmVzW3ZpcnVzZXMkSW5kZXg9PVwiMVwiLF1cblxuY29sbmFtZXModmlyYWxfc2NvcmVzXzEpIDwtIGNvbWJvc19saXN0JHRvb2xjb21ib1xucm93bmFtZXModmlyYWxfc2NvcmVzXzEpIDwtIHZpcnVzZXNfMSRjb250aWdcblxudmlyYWxfc2NvcmVzXzEgPC0gZmxvb3IodmlyYWxfc2NvcmVzXzEpXG5cbnNlcV9zY29yZXMgPC0gcm93U3Vtcyh2aXJhbF9zY29yZXNfMSlcblxuc2VxX3R5cGUgPC0gdGFibGUodmlydXNlc18xJHNlcXR5cGUpW2MoNiwyLDEsNCw1LDMpXVxuc2VxX3R5cGUgPC0gY3Vtc3VtKHNlcV90eXBlKVxuXG5zdWJfc2VxX3Njb3JlcyA8LSBzZXFfc2NvcmVzWzE6c2VxX3R5cGVbMV1dXG5vcmRlcl9zZXFfc2NvcmVzX3ZpcnVzIDwtIG5hbWVzKHN1Yl9zZXFfc2NvcmVzKVtvcmRlcihzdWJfc2VxX3Njb3JlcyldXG5cbnN1Yl9zZXFfc2NvcmVzIDwtIHNlcV9zY29yZXNbc2VxX3R5cGVbMV06c2VxX3R5cGVbMl1dXG5vcmRlcl9zZXFfc2NvcmVzX2JhY3RlcmlhIDwtIG5hbWVzKHN1Yl9zZXFfc2NvcmVzKVtvcmRlcihzdWJfc2VxX3Njb3JlcyldXG5cbnN1Yl9zZXFfc2NvcmVzIDwtIHNlcV9zY29yZXNbc2VxX3R5cGVbMl06c2VxX3R5cGVbM11dXG5vcmRlcl9zZXFfc2NvcmVzX2FyY2hhZWEgPC0gbmFtZXMoc3ViX3NlcV9zY29yZXMpW29yZGVyKHN1Yl9zZXFfc2NvcmVzKV1cblxuc3ViX3NlcV9zY29yZXMgPC0gc2VxX3Njb3Jlc1tzZXFfdHlwZVszXTpzZXFfdHlwZVs0XV1cbm9yZGVyX3NlcV9zY29yZXNfcGxhc21pZCA8LSBuYW1lcyhzdWJfc2VxX3Njb3Jlcylbb3JkZXIoc3ViX3NlcV9zY29yZXMpXVxuXG5zdWJfc2VxX3Njb3JlcyA8LSBzZXFfc2NvcmVzW3NlcV90eXBlWzRdOnNlcV90eXBlWzVdXVxub3JkZXJfc2VxX3Njb3Jlc19wcm90aXN0IDwtIG5hbWVzKHN1Yl9zZXFfc2NvcmVzKVtvcmRlcihzdWJfc2VxX3Njb3JlcyldXG5cbnN1Yl9zZXFfc2NvcmVzIDwtIHNlcV9zY29yZXNbc2VxX3R5cGVbNV06c2VxX3R5cGVbNl1dXG5vcmRlcl9zZXFfc2NvcmVzX2Z1bmdpIDwtIG5hbWVzKHN1Yl9zZXFfc2NvcmVzKVtvcmRlcihzdWJfc2VxX3Njb3JlcyldXG5cbnZpcmFsX3Njb3Jlc18xIDwtIHZpcmFsX3Njb3Jlc18xW2Mob3JkZXJfc2VxX3Njb3Jlc192aXJ1cywgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9yZGVyX3NlcV9zY29yZXNfYmFjdGVyaWEsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9yZGVyX3NlcV9zY29yZXNfYXJjaGFlYSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgb3JkZXJfc2VxX3Njb3Jlc19wbGFzbWlkLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvcmRlcl9zZXFfc2NvcmVzX3Byb3Rpc3QsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9yZGVyX3NlcV9zY29yZXNfZnVuZ2kpLF1cblxucGhlYXRtYXA6OnBoZWF0bWFwKHQodmlyYWxfc2NvcmVzXzEpLFxuICAgICAgICAgICAgICAgICAgYW5ub3RhdGlvbl9jb2wgPSBhbm5fcm93LFxuICAgICAgICAgICAgICAgICAgYW5ub3RhdGlvbl9yb3cgPSBhbm5fY29sLFxuICAgICAgICAgICAgICAgICAgYW5ub3RhdGlvbl9jb2xvcnMgPSBhbm5fY29sb3JzLFxuICAgICAgICAgICAgICAgICAgI2JvcmRlcl9jb2xvciA9IFwiYmxhY2tcIixcbiAgICAgICAgICAgICAgICAgIGNvbG9yID0gYyhyZXYoUkNvbG9yQnJld2VyOjpicmV3ZXIucGFsKDksXCJPcmFuZ2VzXCIpWzQ6N10pLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJDb2xvckJyZXdlcjo6YnJld2VyLnBhbCg5LFwiUHVycGxlc1wiKVs0OjldIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICksXG4gICAgICAgICAgICAgICAgICBzaG93X3Jvd25hbWVzID0gRixcbiAgICAgICAgICAgICAgICAgIHNob3dfY29sbmFtZXMgPSBGLFxuICAgICAgICAgICAgICAgICAgYW5ub3RhdGlvbl9sZWdlbmQgPSBGLFxuICAgICAgICAgICAgICAgICAgY2x1c3Rlcl9yb3dzID0gRixcbiAgICAgICAgICAgICAgICAgIGNsdXN0ZXJfY29scyA9IEYsXG4gICAgICAgICAgICAgICAgICBjZWxsaGVpZ2h0PTMsXG4gICAgICAgICAgICAgICAgICBnYXBzX2NvbCA9IGMoc2VxX3R5cGVbMV0sIHNlcV90eXBlWzJdLCBzZXFfdHlwZVszXSwgc2VxX3R5cGVbNF0sIHNlcV90eXBlWzVdKSxcbiAgICAgICAgICAgICAgICAgIGxlZ2VuZF9icmVha3M9YygtMzo1KSxcbiAgICAgICAgICAgICAgICAgIGxlZ2VuZF9sYWJlbHM9YygtMzo1KSxcbiAgICAgICAgICAgICAgICAgIGZpbGVuYW1lID0gXCIuLi9JbnRlcm1lZGlhcnlGaWxlcy9waGVhdG1hcF92aXJ1c19zZXRfMV92aXJhbF9zY29yZXMucG5nXCJcbiAgICAgICAgICAgICAgICAgIClcbmBgYCJ9 -->
-<pre class="r"><code>                          tune_not_viral=rep(0, 64),
-                          DVF=rep(0, 64),
-                          tune_viral=rep(0, 64),
-                          VIBRANT=rep(0, 64),
-                          VS=rep(0, 64),
-                          VS2=rep(0, 64))
-p &lt;- 1
-
-for (i in c(0,1)){
-  for (j in c(0,1)){
-    for (k in c(0,1)){
-      for (l in c(0,1)){
-        for (m in c(0,1)){
-          for (n in c(0,1)){
-            combos_list$toolcombo[p] &lt;- paste(i,j,k,l,m,n)
-            combos_list$toolcombo2[p] &lt;- paste(if(i){&quot;tv&quot;}else{&quot;0&quot;},if(j){&quot;DVF&quot;}else{&quot;0&quot;},
-                                               if(k){&quot;tnv&quot;}else{&quot;0&quot;},if(l){&quot;VB&quot;}else{&quot;0&quot;},
-                                               if(m){&quot;VS&quot;}else{&quot;0&quot;},if(n){&quot;VS2&quot;}else{&quot;0&quot;})
-            combos_list$tune_not_viral[p] &lt;- k
-            combos_list$DVF[p] &lt;- j
-            combos_list$tune_viral[p] &lt;- i
-            combos_list$VIBRANT[p] &lt;- l
-            combos_list$VS[p] &lt;- m
-            combos_list$VS2[p] &lt;- n
-            p &lt;- p+1
-          }
-        }
-      }
-    }
-  }
-}
-
-combos_list &lt;- combos_list[-1,]
-
-viral_scores &lt;- matrix(data=0, nrow=nrow(viruses), ncol=nrow(combos_list))
-num_viruses &lt;- data.frame(toolcombo=rep(0, nrow(combos_list)),
-                          num_viruses=rep(0, nrow(combos_list)))
-
-for (i in 1:nrow(combos_list)) {
-  viral_scores[,i] &lt;- getting_viral_set_1(viruses, include_vibrant = combos_list$VIBRANT[i],
-                                            include_virsorter = combos_list$VS[i],
-                                            include_virsorter2 = combos_list$VS2[i],
-                                            include_tuning_viral = combos_list$tune_viral[i],
-                                            include_tuning_not_viral = combos_list$tune_not_viral[i],
-                                            include_deepvirfinder = combos_list$DVF[i])
-  
-  if (max(viral_scores[,i])&lt;=0) {
-    num_viruses$num_viruses[i] &lt;- 0
-  }
-  else {
-    num_viruses$num_viruses[i] &lt;- table(viral_scores[,i]&gt;=1)[[2]]
-  }
-  num_viruses$toolcombo[i] &lt;- combos_list$toolcombo[i]
-  
-  num_viruses$toolcombo2[i] &lt;- combos_list$toolcombo2[i]
-}
-num_viruses$numtools &lt;- str_count(num_viruses$toolcombo, &quot;1&quot;)
-num_viruses &lt;- num_viruses[order(num_viruses$num_viruses, decreasing=F),]
-num_viruses$toolcombo &lt;- factor(num_viruses$toolcombo, levels = unique(num_viruses$toolcombo))
-num_viruses$toolcombo2 &lt;- factor(num_viruses$toolcombo2, levels = unique(num_viruses$toolcombo2))
-num_viruses$numtools &lt;- as.factor(num_viruses$numtools)
-
-pal &lt;- ggthemes::tableau_color_pal(palette=&quot;Tableau 10&quot;, type=&quot;regular&quot;)
-pal2 &lt;- ggthemes::tableau_color_pal(palette=&quot;Tableau 20&quot;, type=&quot;regular&quot;)
-
-viruses_1 &lt;- viruses[viruses$Index==&quot;1&quot;,]
-
-ann_col = data.frame(
-    tnv = combos_list$tune_not_viral,
-    tv = combos_list$tune_viral,
-    dvf = combos_list$DVF,
-    vb = combos_list$VIBRANT,
-    vs = combos_list$VS,
-    vs2 = combos_list$VS2
-)
-
-ann_row = data.frame(
-    score = viruses_1$seqtype
-)
-
-ann_colors = list(
-  tnv = c(&quot;black&quot;, pal(6)[1]),
-  tv = c(&quot;black&quot;, pal(6)[3]),
-  dvf = c(&quot;black&quot;, pal(6)[2]),
-  vb = c(&quot;black&quot;, pal(6)[4]),
-  vs = c(&quot;black&quot;, pal(6)[5]),
-  vs2 = c(&quot;black&quot;, pal(6)[6]),
-  score = c(&quot;archaea&quot;=pal2(20)[13], &quot;bacteria&quot;=pal2(20)[9], &quot;fungi&quot;=pal2(20)[20],
-              &quot;plasmid&quot;=pal2(20)[19], &quot;protist&quot;=pal2(20)[5], &quot;virus&quot;=pal2(20)[17])
-)
-
-rownames(ann_col) &lt;- combos_list$toolcombo
-rownames(ann_row) &lt;- viruses_1$contig
-
-viral_scores_1 &lt;- viral_scores[viruses$Index==&quot;1&quot;,]
-
-colnames(viral_scores_1) &lt;- combos_list$toolcombo
-rownames(viral_scores_1) &lt;- viruses_1$contig
-
-viral_scores_1 &lt;- floor(viral_scores_1)
-
-seq_scores &lt;- rowSums(viral_scores_1)
-
-seq_type &lt;- table(viruses_1$seqtype)[c(6,2,1,4,5,3)]
-seq_type &lt;- cumsum(seq_type)
-
-sub_seq_scores &lt;- seq_scores[1:seq_type[1]]
-order_seq_scores_virus &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-sub_seq_scores &lt;- seq_scores[seq_type[1]:seq_type[2]]
-order_seq_scores_bacteria &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-sub_seq_scores &lt;- seq_scores[seq_type[2]:seq_type[3]]
-order_seq_scores_archaea &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-sub_seq_scores &lt;- seq_scores[seq_type[3]:seq_type[4]]
-order_seq_scores_plasmid &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-sub_seq_scores &lt;- seq_scores[seq_type[4]:seq_type[5]]
-order_seq_scores_protist &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-sub_seq_scores &lt;- seq_scores[seq_type[5]:seq_type[6]]
-order_seq_scores_fungi &lt;- names(sub_seq_scores)[order(sub_seq_scores)]
-
-viral_scores_1 &lt;- viral_scores_1[c(order_seq_scores_virus, 
-                                   order_seq_scores_bacteria,
-                                   order_seq_scores_archaea,
-                                   order_seq_scores_plasmid,
-                                   order_seq_scores_protist,
-                                   order_seq_scores_fungi),]
-
-pheatmap::pheatmap(t(viral_scores_1),
-                  annotation_col = ann_row,
-                  annotation_row = ann_col,
-                  annotation_colors = ann_colors,
-                  #border_color = &quot;black&quot;,
-                  color = c(rev(RColorBrewer::brewer.pal(9,&quot;Oranges&quot;)[4:7]),
-                            RColorBrewer::brewer.pal(9,&quot;Purples&quot;)[4:9] 
-                            ),
-                  show_rownames = F,
-                  show_colnames = F,
-                  annotation_legend = F,
-                  cluster_rows = F,
-                  cluster_cols = F,
-                  cellheight=3,
-                  gaps_col = c(seq_type[1], seq_type[2], seq_type[3], seq_type[4], seq_type[5]),
-                  legend_breaks=c(-3:5),
-                  legend_labels=c(-3:5),
-                  filename = &quot;../IntermediaryFiles/pheatmap_virus_set_1_viral_scores.png&quot;
-                  )</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -4844,8 +4693,8 @@ pheatmap::pheatmap(t(viral_scores_1),
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnVtX2hpZ2hfdmlydXNlcyA8LSBtYXRyaXgoZGF0YT1OQSwgbnJvdz02MywgbmNvbD02MylcbmBgYCJ9 -->
 <pre class="r"><code>num_high_viruses &lt;- matrix(data=NA, nrow=63, ncol=63)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSAxNiB3YXJuaW5ncyAodXNlIHdhcm5pbmdzKCkgdG8gc2VlIHRoZW0pXG4ifQ== -->
-<pre><code>There were 16 warnings (use warnings() to see them)</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlcmUgd2VyZSAzMiB3YXJuaW5ncyAodXNlIHdhcm5pbmdzKCkgdG8gc2VlIHRoZW0pXG4ifQ== -->
+<pre><code>There were 32 warnings (use warnings() to see them)</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJvcF9oaWdoX3ZpcnVzZXMgPC0gbWF0cml4KGRhdGE9TkEsIG5yb3c9NjMsIG5jb2w9NjMpXG5cbmZvciAoaSBpbiAxOjYzKSB7XG4gIGZvciAoaiBpbiAxOjYzKSB7XG4gICAgbnVtX2hpZ2hfdmlydXNlc1tpLGpdIDwtIHN1bSh2aXJhbF9zY29yZXNbLGldPj0xICYgdmlyYWxfc2NvcmVzWyxqXT49MSlcbiAgICBcbiAgICBwcm9wX2hpZ2hfdmlydXNlc1tpLGpdIDwtIHN1bSh2aXJhbF9zY29yZXNbLGldPj0xICYgdmlyYWxfc2NvcmVzWyxqXT49MSlcbiAgICBwcm9wX2hpZ2hfdmlydXNlc1tpLGpdIDwtIHByb3BfaGlnaF92aXJ1c2VzW2ksal0vc3VtKHZpcmFsX3Njb3Jlc1ssaV0+PTEgfCB2aXJhbF9zY29yZXNbLGpdPj0xKVxuICB9XG59XG5cbnJvd25hbWVzKG51bV9oaWdoX3ZpcnVzZXMpIDwtIGNvbWJvc19saXN0JHRvb2xjb21ib1xuY29sbmFtZXMobnVtX2hpZ2hfdmlydXNlcykgPC0gY29tYm9zX2xpc3QkdG9vbGNvbWJvXG5cbnJvd25hbWVzKHByb3BfaGlnaF92aXJ1c2VzKSA8LSBjb21ib3NfbGlzdCR0b29sY29tYm9cbmNvbG5hbWVzKHByb3BfaGlnaF92aXJ1c2VzKSA8LSBjb21ib3NfbGlzdCR0b29sY29tYm9cblxuY29tYm9zX2xpc3QkcnVsZXR5cGUgPC0gXCJvdGhlclwiXG5jb21ib3NfbGlzdCRydWxldHlwZVtjb21ib3NfbGlzdCR0b29sY29tYm8gJWluJSBjKFwiMCAwIDEgMCAwIDFcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiMCAwIDEgMSAwIDBcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwiMCAwIDAgMSAwIDBcIildIDwtIFwiaGlnaCBwcmVjaXNpb25cIlxuY29tYm9zX2xpc3QkcnVsZXR5cGVbY29tYm9zX2xpc3QkdG9vbGNvbWJvICVpbiUgYyhcIjEgMSAwIDAgMSAxXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIjEgMSAwIDEgMSAxXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIjEgMSAwIDAgMCAxXCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcIjEgMSAwIDEgMCAxXCIpXSA8LSBcImhpZ2ggcmVjYWxsXCJcbmNvbWJvc19saXN0JHJ1bGV0eXBlW2NvbWJvc19saXN0JHRvb2xjb21ibyAlaW4lIGMoXCIwIDAgMSAwIDAgMVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCIwIDEgMSAwIDAgMVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCIwIDAgMCAwIDAgMVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCIxIDAgMSAxIDAgMVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCIxIDAgMSAwIDEgMVwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCIxIDAgMSAwIDAgMVwiKV0gPC0gXCJoaWdoIE1DQ1wiXG4jY29tYm9zX2xpc3RzJHJ1bGV0eXBlW2FjY3VyYWN5X3Njb3JlcyR0b29sY29tYm8gJWluJSBjKFwiMCAwIDEgMCAwIDFcIildIDwtIFwiaGlnaCBNQ0MgYW5kIGhpZ2ggcHJlY2lzaW9uXCJcbmNvbWJvc19saXN0JHJ1bGV0eXBlW2NvbWJvc19saXN0JHRvb2xjb21ibyAlaW4lIGMoXCIxIDEgMSAxIDEgMVwiKV0gPC0gXCJhbGxcIlxuXG5jb21ib3NfbGlzdCRydWxldHlwZSA8LSBhcy5mYWN0b3IoY29tYm9zX2xpc3QkcnVsZXR5cGUpXG5gYGAifQ== -->
 <pre class="r"><code>prop_high_viruses &lt;- matrix(data=NA, nrow=63, ncol=63)
