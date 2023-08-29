@@ -53,20 +53,22 @@ dataframe and memory usage.
 
 
 ```{r inputs}
+setwd('/Users/riddellj/Documents/GitHub/VSTE/RunFilesForUsers')
+
 # dataset name for file organization and outputs for metrics file
 dataset_name <- "drinking_water"
 # checkV
-checkV_path <- "DrinkingWaterToolOutput/merged_checkV_allcontigs.tsv"
+checkV_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/merged_checkV_allcontigs.tsv"
 # VIBRANT
-vibrant_path <- "DrinkingWaterToolOutput/vibrant_merged_contig_list_all.txt"
+vibrant_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/vibrant_merged_contig_list_all.txt"
 # DeepVirFinder
-dvf_path <- "DrinkingWaterToolOutput/dvf_outputs_merged.tsv"
+dvf_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/dvf_outputs_merged.tsv"
 # Virsorter
-vs_path <- "DrinkingWaterToolOutput/vs_merged_all.txt"
+vs_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/vs_merged_all.txt"
 # Virsorter2
-vs2_path <- "DrinkingWaterToolOutput/vs2_merged_file.txt"
+vs2_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/vs2_merged_file.txt"
 # Kaiju
-kj_path <- "/Users/hegartyb/Documents/BlueSkyPostdoc/ViralSortingToolsEvaluation/Temp/kaiju_outputs_merged.tsv"
+kj_path <- "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/DrinkingWaterToolOutput/kaiju_outputs_merged.tsv"
 # length cutoff (unit: basepairs)
 BP_CUTOFF <- 3000
 
@@ -108,6 +110,7 @@ checkV <- fread(checkV_path,
         checkv_total_genes = gene_count,
         checkv_length = contig_length
         )
+checkV$checkv_provirus <- checkV$checkv_provirus == 'Yes'
 checkV$method = 'checkv'
 checkV$contig <- sub("\\.", "_", checkV$contig)
 checkV$uniq_contig <- paste(checkV$assembly, checkV$contig, sep = "--")
@@ -131,8 +134,8 @@ vb_c <- fread(vibrant_path,
         vibrant_quality = quality
         )
 vb_c$method <- "vibrant"
-vb_c$vibrant_prophage <- "No"
-vb_c$vibrant_prophage[grep("_fragment_", vb_c$contig)] <- "Yes"
+vb_c$vibrant_prophage <- FALSE
+vb_c$vibrant_prophage[grep("_fragment_", vb_c$contig)] <- TRUE
 vb_c$contig <- gsub("_fragment_.*", "", vb_c$contig)
 vb_c$contig <- sub("\\.", "_", vb_c$contig)
 vb_c$uniq_contig <- paste(vb_c$assembly, vb_c$contig, sep = "--")
@@ -254,7 +257,7 @@ but not CheckV. Please go back and change the contig names so that they match
 the pattern in CheckV, or check your CheckV output to make sure it contains
 as many rows as headers in your fasta file (with the bp cutoff).
 ```{r}
-v_missing <- viruses[is.na(viruses$checkv_uniq_contig),]
+v_missing <- viruses[is.na(viruses$checkv_quality),]
 ```
 
 
@@ -286,6 +289,7 @@ viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
 # VirSorter2
 viruses$viral[is.na(viruses$viral)] <- 0
 viruses$hallmark[is.na(viruses$hallmark)] <- 0
+viruses$max_score[is.na(viruses$max_score)] <- 0
 
 #Virsorter
 viruses$category[is.na(viruses$category)] <- 0

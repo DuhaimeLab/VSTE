@@ -27,15 +27,15 @@ library(data.table)
 
 ```{r}
 # dataset name for file organization and outputs for metrics file
-dataset_name <- "drinking_water_uknl"
+dataset_name <- "drinking_water"
 #name from building_env_data_viral_features_set.Rmd
-viruses_filename <- 'merged_viral_feature_outputs.tsv'
+viruses_filename <- 'merged_viral_feature_outputs.csv'
 # path of merged dataset
-path = "/Users/riddellj/Documents/GitHub/VSTE/EnvironmentalData/DrinkingWaterMetagenomes/"
+path = "/Users/riddellj/Documents/GitHub/VSTE/RunFilesForUsers/"
 setwd(path)
 
 # adjust to read file in.
-viruses <- read_tsv(paste(dataset_name, viruses_filename, sep='_'))
+viruses <- read_csv(paste(dataset_name, viruses_filename, sep='_'))
 ```
 
 This section defines a viralness score "keep_score" based on the tool classifications. 
@@ -121,7 +121,7 @@ compute_viral_score <- function(input_seqs,
   if (include_vibrant) {
     keep_score[input_seqs$vibrant_quality=="high quality draft"] <- keep_score[input_seqs$vibrant_quality=="high quality draft"] + 1
     keep_score[input_seqs$vibrant_quality=="medium quality draft"] <- keep_score[input_seqs$vibrant_quality=="medium quality draft"] + 1
-    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$provirus] + 0.5
+    keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$vibrant_prophage] <- keep_score[input_seqs$vibrant_quality=="low quality draft" & input_seqs$vibrant_prophage] + 0.5
   }
   
   if (include_virsorter2) {
@@ -193,14 +193,14 @@ tuning_not_viral <- function(current_score, ins,
                          include_tnv_4=T) {
     # tuning removal
   if (include_tnv_1) {
-    current_score[(ins$checkv_host_genes>50) & !ins$provirus] <- -3
+    current_score[(ins$checkv_host_genes>50) & !ins$checkv_provirus] <- -3
   }
 
   if (include_tnv_2) {
     current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] <- current_score[ins$checkv_viral_genes==0 & ins$checkv_host_genes>=1] - 1
   }
   if (include_tnv_3) {
-    current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$provirus] - 1
+    current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$checkv_provirus] <- current_score[((ins$checkv_viral_genes*3) <= ins$checkv_host_genes) & !ins$checkv_provirus] - 1
   }
   
   if (include_tnv_4) {
@@ -251,7 +251,7 @@ sum(viruses$keep_score_high_MCC>=1)
 
 Write sequence names and viral scores to a file.
 ```{r}
-write_csv(viruses[,c('contig','provirus','keep_score_all', 'keep_score_high_MCC', 'keep_score_high_precision', 'keep_score_high_recall')], paste(dataset_name, 'top_viral_scores.csv', sep="_"))
+write_csv(viruses[,c('contig','checkv_provirus','keep_score_all', 'keep_score_high_MCC', 'keep_score_high_precision', 'keep_score_high_recall')], paste(dataset_name, 'top_viral_scores.csv', sep="_"))
 ```
 
 Write a list of sequences that are considered virus to file. Change high MCC
