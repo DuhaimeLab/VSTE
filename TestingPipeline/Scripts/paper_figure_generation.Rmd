@@ -606,8 +606,19 @@ fig
 ## Visualize how the precision, recall, and MCC changes across pipelines.
 precision
 ```{r}
-accuracy_scores <- accuracy_scores[order(accuracy_scores$precision, decreasing=F),]
-accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+mean_precision <- accuracy_scores %>% 
+  select(precision, toolcombo) %>%
+  group_by(toolcombo) %>%
+  dplyr::summarise(mean = mean(precision)) %>%
+  arrange(mean)
+```
+
+
+```{r}
+accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = mean_precision$toolcombo)
+
+#accuracy_scores <- accuracy_scores[order(accuracy_scores$precision, decreasing=F),]
+#accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
                                   color=numrules, fill=numrules)) +
@@ -630,7 +641,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
   scale_color_manual(name="Number of Rules",
                      values = alpha(rev(viridis(6)), 1))
 
-ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
+fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=precision, 
                                   color=ruletype, fill=ruletype)) +
   geom_boxplot(alpha=0.5) +
   theme_light() +
@@ -650,6 +661,66 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=precision,
                      values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
   scale_color_manual(name="",
                      values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6))
+
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/all_precision_scatterplot.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE
+)
+```
+
+```{r}
+ann_col = data.frame(
+    tnv = combos_list$tune_not_viral,
+    tv = combos_list$tune_viral,
+    dvf = combos_list$DVF,
+    vb = combos_list$VIBRANT,
+    vs = combos_list$VS,
+    vs2 = combos_list$VS2
+)
+rownames(ann_col) <- combos_list$toolcombo
+
+ann_colors = list(
+  tv = c("black", pal(6)[3]),
+  tnv = c("black", pal(6)[1]),
+  dvf = c("black", pal(6)[2]),
+  vb = c("black", pal(6)[4]),
+  vs = c("black", pal(6)[5]),
+  vs2 = c("black", pal(6)[6])
+)
+
+
+
+
+#viral_scores_1 <- accuracy_scores %>% filter(testing_set_index==5)
+viral_scores_1 <- mean_precision
+rn <- viral_scores_1$toolcombo
+
+viral_scores_1 <- viral_scores_1 %>% select(c("mean"))
+viral_scores_1 <- as.matrix(viral_scores_1)
+#viral_scores_1 <- viral_scores_1 %>% select(c("mean"))
+rownames(viral_scores_1) <- rn
+
+pheatmap::pheatmap(viral_scores_1,
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = NA,
+                  show_rownames = T,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows = F,
+                  cluster_cols = F,
+                  cellheight=3,
+                  filename = "../IntermediaryFiles/heatmap_precision_labels_S2A.png"
+                  )
 ```
 
 ```{r}
@@ -679,8 +750,18 @@ accounting for multiple t-tests with Bonferroni, then the following have the sam
 
 recall
 ```{r}
-accuracy_scores <- accuracy_scores[order(accuracy_scores$recall, decreasing=F),]
-accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+mean_recall <- accuracy_scores %>% 
+  select(recall, toolcombo) %>%
+  group_by(toolcombo) %>%
+  dplyr::summarise(mean = mean(recall)) %>%
+  arrange(mean)
+```
+
+```{r}
+#accuracy_scores <- accuracy_scores[order(accuracy_scores$recall, decreasing=F),]
+#accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = unique(accuracy_scores$toolcombo))
+
+accuracy_scores$toolcombo <- factor(accuracy_scores$toolcombo, levels = mean_recall$toolcombo)
 
 ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
                                   color=numrules, fill=numrules)) +
@@ -703,7 +784,7 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
   scale_color_manual(name="Number of Rules",
                      values = alpha(rev(viridis(6)), 1))
 
-ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
+fig <- ggplot(accuracy_scores, aes(x=toolcombo, y=recall, 
                                   color=ruletype, fill=ruletype)) +
   geom_boxplot(alpha=0.5) +
   theme_light() +
@@ -723,7 +804,67 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=recall,
                      values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.4)) +
   scale_color_manual(name="",
                      values = alpha(c(rev(magma(7)[3:6]), "grey"), 0.6))
+
+fig
+
+ggsave(
+  "../IntermediaryFiles/all_recall_scatterplot.png",
+  plot = fig,
+  scale = 1,
+  width = 8,
+  height = 4,
+  units = c("in", "cm", "mm", "px"),
+  dpi = 300,
+  limitsize = TRUE
+)
 ```
+
+making heatmap for the x-axis label - Figure S2B
+```{r}
+ann_col = data.frame(
+    tnv = combos_list$tune_not_viral,
+    tv = combos_list$tune_viral,
+    dvf = combos_list$DVF,
+    vb = combos_list$VIBRANT,
+    vs = combos_list$VS,
+    vs2 = combos_list$VS2
+)
+rownames(ann_col) <- combos_list$toolcombo
+
+ann_colors = list(
+  tv = c("black", pal(6)[3]),
+  tnv = c("black", pal(6)[1]),
+  dvf = c("black", pal(6)[2]),
+  vb = c("black", pal(6)[4]),
+  vs = c("black", pal(6)[5]),
+  vs2 = c("black", pal(6)[6])
+)
+
+
+
+
+#viral_scores_1 <- accuracy_scores %>% filter(testing_set_index==5)
+viral_scores_1 <- mean_recall
+rn <- viral_scores_1$toolcombo
+
+#viral_scores_1 <- viral_scores_1 %>% select(c("recall"))
+viral_scores_1 <- viral_scores_1 %>% select(c("mean"))
+rownames(viral_scores_1) <- rn
+
+pheatmap::pheatmap(as.matrix(viral_scores_1),
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = NA,
+                  show_rownames = T,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows = F,
+                  cluster_cols = F,
+                  cellheight=3,
+                  filename = "../IntermediaryFiles/heatmap_recall_labels_S2B.png"
+                  )
+```
+
 
 ```{r}
 mean_recall <- accuracy_scores %>% 
@@ -801,12 +942,13 @@ ggplot(accuracy_scores, aes(x=precision, y=recall,
                      values = alpha(rev(pal(6)), 1))
 
 ```
+
 MCC
 ```{r}
 mean_MCC <- accuracy_scores %>% 
   select(MCC, toolcombo) %>%
   group_by(toolcombo) %>%
-  summarise(mean = mean(MCC)) %>%
+  dplyr::summarise(mean = mean(MCC)) %>%
   arrange(mean)
 ```
 
@@ -1168,6 +1310,7 @@ ggplot(confusion_vir_called, aes(y=mean, x=size,
   xlab("Length") +
   ylab("Sequences Called Viral (%)") 
 ```
+
 ```{r}
 one.way <- aov(mean ~ seqtype, data = confusion_vir_called)
 
@@ -2741,4 +2884,3 @@ viruses_from_ntv <- getting_viral_set_1(viruses, include_deepvirfinder = F,
 
 table(viruses_from_ntv, viruses$seqtype)
 ```
-

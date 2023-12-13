@@ -462,6 +462,53 @@ ggplot(accuracy_scores, aes(x=toolcombo, y=MCC,
   scale_color_manual(name="Number of Tools",
                      values = alpha(rev(pal(6)), 1))
 ```
+
+making heatmap for the x-axis label - Figure S5
+```{r}
+ann_col = data.frame(
+    tnv = combos_list$tune_not_viral,
+    tv = combos_list$tune_viral,
+    dvf = combos_list$DVF,
+    vb = combos_list$VIBRANT,
+    vs = combos_list$VS,
+    vs2 = combos_list$VS2
+)
+rownames(ann_col) <- combos_list$toolcombo
+
+ann_colors = list(
+  tv = c("black", pal(6)[3]),
+  tnv = c("black", pal(6)[1]),
+  dvf = c("black", pal(6)[2]),
+  vb = c("black", pal(6)[4]),
+  vs = c("black", pal(6)[5]),
+  vs2 = c("black", pal(6)[6])
+)
+
+
+
+
+viral_scores_1 <- accuracy_scores %>% filter(testing_set_index==5)
+#viral_scores_1 <- mean_MCC
+rn <- viral_scores_1$toolcombo
+
+viral_scores_1 <- viral_scores_1 %>% select(c("MCC"))
+#viral_scores_1 <- viral_scores_1 %>% select(c("mean"))
+rownames(viral_scores_1) <- rn
+
+pheatmap::pheatmap(as.matrix(viral_scores_1),
+                  annotation_row = ann_col,
+                  annotation_colors = ann_colors,
+                  border_color = NA,
+                  show_rownames = T,
+                  show_colnames = F,
+                  annotation_legend = F,
+                  cluster_rows = F,
+                  cluster_cols = F,
+                  cellheight=3,
+                  filename = "../IntermediaryFiles/heatmap_MCC_labels_S5.png"
+                  )
+```
+
 ```{r}
 mean_MCC <- accuracy_scores %>% 
   select(MCC, toolcombo) %>%
