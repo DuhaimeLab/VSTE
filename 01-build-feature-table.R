@@ -51,7 +51,6 @@
 ##############################
 # 1 - Load libraries
 ##############################
-
 library(ggplot2)
 library(plyr)
 library(reshape2)
@@ -61,6 +60,7 @@ library(dplyr)
 library(readr)
 library(data.table)
 library(optparse)
+
 
 ##############################
 # 1 - Set parameters
@@ -116,11 +116,13 @@ kj_path <- opt$kaiju
 # length cutoff (unit: basepairs)
 BP_CUTOFF <- opt$length
 
-
-
 ##############################
 # 2 - load data
 ##############################
+
+# add dataframes if they are detected
+df_counter <- 0
+df_c <- list()
 
 if (cv_path != "skip") {
   cv_c <- fread(cv_path, 
@@ -154,8 +156,11 @@ if (cv_path != "skip") {
   cv_c$contig <- sub("\\.", "_", cv_c$contig)
   cv_c$uniq_contig <- paste(cv_c$assembly, cv_c$contig, sep = "--")
   cv_c <- cv_c[!duplicated(cv_c$uniq_contig),]
+  
+  df_c[[df_counter+1]] <- cv_c
+  df_counter <- df_counter + 1
 } else {
-  cv_c <- "skip"
+  print("skipping CheckV, no CheckV output was detected.")
 }
 
 
@@ -169,12 +174,12 @@ if (vb_path != "skip") {
                   'scaffold',
                   'assembly',
                   'type',
-                  'quality'
+                  'Quality'
                 )
   ) %>%
     rename(
       contig = scaffold,
-      vibrant_quality = quality
+      vibrant_quality = Quality
     )
   vb_c$method <- "vibrant"
   vb_c$vibrant_prophage <- FALSE
@@ -183,8 +188,12 @@ if (vb_path != "skip") {
   vb_c$contig <- sub("\\.", "_", vb_c$contig)
   vb_c$uniq_contig <- paste(vb_c$assembly, vb_c$contig, sep = "--")
   vb_c <- vb_c[!duplicated(vb_c$uniq_contig),]
+  
+  df_c[[df_counter+1]] <- vb_c
+  df_counter <- df_counter + 1
 } else {
-  vb_c <- "skip"
+  vb_c <- data.frame()
+  print("skipping VIBRANT, no VIBRANT output was detected.")
 }
 
 
@@ -193,7 +202,7 @@ if (dvf_path != "skip") {
                  header = T,
                  sep = "\t",
                  select = c(
-                   'sample',
+                   'assembly',
                    'name',
                    'score',
                    'pvalue'
@@ -201,15 +210,17 @@ if (dvf_path != "skip") {
   ) %>% 
     rename(
       contig = name,
-      assembly = sample
     )
   dvf_c$contig <- sub("\\.", "_", dvf_c$contig)
   dvf_c$bh_pvalue <- p.adjust(dvf_c$pvalue, method = "BH")
   dvf_c$uniq_contig <- paste(dvf_c$assembly, dvf_c$contig, sep = "--")
   dvf_c <- dvf_c[!duplicated(dvf_c$uniq_contig),]
   
+  df_c[[df_counter+1]] <- dvf_c
+  df_counter <- df_counter + 1
 } else {
-  dvf_c <- "skip"
+  dvf_c <- data.frame()
+  print("skipping DeepVirFinder, no DeepVirFinder output was detected.")
 }
 
 
@@ -217,12 +228,10 @@ if (vs_path != "skip") {
   vs_c <- fread(vs_path,
                 select = c(
                   'assembly',
-                  'contig_id',
-                  'category'
+                  '## Contig_id',
+                  'Category'
                 ),
-  ) %>% 
-    rename(contig = contig_id) %>%
-    drop_na(contig)
+  ) %>% rename(contig = '## Contig_id',category = Category) %>% drop_na(contig)
   vs_c$contig <- sub("VIRSorter_", "", vs_c$contig)
   vs_c$contig <- sub("-circula", "", vs_c$contig)
   vs_c$contig <- sub("uth", "South", vs_c$contig)
@@ -232,8 +241,12 @@ if (vs_path != "skip") {
   
   vs_c <- vs_c[!duplicated(vs_c$uniq_contig),]
   vs_c <- vs_c %>% drop_na(uniq_contig) 
+  
+  df_c[[df_counter+1]] <- vs_c
+  df_counter <- df_counter + 1
 } else {
-  vs_c <- "skip"
+  vs_c <- data.frame()
+  print("skipping VirSorter, no VirSorter output was detected.")
 }
  
 
@@ -259,49 +272,55 @@ if (vs2_path != "skip") {
       sep = "\\|\\|",
       remove = T
     )
-  vs2_c$assembly <- sub("_" + str(BP_CUTOFF), "", vs2_c$assembly)
   vs2_c$contig <- sub("\\.", "_", vs2_c$contig)
   vs2_c$uniq_contig <- paste(vs2_c$assembly, vs2_c$contig, sep="--")
   vs2_c <- vs2_c[!duplicated(vs2_c$uniq_contig),]
+  
+  df_c[[df_counter+1]] <- vs2_c
+  df_counter <- df_counter + 1
 } else {
-  vs2_c <- "skip"
+  vs2_c <- data.frame()
+  print("skipping VirSorter2, no VirSorter2 output was detected.")
 }
 
 
 if (kj_path != "skip") {
-  kj_c <- read_tsv(kj_path, col_names = T)
-  colnames(kj_c)[1] <- "assembly"
-  colnames(kj_c)[3] <- "contig"
-  kj_c$contig <- sub("\\.", "_", kj_c$contig)
-  kj_c <- separate(kj_c, col = Name, into = c("Kaiju_Viral","Kingdom"), sep=";")
+  kj_c <- fread(kj_path,
+                 header = T,
+                 sep = '\t',
+                 select = c(
+                   'assembly_contig',
+                   'length_or_score_of_best_match',
+                   'taxonomy',
+                   'assembly'
+                 )
+  ) %>% rename(contig = assembly_contig)
+  
+  kj_c <- separate(kj_c, col = taxonomy, into = c("Kaiju_Viral","Kingdom"), sep=";")
   kj_c$uniq_contig <- paste(kj_c$assembly, kj_c$contig, sep="--")
-  kj_c <- kj_c[!duplicated(kj_c$contig),]
+  kj_c <- kj_c[!duplicated(kj_c$uniq_contig),]
+  
+  df_c[[df_counter+1]] <- kj_c
+  df_counter <- df_counter + 1
 } else {
-  kj_c <- "skip"
+  kj_c <- data.frame()
+  print("skipping Kaiju, no Kaiju output was detected.")
 }
 
 ##############################
 # 3 - merge tool outputs
 ##############################
 
-df_c <- c(cv_c, vb_c, dvf_c, vs_c, vs2_c, kj_c)
-
-viruses <- data.frame(matrix(vector(),ncol=2))
-colnames(viruses) <- c("uniq_contig", "assembly")
-
-for (df in df_c) {
-  if (df != "skip") {
-    viruses <- full_join(x=viruses, y=df, by=c("uniq_contig", "assembly"))
-  }
-}
-
+library(purrr)
+viruses <- df_c %>% reduce(full_join, by="uniq_contig")
 
 ##############################
 # 4 - filter by length cutoff
 ##############################
 
+if (nrow(cv_c) != 0) {
 viruses <- viruses %>% filter(checkv_length > BP_CUTOFF)
-
+}
 
 ##############################
 # 5 - check missing
@@ -313,10 +332,10 @@ viruses <- viruses %>% filter(checkv_length > BP_CUTOFF)
 # the pattern in CheckV, or check your CheckV output to make sure it contains
 # as many rows as headers in your fasta file (with the bp cutoff).
 
-if (cv_c != "skip") {
+if (nrow(cv_c) != 0) {
   v_missing <- viruses[is.na(viruses$checkv_quality),]
 } else {
-  print("Cannot check for missing sequences in the merged viruses dataframe because no CheckV output was provided.")
+  print("Cannot check for missing sequences in the merged viruses dataframe because no CheckV output was detected.")
 }
 
 
@@ -325,15 +344,19 @@ if (cv_c != "skip") {
 #     These will be used in the classification step.
 ###############################################################################
 
-if (cv_c != "skip") {
+if (nrow(cv_c) != 0) {
   viruses$percent_host <- viruses$checkv_host_genes/viruses$checkv_total_genes*100
   viruses$percent_viral <- viruses$checkv_viral_genes/viruses$checkv_total_genes*100
   viruses$percent_unknown <- 100-(viruses$checkv_host_genes+viruses$checkv_viral_genes)/viruses$checkv_total_genes*100
-  viruses$kaiju_match_ratio <- viruses$len/viruses$checkv_length
 } else {
-  print("Cannot calculate percent host, viral, and unknown features becaues no checkV output was provided.")
+  print("Cannot calculate percent host, viral, and unknown features because no checkV output was detected.")
 }
 
+if (nrow(kj_c) != 0) {
+  viruses$kaiju_match_ratio <- viruses$length_or_score_of_best_match/viruses$checkv_length
+} else {
+  print("Cannot calculate kaiju match ratio, no kaiju output was detected.")
+}
 ###############################################################################
 # 7 - remove NAs
 # Make sure this step is not removing NAs that shouldn't be NA! 
@@ -341,38 +364,39 @@ if (cv_c != "skip") {
 ###############################################################################
 
 # checkV
-if (cv_c != "skip") {
+if (nrow(cv_c) != 0) {
   viruses$percent_viral[is.na(viruses$percent_viral)] <- 0
   viruses$percent_unknown[is.na(viruses$percent_unknown)] <- 0
   viruses$checkv_completeness[is.na(viruses$checkv_completeness)] <- 0
 }
 
 # VIBRANT
-if (vb_c != "skip") {
+if (nrow(vb_c) != 0) {
   viruses$vibrant_quality[is.na(viruses$vibrant_quality)] <- 0
 }
 
 # DeepVirFinder
-if (dvf_c != "skip") {
+if (nrow(dvf_c) != 0) {
   viruses$score[is.na(viruses$score)] <- 0
   viruses$bh_pvalue[is.na(viruses$bh_pvalue)] <- 0
 }
 
 # VirSorter2
-if (vs2_c != "skip") {
+if (nrow(vs2_c) != 0) {
   viruses$viral[is.na(viruses$viral)] <- 0
   viruses$hallmark[is.na(viruses$hallmark)] <- 0
   viruses$max_score[is.na(viruses$max_score)] <- 0
 }
 
 #Virsorter
-if (vs_c != "skip") {
+if (nrow(vs_c) != 0) {
   viruses$category[is.na(viruses$category)] <- 0
 }
 
 # Kaiju
-if (kj_c != "skip") {
+if (nrow(kj_c) != 0) {
   viruses$Kaiju_Viral[is.na(viruses$Kaiju_Viral)] <- "unknown"
+  viruses$kaiju_match_ratio[is.na(viruses$kaiju_match_ratio)] <- 0
 }
 
 ##############################
@@ -381,5 +405,5 @@ if (kj_c != "skip") {
 
 viruses_filename <- opt$outfile
 write.csv(viruses, viruses_filename)
-
+print(paste('Wrote merged viruses dataframe to',viruses_filename, sep=""))
 
