@@ -1,6 +1,12 @@
+#!/usr/bin/env Rscript
 
 
-
+# This Rmarkdown file takes outputs from viral identification tools and merges
+# them into one file, "{dataset}_merged_viral_id_outputs.csv", which is the input
+# for identifying_viral_metrics_environmental.Rmd.
+# 
+# Please reach out to James Riddell (riddell.26@buckeyemail.osu.edu) or
+# Bridget Hegarty (beh53@case.edu) regarding any issues, or open an issue on github.
 
 
 
@@ -17,6 +23,7 @@ library(tidyr)
 library(dplyr)
 library(readr)
 library(data.table)
+library(optparse)
 
 ##############################
 # 2 - Set parameters
@@ -26,22 +33,25 @@ option_list = list(
   make_option(c("-i", "--infile"), type="character", default="./merged_viral_feature_outputs.csv", 
               help="input path/filename from 01-build-feature-table.R [default = %default]", metavar="character"),
   
-  make_option(c("-a", "--virsorter2"), type="character", default=FALSE, 
+  make_option(c("-o", "--outfile"), type="character", default="./viral_keep_scores.csv", 
+              help="input path/filename from 01-build-feature-table.R [default = %default]", metavar="character"),
+  
+  make_option(c("-a", "--virsorter2"), type="logical", default=FALSE, 
               help="specify if <tool_name> was included in <infile> generation [default = %default]", metavar="character"),
   
-  make_option(c("-b", "--virsorter"), type="character", default=FALSE, 
+  make_option(c("-b", "--virsorter"), type="logical", default=FALSE, 
               help="specify if <tool_name> was included in <infile> generation [default = %default]", metavar="character"),
   
-  make_option(c("-c", "--vibrant"), type="character", default=FALSE, 
+  make_option(c("-c", "--vibrant"), type="logical", default=FALSE, 
               help="specify if <tool_name> was included in <infile> generation [default = %default]", metavar="character"),
   
-  make_option(c("-d", "--deepvirfinder"), type="character", default=FALSE, 
+  make_option(c("-d", "--deepvirfinder"), type="logical", default=FALSE, 
               help="specify if <tool_name> was included in <infile> generation [default = %default]", metavar="character"),
   
-  make_option(c("-t", "--tuning_viral"), type="character", default=FALSE, 
+  make_option(c("-t", "--tuning_viral"), type="logical", default=FALSE, 
               help="specify if <tuning_viral> is wished to be used. Requires virsorter2, checkv, and kaiju. [default = %default]", metavar="character"),
   
-  make_option(c("-n", "--tuning_not_viral"), type="character", default=FALSE, 
+  make_option(c("-n", "--tuning_not_viral"), type="logical", default=FALSE, 
               help="specify if <tuning_viral> is wished to be used. Requires CheckV. [default = %default]", metavar="character")
 ); 
 
@@ -98,6 +108,9 @@ opt = parse_args(opt_parser);
 # 
 # Users can decide which combination is appropriate for them and only need to run
 # the chunks for the appropriate tools.
+
+# Load in virus table
+viruses <- read.csv(opt$infile)
 
 compute_viral_score <- function(input_seqs,
                                 include_vibrant=F, 
@@ -211,10 +224,9 @@ tuning_not_viral <- function(current_score, ins,
 # to include the rule, and False to exclude it.
 
 
-command_line_params <- paste(names(opt)[names(opt) != "infile" & sapply(opt, function(x) x != FALSE)], collapse="__")
-
-viruses[[command_line_params]] <- compute_viral_score(viruses,
-                                                      include_vibrant=opt$vibrant, 
+command_line_params <- paste(names(opt)[names(opt) != "infile" & names(opt) != "outfile" & sapply(opt, function(x) x != FALSE)], collapse="__")
+viruses$command_line_params <- compute_viral_score(viruses,
+                                                      include_vibrant=opt$vibrant,
                                                       include_virsorter=opt$virsorter,
                                                       include_virsorter2=opt$virsorter2,
                                                       include_deepvirfinder=opt$deepvirfinder,
@@ -244,4 +256,11 @@ viruses$keep_score_high_precision <- compute_viral_score(viruses, include_deepvi
                                                          include_tuning_viral = F,
                                                          include_tuning_not_viral = T,
                                                          include_virsorter = F)
+
+viruses_filename <- opt$outfile
+
+virus_keep_score_df <- viruses[['uniq_contig', command_line_params, 'keep_score_all', 'keep_score_high_recall', 'keep_score_high_MCC', 'keep_score_high_precision']]
+
+write.csv(virus_keep_score_df, viruses_filename)
+print(paste('Wrote virus keep scores to ',viruses_filename, sep=""))
 

@@ -231,13 +231,10 @@ if (vs_path != "skip") {
                   '## Contig_id',
                   'Category'
                 ),
-  ) %>% rename(contig = '## Contig_id',category = Category) %>% drop_na(contig)
-  vs_c$contig <- sub("VIRSorter_", "", vs_c$contig)
-  vs_c$contig <- sub("-circula", "", vs_c$contig)
-  vs_c$contig <- sub("uth", "South", vs_c$contig)
-  vs_c$contig <- sub("pannenburg", "Spannenburg", vs_c$contig)
-  vs_c$contig <- sub("\\.", "_", vs_c$contig)
-  vs_c$uniq_contig <- paste(vs_c$assembly, vs_c$contig, sep = "--")
+  ) %>% rename(uniq_contig = '## Contig_id') %>% drop_na(uniq_contig)
+  vs_c$uniq_contig <- sub("VIRSorter_", "", vs_c$uniq_contig)
+  vs_c$uniq_contig <- sub("-circular", "", vs_c$uniq_contig)
+  vs_c$uniq_contig <- sub("\\.", "_", vs_c$uniq_contig)
   
   vs_c <- vs_c[!duplicated(vs_c$uniq_contig),]
   vs_c <- vs_c %>% drop_na(uniq_contig) 
@@ -299,6 +296,7 @@ if (kj_path != "skip") {
   kj_c <- separate(kj_c, col = taxonomy, into = c("Kaiju_Viral","Kingdom"), sep=";")
   kj_c$uniq_contig <- paste(kj_c$assembly, kj_c$contig, sep="--")
   kj_c <- kj_c[!duplicated(kj_c$uniq_contig),]
+  kj_c$uniq_contig <- sub("\\.", "_", kj_c$uniq_contig)
   
   df_c[[df_counter+1]] <- kj_c
   df_counter <- df_counter + 1
@@ -312,7 +310,7 @@ if (kj_path != "skip") {
 ##############################
 
 library(purrr)
-viruses <- df_c %>% reduce(full_join, by="uniq_contig")
+viruses <- df_c %>% reduce(full_join, by=c("uniq_contig", "assembly"))
 
 ##############################
 # 4 - filter by length cutoff
@@ -390,7 +388,7 @@ if (nrow(vs2_c) != 0) {
 
 #Virsorter
 if (nrow(vs_c) != 0) {
-  viruses$category[is.na(viruses$category)] <- 0
+  viruses$Category[is.na(viruses$Category)] <- 0
 }
 
 # Kaiju
@@ -405,5 +403,5 @@ if (nrow(kj_c) != 0) {
 
 viruses_filename <- opt$outfile
 write.csv(viruses, viruses_filename)
-print(paste('Wrote merged viruses dataframe to',viruses_filename, sep=""))
+print(paste('Wrote merged viruses dataframe to ',viruses_filename, sep=""))
 
