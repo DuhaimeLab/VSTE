@@ -225,7 +225,8 @@ tuning_not_viral <- function(current_score, ins,
 
 
 command_line_params <- paste(names(opt)[names(opt) != "infile" & names(opt) != "outfile" & sapply(opt, function(x) x != FALSE)], collapse="__")
-viruses$command_line_params <- compute_viral_score(viruses,
+
+viruses[[command_line_params]] <- compute_viral_score(viruses,
                                                       include_vibrant=opt$vibrant,
                                                       include_virsorter=opt$virsorter,
                                                       include_virsorter2=opt$virsorter2,
@@ -259,7 +260,12 @@ viruses$keep_score_high_precision <- compute_viral_score(viruses, include_deepvi
 
 viruses_filename <- opt$outfile
 
-virus_keep_score_df <- viruses[['uniq_contig', command_line_params, 'keep_score_all', 'keep_score_high_recall', 'keep_score_high_MCC', 'keep_score_high_precision']]
+virus_keep_score_df <- viruses %>% select('uniq_contig',
+                                          paste(names(opt)[names(opt) != "infile" & names(opt) != "outfile" & sapply(opt, function(x) x != FALSE)], collapse="__"),
+                                          'keep_score_all',
+                                          'keep_score_high_recall',
+                                          'keep_score_high_MCC',
+                                          'keep_score_high_precision')
 
 write.csv(virus_keep_score_df, viruses_filename)
 print(paste('Wrote virus keep scores to ',viruses_filename, sep=""))
